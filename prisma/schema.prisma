@@ -1,15 +1,48 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+// MODEL UNTUK USER
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String   // Password akan di-hash sebelum disimpan
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi: Satu User bisa membuat banyak Tantangan
+  createdChallenges Challenge[] @relation("Challenger")
+  // Relasi: Satu User bisa mengerjakan banyak Tantangan
+  acceptedChallenges Challenge[] @relation("Solver")
+}
+
+// MODEL UNTUK TANTANGAN
+model Challenge {
+  id           Int      @id @default(autoincrement())
+  title        String
+  category     String
+  imageUrl     String
+  description  String
+  reward       Int
+  deadline     DateTime
+  status       String   @default("Open") // Contoh: Open, Judging, Completed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relasi ke User yang membuat tantangan
+  challengerId Int
+  challenger   User     @relation("Challenger", fields: [challengerId], references: [id])
+
+  // Relasi ke User yang menerima tantangan (bisa null)
+  solverId     Int?
+  solver       User?    @relation("Solver", fields: [solverId], references: [id])
 }

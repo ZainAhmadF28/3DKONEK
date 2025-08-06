@@ -1,59 +1,66 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 
-// Fungsi GET yang sudah ada sebelumnya
+// FUNGSI GET: Mengambil SEMUA tantangan dari database
 export async function GET(request: Request) {
   try {
-    const jsonDirectory = path.join(process.cwd(), 'src', 'data');
-    const fileContents = await fs.readFile(path.join(jsonDirectory, 'challenges.json'), 'utf8');
-    const challenges = JSON.parse(fileContents);
+    // Mengambil semua data tantangan dari database menggunakan Prisma
+    const challenges = await prisma.challenge.findMany({
+      // Urutkan berdasarkan tanggal dibuat, yang terbaru di atas
+      orderBy: {
+        createdAt: 'desc',
+      },
+      // Sertakan juga data pembuat tantangan (challenger)
+      include: {
+        challenger: {
+          select: {
+            name: true, // Hanya ambil nama pembuatnya
+          },
+        },
+      },
+    });
+
     return NextResponse.json(challenges);
+
   } catch (error) {
-    console.error(error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error('FETCH_CHALLENGES_ERROR', error);
+    return NextResponse.json({ message: 'Gagal mengambil data dari database.' }, { status: 500 });
   }
 }
 
-// =======================================================
-// == TAMBAHKAN FUNGSI POST BARU INI ==
-// =======================================================
+// FUNGSI POST: Membuat tantangan BARU ke database
 export async function POST(request: Request) {
-  // 1. Cek otentikasi pengguna
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user?.id) {
-    return new NextResponse('Tidak diotorisasi', { status: 401 });
+    return NextResponse.json({ message: 'Tidak diotorisasi' }, { status: 401 });
   }
 
   try {
-    // 2. Ambil data dari body request
     const body = await request.json();
     const { title, category, imageUrl, description, reward, deadline } = body;
 
     if (!title || !category || !imageUrl || !description || !reward || !deadline) {
-        return new NextResponse('Data tidak lengkap', { status: 400 });
+      return NextResponse.json({ message: 'Data tidak lengkap' }, { status: 400 });
     }
 
-    // 3. Simpan tantangan baru ke database menggunakan Prisma
     const newChallenge = await prisma.challenge.create({
       data: {
         title,
         category,
         imageUrl,
         description,
-        reward: parseInt(reward, 10), // Pastikan reward adalah angka
-        deadline: new Date(deadline), // Pastikan deadline adalah objek Date
-        challengerId: session.user.id, // Hubungkan dengan ID pengguna yang login
+        reward: parseInt(reward, 10),
+        deadline: new Date(deadline),
+        challengerId: session.user.id,
       },
     });
 
     return NextResponse.json(newChallenge, { status: 201 });
   } catch (error) {
     console.error('CREATE_CHALLENGE_ERROR', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ message: 'Terjadi kesalahan pada server.' }, { status: 500 });
   }
 }

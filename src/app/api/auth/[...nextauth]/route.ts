@@ -14,47 +14,65 @@ export const authOptions: AuthOptions = {
         email: { label: 'email', type: 'text' },
         password: { label: 'password', type: 'password' },
       },
+      // Fungsi authorize ini adalah titik krusial yang kita perbaiki
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Data tidak valid');
         }
 
-        const user = await prisma.user.findUnique({
+        const userFromDb = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
         });
 
-        if (!user || !user?.password) {
+        if (!userFromDb || !userFromDb?.password) {
           throw new Error('User tidak ditemukan');
         }
 
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
-          user.password
+          userFromDb.password
         );
 
         if (!isCorrectPassword) {
           throw new Error('Password salah');
         }
 
-        return user;
+        // =======================================================
+        // == INI ADALAH PERBAIKAN KUNCI ==
+        // =======================================================
+        // Kita tidak mengembalikan `userFromDb` secara langsung.
+        // Sebaliknya, kita membuat objek baru yang bersih dan secara eksplisit
+        // cocok dengan tipe `User` yang diharapkan oleh NextAuth.
+        return {
+          id: userFromDb.id,
+          name: userFromDb.name,
+          email: userFromDb.email,
+          role: userFromDb.role, // Secara eksplisit menyertakan 'role'
+          // Properti 'image' bersifat opsional, jadi tidak perlu disertakan jika tidak ada.
+        };
       },
     }),
   ],
-  // =======================================================
-  // == TAMBAHKAN BLOK CALLBACKS INI UNTUK MENYERTAKAN ID ==
   callbacks: {
+    // Callback `jwt` sekarang menerima `user` yang tipenya sudah benar
     jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id as number; // Pastikan 'id' adalah number
+        token.role = user.role;
+      }
       return token;
     },
+    // Callback `session` mengambil data dari token yang sudah benar
     session({ session, token }) {
-      if (session.user) session.user.id = token.id as number;
+      if (token && session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
       return session;
     },
   },
-  // =======================================================
   debug: process.env.NODE_ENV === 'development',
   session: {
     strategy: 'jwt',

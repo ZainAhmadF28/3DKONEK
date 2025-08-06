@@ -7,8 +7,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, name, password } = body;
 
+    // Validasi input dasar
     if (!email || !name || !password) {
-      return new NextResponse('Data tidak lengkap', { status: 400 });
+      // Mengembalikan error dalam format JSON
+      return NextResponse.json({ message: 'Semua kolom wajib diisi.' }, { status: 400 });
     }
 
     // Cek apakah email sudah terdaftar
@@ -17,7 +19,8 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return new NextResponse('Email sudah digunakan', { status: 409 });
+      // Mengembalikan error dalam format JSON
+      return NextResponse.json({ message: 'Email sudah digunakan.' }, { status: 409 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -30,9 +33,12 @@ export async function POST(request: Request) {
       },
     });
 
+    // Mengembalikan data user dalam format JSON saat sukses
     return NextResponse.json(user);
+    
   } catch (error) {
     console.error('REGISTRATION_ERROR', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    // Mengembalikan error server dalam format JSON
+    return NextResponse.json({ message: 'Terjadi kesalahan pada server.' }, { status: 500 });
   }
 }

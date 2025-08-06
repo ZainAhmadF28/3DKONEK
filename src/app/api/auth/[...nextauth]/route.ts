@@ -42,6 +42,19 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
+  // =======================================================
+  // == TAMBAHKAN BLOK CALLBACKS INI UNTUK MENYERTAKAN ID ==
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) session.user.id = token.id as number;
+      return session;
+    },
+  },
+  // =======================================================
   debug: process.env.NODE_ENV === 'development',
   session: {
     strategy: 'jwt',

@@ -16,11 +16,19 @@ module.exports = {
         'spin-slow': 'spin 20s linear infinite',
         'spin-slower': 'spin 30s linear infinite reverse',
         'scale-in': 'scale-in 0.2s ease-out forwards', // Animasi untuk modal
+        'fade-in': 'fade-in 0.2s ease-out forwards',  // <-- ANIMASI BARU UNTUK LIGHTBOX
       },
       keyframes: {
         'scale-in': {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        // =======================================================
+        // == KEYFRAME BARU UNTUK ANIMASI FADE-IN ==
+        // =======================================================
+        'fade-in': {
+            '0%': { opacity: '0' },
+            '100%': { opacity: '1' },
         },
       }
     },

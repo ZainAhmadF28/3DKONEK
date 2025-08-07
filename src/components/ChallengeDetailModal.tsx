@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { FaTimes, FaShareAlt, FaUser, FaEye, FaCogs, FaPaperPlane, FaComments } from 'react-icons/fa';
 import { Challenge } from './ChallengeCard';
 import ImageCarousel from './ImageCarousel';
 import ImageLightbox from './ImageLightbox';
+import DiscussionChat from './DiscussionChat';
 
 interface ModalProps {
   challenge: Challenge | null;
@@ -17,6 +19,7 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
   const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [proposalMessage, setProposalMessage] = useState('');
+  const [proposalFile, setProposalFile] = useState<File | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -29,38 +32,54 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
     return null;
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProposalFile(e.target.files[0]);
+    }
+  };
+
   const handleProposalSubmit = async () => {
-      if (!proposalMessage) {
-          setError("Silakan tulis pesan singkat untuk proposal Anda.");
-          return;
+    if (!proposalMessage) {
+      setError("Pesan singkat wajib diisi.");
+      return;
+    }
+    setIsSubmitting(true);
+    setError('');
+
+    const formData = new FormData();
+    formData.append('message', proposalMessage);
+    if (proposalFile) {
+      formData.append('file', proposalFile);
+    }
+
+    try {
+      const res = await fetch(`/api/challenges/${challenge.id}/proposals`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Gagal mengajukan proposal.');
       }
-      setIsSubmitting(true);
-      setError('');
-      try {
-          const res = await fetch(`/api/challenges/${challenge.id}/proposals`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ message: proposalMessage }),
-          });
-          if (!res.ok) {
-              const data = await res.json();
-              throw new Error(data.message || 'Gagal mengajukan proposal.');
-          }
-          alert('Proposal berhasil diajukan!');
-          onClose(); // Tutup modal setelah berhasil
-      } catch (err: any) {
-          setError(err.message);
-      } finally {
-          setIsSubmitting(false);
-      }
+      alert('Proposal berhasil diajukan!');
+      onClose();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const rewardFormatted = new Intl.NumberFormat('id-ID', {
-    style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
   }).format(challenge.reward);
 
   const deadlineFormatted = new Date(challenge.deadline).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric'
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   });
 
   const handleShare = () => {
@@ -70,17 +89,16 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
     });
   };
 
-  // Tentukan apakah tombol "Ajukan Proposal" harus ditampilkan
   const canSubmitProposal = session && session.user.id !== challenge.challenger?.id && challenge.status === 'OPEN';
 
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4"
+      <div
+        className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 transition-opacity duration-300"
         onClick={onClose}
       >
-        <div 
-          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
+        <div
+          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform transition-transform duration-300 scale-95 animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
           <ImageCarousel images={challenge.images} onImageClick={(url) => setLightboxImageUrl(url)} />
@@ -103,59 +121,70 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
             <p className="text-gray-700 leading-relaxed mb-6">{challenge.description}</p>
             
             {challenge.material && (
-                <div className="mb-6">
-                    <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2"><FaCogs /> Material yang Diinginkan</h4>
-                    <p className="text-gray-600 bg-slate-50 p-3 rounded-lg border">{challenge.material}</p>
-                </div>
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2"><FaCogs /> Material yang Diinginkan</h4>
+                <p className="text-gray-600 bg-slate-50 p-3 rounded-lg border">{challenge.material}</p>
+              </div>
             )}
+            
+            <DiscussionChat challengeId={challenge.id} />
 
-            {/* Form untuk mengajukan proposal */}
             {canSubmitProposal && (
-                <div className="mt-6 border-t pt-4">
-                    <h4 className="font-semibold text-gray-800 mb-2">Ajukan Proposal</h4>
-                    <p className="text-sm text-gray-500 mb-2">Tulis pesan singkat kepada pemberi tantangan mengapa Anda adalah orang yang tepat.</p>
-                    <textarea 
-                        value={proposalMessage}
-                        onChange={(e) => setProposalMessage(e.target.value)}
-                        rows={3}
-                        className="w-full p-2 border rounded-lg"
-                        placeholder="Contoh: Saya memiliki pengalaman 5 tahun di bidang permesinan dan memiliki akses ke bengkel CNC..."
-                    />
-                    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              <div className="mt-6 border-t pt-4">
+                <h4 className="font-semibold text-gray-800 mb-2">Ajukan Proposal</h4>
+                <p className="text-sm text-gray-500 mb-2">Tulis pesan singkat dan unggah file proposal (PDF) jika ada.</p>
+                <textarea
+                  value={proposalMessage}
+                  onChange={(e) => setProposalMessage(e.target.value)}
+                  rows={3}
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Contoh: Saya memiliki pengalaman 5 tahun di bidang permesinan..."
+                />
+                <div className="mt-2">
+                  <label htmlFor="proposalFile" className="block text-gray-700 font-semibold text-sm mb-1">File Proposal (PDF, Opsional)</label>
+                  <input
+                    type="file"
+                    name="proposalFile"
+                    id="proposalFile"
+                    onChange={handleFileChange}
+                    className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    accept=".pdf"
+                  />
                 </div>
+                {proposalFile && <p className="text-sm text-gray-600 mt-2">File dipilih: {proposalFile.name}</p>}
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              </div>
             )}
           </div>
 
           <div className="flex justify-between items-center p-4 border-t bg-gray-50 rounded-b-lg gap-4 mt-auto">
             <div>
-              <button onClick={handleShare} className="flex items-center gap-2 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-200 transition-colors">
+              <button onClick={handleShare} className="flex items-center gap-2 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-200">
                 <FaShareAlt />
                 <span>Bagikan</span>
               </button>
             </div>
             <div className="flex gap-2">
-                <button className="flex items-center gap-2 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-200 transition-colors">
-                    <FaComments /><span>Gabung Diskusi</span>
+              {canSubmitProposal && (
+                <button
+                  onClick={handleProposalSubmit}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400"
+                >
+                  <FaPaperPlane />
+                  <span>{isSubmitting ? 'Mengirim...' : 'Ajukan Proposal'}</span>
                 </button>
-                {canSubmitProposal && (
-                    <button 
-                        onClick={handleProposalSubmit}
-                        disabled={isSubmitting}
-                        className="flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400"
-                    >
-                        <FaPaperPlane /><span>{isSubmitting ? 'Mengirim...' : 'Ajukan Proposal'}</span>
-                    </button>
-                )}
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {lightboxImageUrl && (
-        <ImageLightbox 
-          src={lightboxImageUrl} 
-          alt={`Gambar untuk ${challenge.title}`} 
-          onClose={() => setLightboxImageUrl(null)} 
+        <ImageLightbox
+          src={lightboxImageUrl}
+          alt={`Gambar untuk ${challenge.title}`}
+          onClose={() => setLightboxImageUrl(null)}
         />
       )}
     </>

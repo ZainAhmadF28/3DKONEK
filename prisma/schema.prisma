@@ -10,96 +10,102 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-// ENUM BARU UNTUK STATUS TANTANGAN
-enum ChallengeStatus {
-  OPEN      // Terbuka untuk proposal
-  IN_PROGRESS // Proposal sudah disetujui, sedang dikerjakan
-  COMPLETED // Selesai
-}
-
-// ENUM BARU UNTUK STATUS PROPOSAL
-enum ProposalStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
+enum Role { USER, ADMIN }
+enum ChallengeStatus { OPEN, IN_PROGRESS, COMPLETED, DONE }
+enum ProposalStatus { PENDING, APPROVED, REJECTED }
+enum SubmissionStatus { PENDING, APPROVED, REVISION_REQUESTED }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  createdChallenges Challenge[] @relation("Challenger")
+  id                 Int      @id @default(autoincrement())
+  email              String   @unique
+  name               String?
+  password           String
+  role               Role     @default(USER)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  createdChallenges  Challenge[] @relation("Challenger")
   acceptedChallenges Challenge[] @relation("Solver")
-  views ChallengeView[]
+  views              ChallengeView[]
+  proposals          Proposal[]
+  submissions        Submission[]
   
-  // Relasi baru
-  proposals Proposal[]
-  messages  Message[]
+  // Relasi baru yang sudah dipisah
+  publicComments     PublicComment[]
+  privateMessages    PrivateMessage[]
 }
 
 model Challenge {
-  id           Int      @id @default(autoincrement())
+  id           Int             @id @default(autoincrement())
   title        String
   category     String
   description  String
   material     String?
   reward       Int
   deadline     DateTime
-  status       ChallengeStatus @default(OPEN) // Menggunakan Enum Status
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  status       ChallengeStatus @default(OPEN)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
   challengerId Int
-  challenger   User     @relation("Challenger", fields: [challengerId], references: [id], onDelete: Cascade)
-
+  challenger   User            @relation("Challenger", fields: [challengerId], references: [id], onDelete: Cascade)
   solverId     Int?
-  solver       User?    @relation("Solver", fields: [solverId], references: [id], onDelete: SetNull)
-
+  solver       User?           @relation("Solver", fields: [solverId], references: [id], onDelete: SetNull)
   images       ChallengeImage[]
   views        ChallengeView[]
-  
-  // Relasi baru
   proposals    Proposal[]
-  messages     Message[]
+  submissions  Submission[]
+  
+  // Relasi baru yang sudah dipisah
+  publicComments     PublicComment[]
+  privateMessages    PrivateMessage[]
 }
 
-// MODEL BARU UNTUK PROPOSAL
-model Proposal {
-  id          Int      @id @default(autoincrement())
-  message     String
-  status      ProposalStatus @default(PENDING)
-  createdAt   DateTime @default(now())
-
-  challengeId Int
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  authorId    Int
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-}
-
-// MODEL BARU UNTUK CHAT (FONDASI)
-model Message {
+// MODEL BARU UNTUK KOMENTAR PUBLIK (PENGGANTI 'Message')
+model PublicComment {
   id          Int      @id @default(autoincrement())
   content     String
   createdAt   DateTime @default(now())
-
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
   authorId    Int
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
+// MODEL BARU UNTUK CHAT PRIVAT
+model PrivateMessage {
+  id          Int      @id @default(autoincrement())
+  content     String
+  createdAt   DateTime @default(now())
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+
+// --- Model-model lain yang sudah ada ---
+model Proposal {
+  id          Int            @id @default(autoincrement())
+  message     String
+  fileUrl     String?
+  status      ProposalStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  challengeId Int
+  challenge   Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id        Int              @id @default(autoincrement())
+  fileUrl   String
+  notes     String?
+  status    SubmissionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  challengeId Int
+  challenge   Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
 
 model ChallengeImage {
   id          Int      @id @default(autoincrement())
@@ -113,9 +119,7 @@ model ChallengeView {
   userId      Int
   challengeId Int
   viewedAt    DateTime @default(now())
-
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
   @@id([userId, challengeId])
 }

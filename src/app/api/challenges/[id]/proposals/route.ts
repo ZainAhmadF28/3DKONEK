@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
+import { writeFile, mkdir, stat } from 'fs/promises';
+import path from 'path';
 
 export async function POST(
   request: Request,
@@ -13,28 +15,38 @@ export async function POST(
   }
 
   try {
+    const formData = await request.formData();
     const challengeId = parseInt(params.id, 10);
-    const { message } = await request.json();
+    const message = formData.get('message') as string;
+    const file = formData.get('file') as File | null;
 
     if (!message) {
       return NextResponse.json({ message: 'Pesan proposal wajib diisi.' }, { status: 400 });
     }
 
-    // Cek apakah user sudah pernah mengajukan proposal untuk tantangan ini
-    const existingProposal = await prisma.proposal.findFirst({
-        where: {
-            challengeId: challengeId,
-            authorId: session.user.id
-        }
-    });
+    let fileUrl: string | undefined = undefined;
 
-    if (existingProposal) {
-        return NextResponse.json({ message: 'Anda sudah mengajukan proposal untuk tantangan ini.' }, { status: 409 });
+    if (file) {
+      const uploadDir = path.join(process.cwd(), 'public/uploads/proposals');
+      try {
+        await stat(uploadDir);
+      } catch (e: any) {
+        if (e.code === 'ENOENT') {
+          await mkdir(uploadDir, { recursive: true });
+        } else {
+          throw e;
+        }
+      }
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+      await writeFile(path.join(uploadDir, filename), buffer);
+      fileUrl = `/uploads/proposals/${filename}`;
     }
 
     const newProposal = await prisma.proposal.create({
       data: {
         message,
+        fileUrl,
         challengeId: challengeId,
         authorId: session.user.id,
       },

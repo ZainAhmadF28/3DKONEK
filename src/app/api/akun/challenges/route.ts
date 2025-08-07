@@ -4,16 +4,13 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 
 export async function GET(request: Request) {
-  // 1. Dapatkan sesi pengguna dari server
   const session = await getServerSession(authOptions);
 
-  // 2. Pastikan pengguna sudah login
   if (!session || !session.user || !session.user.id) {
     return NextResponse.json({ message: 'Tidak diotorisasi.' }, { status: 401 });
   }
 
   try {
-    // 3. Ambil tantangan dari database DI MANA challengerId = id pengguna yang login
     const userChallenges = await prisma.challenge.findMany({
       where: {
         challengerId: session.user.id,
@@ -21,13 +18,19 @@ export async function GET(request: Request) {
       orderBy: {
         createdAt: 'desc',
       },
-      // Sertakan juga gambar untuk setiap tantangan
       include: {
-        images: {
-          select: {
-            url: true,
-          },
-        },
+        images: { select: { url: true } },
+        proposals: { include: { author: { select: { name: true } } } },
+        submissions: { include: { author: { select: { name: true } } }, orderBy: { createdAt: 'desc' } },
+        // =======================================================
+        // == SERTAKAN DETAIL SOLVER (PENGERJA) ==
+        // =======================================================
+        solver: {
+            select: {
+                id: true,
+                name: true,
+            }
+        }
       },
     });
 

@@ -11,23 +11,26 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Ambil tantangan di mana ID solver adalah ID pengguna yang login
-    // dan statusnya IN_PROGRESS
     const acceptedChallenges = await prisma.challenge.findMany({
       where: {
         solverId: session.user.id,
-        status: ChallengeStatus.IN_PROGRESS,
+        // Ambil semua tantangan yang sedang atau sudah selesai dikerjakan
+        status: { in: [ChallengeStatus.IN_PROGRESS, ChallengeStatus.COMPLETED, ChallengeStatus.DONE] }
       },
       orderBy: {
         updatedAt: 'desc',
       },
       include: {
-        images: {
-          select: { url: true },
-        },
-        challenger: {
-          select: { name: true },
-        },
+        images: { select: { url: true } },
+        challenger: { select: { name: true } },
+        // =======================================================
+        // == SERTAKAN RIWAYAT SUBMISSION ==
+        // =======================================================
+        submissions: {
+            orderBy: {
+                createdAt: 'desc'
+            }
+        }
       },
     });
 

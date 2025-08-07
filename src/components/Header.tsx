@@ -21,8 +21,12 @@ const Header = () => {
           <ul className="flex space-x-8 items-center">
             <li><Link href="/" className="hover:text-gray-200">Beranda</Link></li>
             <li><Link href="/tantangan" className="hover:text-gray-200">Tantangan</Link></li>
+
+            {/* LINK BARU */}
+            <li><Link href="/perpustakaan" className="hover:text-gray-200 font-semibold">Perpustakaan</Link></li>
+
             {status === 'authenticated' && session.user.role === 'USER' && (
-                <li><Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2"><FaTools /> Bengkel Saya</Link></li>
+              <li><Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2"><FaTools /> Bengkel Saya</Link></li>
             )}
           </ul>
         </nav>
@@ -31,7 +35,6 @@ const Header = () => {
           {status === 'loading' ? (
             <div className="text-sm">Memuat...</div>
           ) : session ? (
-            // Tampilan jika pengguna SUDAH LOGIN
             <>
               {session.user.role === 'ADMIN' && (
                 <Link href="/admin" className="bg-yellow-400 hover:bg-yellow-500 text-slate-800 font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
@@ -39,9 +42,9 @@ const Header = () => {
                   Admin
                 </Link>
               )}
-              
+
               {session.user.role === 'USER' && (
-                 <Link href="/akun/dashboard" className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
+                <Link href="/akun/dashboard" className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
                   <FaUserCircle className="mr-2" />
                   Dashboard Saya
                 </Link>
@@ -56,7 +59,6 @@ const Header = () => {
               </button>
             </>
           ) : (
-            // Tampilan jika pengguna BELUM LOGIN
             <>
               <Link href="/login" className="bg-transparent hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors">
                 <FaSignInAlt className="mr-2" />

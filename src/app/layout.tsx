@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AuthProvider from "@/components/AuthProvider"; // Import provider
+import AuthProvider from "@/components/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,9 +16,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="id">
+      <head>
+        {/* Script baru untuk menjalankan Google <model-viewer> */}
+        <script
+          type="module"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+          async
+        ></script>
+      </head>
       <body className={inter.className}>
-        <AuthProvider> {/* Bungkus children dengan AuthProvider */}
+        <AuthProvider>
           {children}
         </AuthProvider>
       </body>

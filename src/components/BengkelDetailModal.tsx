@@ -1,20 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-// ... (imports tetap sama)
-import { useSession } from 'next-auth/react';
-import { FaTimes, FaFileUpload, FaPaperPlane, FaComments, FaFileArchive } from 'react-icons/fa';
+import { FaTimes, FaPaperPlane, FaComments, FaFileArchive, FaCube, FaDownload } from 'react-icons/fa'; // Import FaDownload
 import { Challenge } from './ChallengeCard';
 import ImageCarousel from './ImageCarousel';
 
 interface ModalProps {
-  challenge: Challenge & { submissions?: any[] }; // Tipe diperluas untuk submissions
+  challenge: Challenge & { submissions?: any[] };
   onClose: () => void;
   onSubmissionSuccess: () => void;
+  onView3D: (fileUrl: string) => void;
 }
 
-const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmissionSuccess }) => {
-  const { data: session } = useSession();
+const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmissionSuccess, onView3D }) => {
   const [submissionFile, setSubmissionFile] = useState<File | null>(null);
   const [submissionNotes, setSubmissionNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,9 +70,8 @@ const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmis
           <button onClick={onClose} className="text-gray-400 hover:text-gray-800 text-2xl p-1 -mt-2 -mr-2"><FaTimes /></button>
         </div>
         <div className="px-5 pb-5 overflow-y-auto">
-          {/* Form untuk Submit Pekerjaan */}
           {!isWorkDone && (
-            <div className="mt-4 border-t pt-4">
+            <div className="border-t pt-4">
               <h3 className="text-xl font-bold text-slate-800 mb-2">Kumpulkan Hasil Pekerjaan</h3>
               <div className="mb-4">
                 <label htmlFor="submissionFile" className="block text-gray-700 font-semibold text-sm mb-1">File Hasil Desain (.glb)</label>
@@ -89,16 +86,32 @@ const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmis
             </div>
           )}
 
-          {/* Riwayat Submission */}
           <div className="mt-4 border-t pt-4">
              <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2"><FaFileArchive /> Riwayat Pengumpulan</h4>
              {challenge.submissions && challenge.submissions.length > 0 ? (
                 <ul className="space-y-2 text-sm">
                     {challenge.submissions.map(sub => (
-                        <li key={sub.id} className="p-2 bg-slate-50 rounded-md border flex justify-between items-center">
+                        <li key={sub.id} className="p-3 bg-slate-50 rounded-md border flex justify-between items-center">
                             <div>
-                                <a href={sub.fileUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline font-semibold">Lihat File Submission</a>
-                                <p className="text-gray-500 text-xs">Dikirim pada: {new Date(sub.createdAt).toLocaleString('id-ID')}</p>
+                                <p className="text-gray-500 text-xs mb-1">Dikirim pada: {new Date(sub.createdAt).toLocaleString('id-ID')}</p>
+                                <div className="flex items-center gap-4">
+                                    <button 
+                                      onClick={() => onView3D(sub.fileUrl)}
+                                      className="text-indigo-600 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"
+                                    >
+                                      <FaCube /> Lihat Model 3D
+                                    </button>
+                                    {/* ======================================================= */}
+                                    {/* == TOMBOL UNDUH BARU == */}
+                                    {/* ======================================================= */}
+                                    <a 
+                                      href={sub.fileUrl} 
+                                      download 
+                                      className="text-gray-600 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"
+                                    >
+                                      <FaDownload /> Unduh
+                                    </a>
+                                </div>
                             </div>
                             <span className={`font-bold px-2 py-0.5 rounded-full text-xs ${sub.status === 'APPROVED' ? 'bg-green-100 text-green-800' : sub.status === 'REVISION_REQUESTED' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>{sub.status}</span>
                         </li>

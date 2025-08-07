@@ -9,6 +9,7 @@ import ChallengeCard, { Challenge } from '@/components/ChallengeCard';
 import Link from 'next/link';
 import { FaTools, FaComments } from 'react-icons/fa';
 import BengkelDetailModal from '@/components/BengkelDetailModal';
+import ThreeDViewerModal from '@/components/ThreeDViewerModal'; // Import modal 3D
 
 const BengkelPage = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const BengkelPage = () => {
   const [acceptedChallenges, setAcceptedChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
+  const [modelViewerSrc, setModelViewerSrc] = useState<string | null>(null); // State baru
 
   const fetchAcceptedChallenges = async () => {
     setIsLoading(true);
@@ -50,6 +52,11 @@ const BengkelPage = () => {
     setSelectedChallenge(null);
   };
 
+  // Fungsi baru untuk membuka penampil 3D
+  const handleView3D = (fileUrl: string) => {
+    setModelViewerSrc(fileUrl);
+  };
+
   if (status === 'loading' || !session) {
     return <div className="flex justify-center items-center min-h-screen">Memuat...</div>;
   }
@@ -75,15 +82,15 @@ const BengkelPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {acceptedChallenges.map((challenge) => (
                     <div key={challenge.id} className="bg-white rounded-lg shadow-lg flex flex-col">
-                      <ChallengeCard 
-                        challenge={challenge} 
-                        onClick={() => handleCardClick(challenge)} 
-                      />
-                      <div className="p-4 border-t">
-                          <Link href={`/chat/${challenge.id}`} className="w-full text-center block bg-slate-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm flex items-center justify-center gap-2">
-                              <FaComments /> Buka Chat Diskusi
-                          </Link>
-                      </div>
+                        <ChallengeCard 
+                            challenge={challenge} 
+                            onClick={() => handleCardClick(challenge)} 
+                        />
+                        <div className="p-4 border-t">
+                            <Link href={`/chat/${challenge.id}`} className="w-full text-center block bg-slate-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm flex items-center justify-center gap-2">
+                                <FaComments /> Buka Chat Diskusi
+                            </Link>
+                        </div>
                     </div>
                   ))}
                 </div>
@@ -105,7 +112,16 @@ const BengkelPage = () => {
         challenge={selectedChallenge}
         onClose={handleCloseModal}
         onSubmissionSuccess={fetchAcceptedChallenges}
+        onView3D={handleView3D} // Teruskan fungsi handler ke modal
       />
+
+      {/* Render modal 3D secara kondisional */}
+      {modelViewerSrc && (
+        <ThreeDViewerModal 
+          src={modelViewerSrc} 
+          onClose={() => setModelViewerSrc(null)} 
+        />
+      )}
     </>
   );
 };

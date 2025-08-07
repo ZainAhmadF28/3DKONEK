@@ -10,10 +10,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { USER, ADMIN }
-enum ChallengeStatus { OPEN, IN_PROGRESS, COMPLETED, DONE }
-enum ProposalStatus { PENDING, APPROVED, REJECTED }
-enum SubmissionStatus { PENDING, APPROVED, REVISION_REQUESTED }
+// Enum harus didefinisikan dengan setiap nilai di baris baru
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ChallengeStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  DONE
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REVISION_REQUESTED
+}
 
 model User {
   id                 Int      @id @default(autoincrement())
@@ -28,8 +48,6 @@ model User {
   views              ChallengeView[]
   proposals          Proposal[]
   submissions        Submission[]
-  
-  // Relasi baru yang sudah dipisah
   publicComments     PublicComment[]
   privateMessages    PrivateMessage[]
 }
@@ -53,24 +71,20 @@ model Challenge {
   views        ChallengeView[]
   proposals    Proposal[]
   submissions  Submission[]
-  
-  // Relasi baru yang sudah dipisah
   publicComments     PublicComment[]
   privateMessages    PrivateMessage[]
 }
 
-// MODEL BARU UNTUK KOMENTAR PUBLIK (PENGGANTI 'Message')
 model PublicComment {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   content     String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   challengeId Int
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  authorId    Int
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  author      User      @relation(fields: [authorId], references: [id])
 }
 
-// MODEL BARU UNTUK CHAT PRIVAT
 model PrivateMessage {
   id          Int      @id @default(autoincrement())
   content     String
@@ -81,8 +95,6 @@ model PrivateMessage {
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
-
-// --- Model-model lain yang sudah ada ---
 model Proposal {
   id          Int            @id @default(autoincrement())
   message     String

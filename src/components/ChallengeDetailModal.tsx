@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { FaTimes, FaShareAlt, FaUser, FaEye, FaCogs, FaPaperPlane, FaComments } from 'react-icons/fa';
+import { FaTimes, FaShareAlt, FaUser, FaEye, FaCogs, FaPaperPlane } from 'react-icons/fa';
 import { Challenge } from './ChallengeCard';
 import ImageCarousel from './ImageCarousel';
 import ImageLightbox from './ImageLightbox';
-import DiscussionChat from './DiscussionChat';
+import PublicComments from './PublicComments'; // Menggunakan komponen Komentar Publik yang baru
 
 interface ModalProps {
   challenge: Challenge | null;
@@ -94,11 +94,11 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
   return (
     <>
       <div
-        className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 transition-opacity duration-300"
+        className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4"
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform transition-transform duration-300 scale-95 animate-scale-in"
+          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           <ImageCarousel images={challenge.images} onImageClick={(url) => setLightboxImageUrl(url)} />
@@ -127,7 +127,8 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
               </div>
             )}
             
-            <DiscussionChat challengeId={challenge.id} />
+            {/* Menggunakan komponen Komentar Publik yang baru */}
+            <PublicComments challengeId={challenge.id} />
 
             {canSubmitProposal && (
               <div className="mt-6 border-t pt-4">
@@ -160,8 +161,7 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
           <div className="flex justify-between items-center p-4 border-t bg-gray-50 rounded-b-lg gap-4 mt-auto">
             <div>
               <button onClick={handleShare} className="flex items-center gap-2 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-200">
-                <FaShareAlt />
-                <span>Bagikan</span>
+                <FaShareAlt /><span>Bagikan</span>
               </button>
             </div>
             <div className="flex gap-2">
@@ -171,8 +171,7 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
                   disabled={isSubmitting}
                   className="flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400"
                 >
-                  <FaPaperPlane />
-                  <span>{isSubmitting ? 'Mengirim...' : 'Ajukan Proposal'}</span>
+                  <FaPaperPlane /><span>{isSubmitting ? 'Mengirim...' : 'Ajukan Proposal'}</span>
                 </button>
               )}
             </div>

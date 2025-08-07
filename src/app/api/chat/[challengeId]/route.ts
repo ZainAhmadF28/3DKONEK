@@ -8,12 +8,10 @@ async function verifyUserAccess(userId: number, challengeId: number) {
         where: { id: challengeId },
         select: { challengerId: true, solverId: true }
     });
-
     if (!challenge) return false;
     return userId === challenge.challengerId || userId === challenge.solverId;
 }
 
-// FUNGSI UNTUK MENGAMBIL PESAN PRIVAT
 export async function GET(
   request: Request,
   { params }: { params: { challengeId: string } }
@@ -25,23 +23,15 @@ export async function GET(
 
   try {
     const challengeId = parseInt(params.challengeId, 10);
-
-    // Verifikasi apakah user punya akses ke chat ini
     const hasAccess = await verifyUserAccess(session.user.id, challengeId);
     if (!hasAccess) {
         return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
     }
 
-    const messages = await prisma.message.findMany({
+    const messages = await prisma.privateMessage.findMany({ // MENGGUNAKAN privateMessage
       where: { challengeId: challengeId },
-      include: {
-        author: {
-          select: { id: true, name: true },
-        },
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
+      include: { author: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'asc' },
     });
     return NextResponse.json(messages);
   } catch (error) {
@@ -49,7 +39,6 @@ export async function GET(
   }
 }
 
-// FUNGSI UNTUK MENGIRIM PESAN PRIVAT
 export async function POST(
   request: Request,
   { params }: { params: { challengeId: string } }
@@ -62,8 +51,6 @@ export async function POST(
   try {
     const challengeId = parseInt(params.challengeId, 10);
     const { content } = await request.json();
-
-    // Verifikasi apakah user punya akses ke chat ini
     const hasAccess = await verifyUserAccess(session.user.id, challengeId);
     if (!hasAccess) {
         return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
@@ -73,17 +60,13 @@ export async function POST(
       return NextResponse.json({ message: 'Isi pesan tidak boleh kosong.' }, { status: 400 });
     }
 
-    const newMessage = await prisma.message.create({
+    const newMessage = await prisma.privateMessage.create({ // MENGGUNAKAN privateMessage
       data: {
         content,
         challengeId: challengeId,
         authorId: session.user.id,
       },
-      include: {
-        author: {
-          select: { id: true, name: true },
-        },
-      },
+      include: { author: { select: { id: true, name: true } } },
     });
 
     return NextResponse.json(newMessage, { status: 201 });

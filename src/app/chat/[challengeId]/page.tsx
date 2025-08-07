@@ -98,7 +98,7 @@ const PrivateChatPage = () => {
           </Link>
           <div className="bg-white rounded-lg shadow-md flex flex-col h-[70vh]">
             <div className="p-4 border-b">
-              <h1 className="text-xl font-bold text-slate-800">Diskusi Privat</h1>
+              <h1 className="text-xl font-bold text-slate-800">Chat Privat Proyek</h1>
               <p className="text-sm text-slate-500">Tantangan ID: {challengeId}</p>
             </div>
             

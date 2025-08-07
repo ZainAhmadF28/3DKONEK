@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ChallengeStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  DONE
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REVISION_REQUESTED
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  email              String   @unique
+  name               String?
+  password           String
+  role               Role     @default(USER)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  createdChallenges  Challenge[] @relation("Challenger")
+  acceptedChallenges Challenge[] @relation("Solver")
+  views              ChallengeView[]
+  proposals          Proposal[]
+  submissions        Submission[]
+  publicComments     PublicComment[]
+  privateMessages    PrivateMessage[]
+}
+
+model Challenge {
+  id           Int             @id @default(autoincrement())
+  title        String
+  category     String
+  description  String
+  material     String?
+  reward       Int
+  deadline     DateTime
+  status       ChallengeStatus @default(OPEN)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  challengerId Int
+  challenger   User            @relation("Challenger", fields: [challengerId], references: [id], onDelete: Cascade)
+  solverId     Int?
+  solver       User?           @relation("Solver", fields: [solverId], references: [id], onDelete: SetNull)
+  images       ChallengeImage[]
+  views        ChallengeView[]
+  proposals    Proposal[]
+  submissions  Submission[]
+  publicComments     PublicComment[]
+  privateMessages    PrivateMessage[]
+}
+
+model PublicComment {
+  id          Int      @id @default(autoincrement())
+  content     String
+  createdAt   DateTime @default(now())
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  
+  // =======================================================
+  // == PERBAIKAN KUNCI ADA DI SINI ==
+  // =======================================================
+  // Field ini sebelumnya hilang, sekarang ditambahkan
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model PrivateMessage {
+  id          Int      @id @default(autoincrement())
+  content     String
+  fileUrl     String?
+  fileType    String?
+  createdAt   DateTime @default(now())
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Proposal {
+  id          Int            @id @default(autoincrement())
+  message     String
+  fileUrl     String?
+  status      ProposalStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  challengeId Int
+  challenge   Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id        Int              @id @default(autoincrement())
+  fileUrl   String
+  notes     String?
+  status    SubmissionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  challengeId Int
+  challenge   Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model ChallengeImage {
+  id          Int      @id @default(autoincrement())
+  url         String
+  createdAt   DateTime @default(now())
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+}
+
+model ChallengeView {
+  userId      Int
+  challengeId Int
+  viewedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  @@id([userId, challengeId])
+}

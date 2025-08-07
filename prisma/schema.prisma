@@ -10,7 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enum harus didefinisikan dengan setiap nilai di baris baru
 enum Role {
   USER
   ADMIN
@@ -76,13 +75,18 @@ model Challenge {
 }
 
 model PublicComment {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   content     String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
   challengeId Int
-  authorId    String
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
-  author      User      @relation(fields: [authorId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  
+  // =======================================================
+  // == PERBAIKAN KUNCI ADA DI SINI ==
+  // =======================================================
+  // Field ini sebelumnya hilang, sekarang ditambahkan
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
 model PrivateMessage {
@@ -91,6 +95,8 @@ model PrivateMessage {
   createdAt   DateTime @default(now())
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  
+  // Field ini juga perlu ditambahkan untuk konsistensi
   authorId    Int
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }

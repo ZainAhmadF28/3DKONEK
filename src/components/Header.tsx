@@ -21,7 +21,6 @@ const Header = () => {
           <ul className="flex space-x-8 items-center">
             <li><Link href="/" className="hover:text-gray-200">Beranda</Link></li>
             <li><Link href="/tantangan" className="hover:text-gray-200">Tantangan</Link></li>
-            {/* LINK BARU UNTUK BENGKEL */}
             {status === 'authenticated' && session.user.role === 'USER' && (
                 <li><Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2"><FaTools /> Bengkel Saya</Link></li>
             )}
@@ -32,16 +31,19 @@ const Header = () => {
           {status === 'loading' ? (
             <div className="text-sm">Memuat...</div>
           ) : session ? (
+            // Tampilan jika pengguna SUDAH LOGIN
             <>
               {session.user.role === 'ADMIN' && (
                 <Link href="/admin" className="bg-yellow-400 hover:bg-yellow-500 text-slate-800 font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
-                  <FaTachometerAlt className="mr-2" /> Admin
+                  <FaTachometerAlt className="mr-2" />
+                  Admin
                 </Link>
               )}
               
               {session.user.role === 'USER' && (
                  <Link href="/akun/dashboard" className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
-                  <FaUserCircle className="mr-2" /> Dashboard
+                  <FaUserCircle className="mr-2" />
+                  Dashboard Saya
                 </Link>
               )}
 
@@ -49,16 +51,20 @@ const Header = () => {
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm"
               >
-                <FaSignOutAlt className="mr-2" /> Logout
+                <FaSignOutAlt className="mr-2" />
+                Logout
               </button>
             </>
           ) : (
+            // Tampilan jika pengguna BELUM LOGIN
             <>
               <Link href="/login" className="bg-transparent hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors">
-                <FaSignInAlt className="mr-2" /> Login
+                <FaSignInAlt className="mr-2" />
+                Login
               </Link>
               <Link href="/register" className="bg-[#ff6b35] hover:bg-[#ff5500] text-white font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md">
-                <FaUserPlus className="mr-2" /> Daftar
+                <FaUserPlus className="mr-2" />
+                Daftar
               </Link>
             </>
           )}

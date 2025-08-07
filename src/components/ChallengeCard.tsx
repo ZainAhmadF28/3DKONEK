@@ -2,21 +2,23 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { FaEye, FaUsers } from 'react-icons/fa';
+import { FaEye, FaUser } from 'react-icons/fa';
 
+// Perbarui tipe Challenge untuk menyertakan data baru
 export interface Challenge {
   id: number;
   title: string;
   category: string;
-  images: { url: string }[]; // Diubah dari imageUrl
+  images: { url: string }[];
   description: string;
+  material: string | null;
   reward: number;
   deadline: string | Date;
   status: string;
-  // Properti opsional dari relasi
   challenger?: { name: string | null; };
-  participants?: number; // Asumsi
-  views?: number; // Asumsi
+  _count?: { // Data agregat dari Prisma
+    views: number;
+  };
 }
 
 interface ChallengeCardProps {
@@ -35,7 +37,6 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
     style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
   }).format(challenge.reward);
 
-  // Ambil gambar pertama sebagai thumbnail
   const thumbnailUrl = challenge.images && challenge.images.length > 0 ? challenge.images[0].url : null;
 
   return (
@@ -45,13 +46,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
     >
       <div className="relative h-56 w-full overflow-hidden bg-gray-200">
         {thumbnailUrl ? (
-          <Image
-            src={thumbnailUrl}
-            alt={`Gambar untuk ${challenge.title}`}
-            layout="fill"
-            objectFit="cover"
-            className="group-hover:scale-105 transition-transform duration-300"
-          />
+          <Image src={thumbnailUrl} alt={`Gambar untuk ${challenge.title}`} layout="fill" objectFit="cover" className="group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">Tidak Ada Gambar</div>
         )}
@@ -65,16 +60,24 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
           </span>
         </div>
         <h3 className="text-xl font-bold text-[#0a2540] mb-2 h-14 overflow-hidden">{challenge.title}</h3>
-        <div className="text-2xl font-bold text-[#ff6b35] mt-auto pt-4">
+        
+        {/* Tampilkan nama pembuat dan jumlah view */}
+        <div className="flex items-center text-sm text-gray-500 gap-4 mb-4">
+            <span className="flex items-center gap-1.5" title="Dibuat oleh">
+                <FaUser /> {challenge.challenger?.name || 'Anonim'}
+            </span>
+            <span className="flex items-center gap-1.5" title="Dilihat oleh">
+                <FaEye /> {challenge._count?.views || 0}
+            </span>
+        </div>
+
+        <div className="text-2xl font-bold text-[#ff6b35] mt-auto pt-2">
           {rewardFormatted}
         </div>
       </div>
       
       <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center" title="Dilihat"><FaEye className="mr-1.5" /> {challenge.views || 0}</span>
-          <span className="flex items-center" title="Peserta"><FaUsers className="mr-1.5" /> {challenge.participants || 0}</span>
-        </div>
+        <span>ID: {challenge.id}</span>
         <span className="font-semibold text-indigo-600">Lihat Detail &rarr;</span>
       </div>
     </div>

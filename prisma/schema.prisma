@@ -15,6 +15,20 @@ enum Role {
   ADMIN
 }
 
+// ENUM BARU UNTUK STATUS TANTANGAN
+enum ChallengeStatus {
+  OPEN      // Terbuka untuk proposal
+  IN_PROGRESS // Proposal sudah disetujui, sedang dikerjakan
+  COMPLETED // Selesai
+}
+
+// ENUM BARU UNTUK STATUS PROPOSAL
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -26,17 +40,22 @@ model User {
 
   createdChallenges Challenge[] @relation("Challenger")
   acceptedChallenges Challenge[] @relation("Solver")
+  views ChallengeView[]
+  
+  // Relasi baru
+  proposals Proposal[]
+  messages  Message[]
 }
 
 model Challenge {
   id           Int      @id @default(autoincrement())
   title        String
   category     String
-  // imageUrl     String // Dihapus dari sini
   description  String
+  material     String?
   reward       Int
   deadline     DateTime
-  status       String   @default("Open")
+  status       ChallengeStatus @default(OPEN) // Menggunakan Enum Status
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -46,15 +65,57 @@ model Challenge {
   solverId     Int?
   solver       User?    @relation("Solver", fields: [solverId], references: [id], onDelete: SetNull)
 
-  // Relasi baru: Satu tantangan punya banyak gambar
   images       ChallengeImage[]
+  views        ChallengeView[]
+  
+  // Relasi baru
+  proposals    Proposal[]
+  messages     Message[]
 }
 
-// MODEL BARU UNTUK MENYIMPAN GAMBAR
+// MODEL BARU UNTUK PROPOSAL
+model Proposal {
+  id          Int      @id @default(autoincrement())
+  message     String
+  status      ProposalStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// MODEL BARU UNTUK CHAT (FONDASI)
+model Message {
+  id          Int      @id @default(autoincrement())
+  content     String
+  createdAt   DateTime @default(now())
+
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+
 model ChallengeImage {
   id          Int      @id @default(autoincrement())
-  url         String   // Path ke file gambar
+  url         String
   createdAt   DateTime @default(now())
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+}
+
+model ChallengeView {
+  userId      Int
+  challengeId Int
+  viewedAt    DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, challengeId])
 }

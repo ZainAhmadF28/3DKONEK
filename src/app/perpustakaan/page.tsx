@@ -5,8 +5,8 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ModelViewer from '@/components/ModelViewer'; // Gunakan komponen yang sudah ada
-import { FaUpload } from 'react-icons/fa';
+import ModelViewer from '@/components/ModelViewer';
+import { FaUpload, FaDownload } from 'react-icons/fa'; // 1. Import ikon Download
 
 interface GalleryItem {
   id: number;
@@ -75,9 +75,21 @@ const PerpustakaanPage = () => {
               {items.map(item => (
                 <div key={item.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
                   <ModelViewer src={item.fileUrl} alt={item.title} />
-                  <div className="p-4">
+                  {/* ======================================================= */}
+                  {/* == PERBAIKAN UTAMA ADA DI SINI == */}
+                  {/* ======================================================= */}
+                  <div className="p-4 flex-grow flex flex-col">
                     <h3 className="text-lg font-bold text-slate-800">{item.title}</h3>
-                    <p className="text-sm text-gray-500">by {item.author.name || 'Anonim'}</p>
+                    <p className="text-sm text-gray-500 mb-4">by {item.author.name || 'Anonim'}</p>
+                    <div className="mt-auto">
+                      <a 
+                        href={item.fileUrl} 
+                        download // Atribut ini membuat link menjadi tombol unduh
+                        className="w-full text-center block bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
+                      >
+                        <FaDownload /> Unduh File (.glb)
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}

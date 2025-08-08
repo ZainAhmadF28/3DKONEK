@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
+import { ForumProvider } from "@/context/ForumContext"; // 1. Import Provider
+import ForumSidebar from "@/components/ForumSidebar"; // 2. Import Sidebar
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
-        {/* Script baru untuk menjalankan Google <model-viewer> */}
+        {/* Script untuk Google <model-viewer> */}
         <script
           type="module"
           src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
@@ -27,7 +29,12 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          {children}
+          {/* 3. Bungkus semua dengan ForumProvider */}
+          <ForumProvider>
+            {children}
+            {/* 4. Render Sidebar */}
+            <ForumSidebar />
+          </ForumProvider>
         </AuthProvider>
       </body>
     </html>

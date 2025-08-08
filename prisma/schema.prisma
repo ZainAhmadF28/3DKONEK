@@ -48,6 +48,7 @@ model User {
   proposals          Proposal[]
   submissions        Submission[]
   publicComments     PublicComment[]
+  forumPosts         ForumPost[]
 
   // =======================================================
   // == PERBAIKAN: Relasi pesan privat diperjelas ==
@@ -158,6 +159,17 @@ model ChallengeImage {
 
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+}
+
+model ForumPost {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  fileUrl   String?
+  fileType  String?
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
 }
 
 model ChallengeView {

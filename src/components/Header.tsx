@@ -3,10 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { FaCogs, FaUserPlus, FaSignInAlt, FaSignOutAlt, FaTachometerAlt, FaUserCircle, FaTools } from 'react-icons/fa';
+import { 
+  FaCogs, FaUserPlus, FaSignInAlt, FaSignOutAlt, 
+  FaTachometerAlt, FaUserCircle, FaTools, FaComments as FaForum 
+} from 'react-icons/fa';
+import { useForum } from '@/context/ForumContext'; // Import hook
 
 const Header = () => {
   const { data: session, status } = useSession();
+  const { openForum } = useForum(); // Gunakan context untuk membuka forum
 
   return (
     <header className="bg-gradient-to-r from-[#0052cc] to-[#00c6ff] text-white p-4 fixed w-full top-0 z-50 shadow-lg">
@@ -17,16 +22,29 @@ const Header = () => {
             <span>KitaRekayasa</span>
           </Link>
         </div>
+
         <nav className="hidden md:flex">
           <ul className="flex space-x-8 items-center">
             <li><Link href="/" className="hover:text-gray-200">Beranda</Link></li>
             <li><Link href="/tantangan" className="hover:text-gray-200">Tantangan</Link></li>
-
-            {/* LINK BARU */}
             <li><Link href="/perpustakaan" className="hover:text-gray-200 font-semibold">Perpustakaan</Link></li>
 
+            {/* Tombol untuk membuka forum */}
+            <li>
+              <button 
+                onClick={openForum} 
+                className="hover:text-gray-200 font-semibold flex items-center gap-2"
+              >
+                <FaForum /> Forum
+              </button>
+            </li>
+
             {status === 'authenticated' && session.user.role === 'USER' && (
-              <li><Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2"><FaTools /> Bengkel Saya</Link></li>
+              <li>
+                <Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2">
+                  <FaTools /> Bengkel Saya
+                </Link>
+              </li>
             )}
           </ul>
         </nav>

@@ -5,11 +5,15 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { FaPaperPlane, FaUserCircle } from 'react-icons/fa';
 
+// Tipe data untuk komentar, disesuaikan dengan respons API
 interface Comment {
   id: number;
   content: string;
   createdAt: string;
-  author: { name: string | null; };
+  // PERBAIKAN: Menggunakan 'user' bukan 'author'
+  user: { 
+    name: string | null; 
+  };
 }
 
 interface PublicCommentsProps {
@@ -75,7 +79,8 @@ const PublicComments: React.FC<PublicCommentsProps> = ({ challengeId }) => {
             <div key={comment.id} className="flex items-start gap-3">
               <FaUserCircle size={24} className="text-gray-400 mt-1" />
               <div className="flex-1">
-                <p className="font-bold text-sm text-slate-800">{comment.author.name || 'Anonim'}</p>
+                {/* PERBAIKAN: Menggunakan 'comment.user.name' bukan 'comment.author.name' */}
+                <p className="font-bold text-sm text-slate-800">{comment.user.name || 'Anonim'}</p>
                 <p className="text-sm text-slate-700 bg-white p-2 rounded-lg">{comment.content}</p>
                 <p className="text-xs text-gray-400 mt-1">{new Date(comment.createdAt).toLocaleString('id-ID')}</p>
               </div>

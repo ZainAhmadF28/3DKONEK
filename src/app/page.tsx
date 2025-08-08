@@ -11,7 +11,7 @@ import Footer from '@/components/Footer';
 export default function Home() {
   return (
     <div className="bg-[#f0f7ff]">
-      <Header />
+      <Header />git
       <main>
         <Hero />
         <Problems />

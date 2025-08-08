@@ -15,7 +15,7 @@ export async function GET(
     const challengeId = parseInt(params.id, 10);
 
     const comments = await prisma.publicComment.findMany({
-      where: { challengeId },
+      where: { challengeId: challengeId },
       include: {
         author: {
           select: {
@@ -44,8 +44,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
+  if (!session || !session.user || !session.user.id) {
     return NextResponse.json({ message: 'Hanya pengguna terdaftar yang bisa berkomentar.' }, { status: 401 });
   }
 
@@ -60,7 +59,7 @@ export async function POST(
     const newComment = await prisma.publicComment.create({
       data: {
         content,
-        challengeId,
+        challengeId: challengeId,
         authorId: session.user.id,
       },
       include: {

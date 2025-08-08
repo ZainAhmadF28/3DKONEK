@@ -49,14 +49,8 @@ model User {
   submissions        Submission[]
   publicComments     PublicComment[]
   forumPosts         ForumPost[]
-
-  // =======================================================
-  // == PERBAIKAN: Relasi pesan privat diperjelas ==
-  // =======================================================
   sentMessages       PrivateMessage[] @relation("SentMessages")
   receivedMessages   PrivateMessage[] @relation("ReceivedMessages")
-
-  // Relasi baru: Satu user bisa mengunggah banyak item galeri
   galleryItems       GalleryItem[]
 }
 
@@ -65,9 +59,8 @@ model GalleryItem {
   title       String
   description String?
   category    String
-  fileUrl     String   // Path ke file .glb
+  fileUrl     String
   createdAt   DateTime @default(now())
-
   authorId    Int
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
@@ -77,34 +70,30 @@ model Challenge {
   title        String
   description  String
   category     String
+  material     String?          // <-- PERBAIKAN: Field ini ditambahkan kembali
   reward       Int
   deadline     DateTime
   status       ChallengeStatus  @default(OPEN)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-
   challengerId Int
-  challenger   User             @relation("Challenger", fields: [challengerId], references: [id])
-
+  challenger   User             @relation("Challenger", fields: [challengerId], references: [id], onDelete: Cascade)
   solverId     Int?
-  solver       User?            @relation("Solver", fields: [solverId], references: [id])
-
+  solver       User?            @relation("Solver", fields: [solverId], references: [id], onDelete: SetNull)
   proposals    Proposal[]
   submissions  Submission[]
-  comments     PublicComment[]
+  publicComments PublicComment[]
   images       ChallengeImage[]
   views        ChallengeView[]
-  privateMessages PrivateMessage[] // Tambahkan relasi ini
+  privateMessages PrivateMessage[]
 }
 
 model PublicComment {
   id          Int      @id @default(autoincrement())
   content     String
   createdAt   DateTime @default(now())
-
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
@@ -113,42 +102,34 @@ model PrivateMessage {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-
-  // =======================================================
-  // == PERBAIKAN: Relasi pengirim dan penerima diperjelas ==
-  // =======================================================
   senderId  Int
   sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-
   receiverId Int
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
 
 model Proposal {
   id          Int             @id @default(autoincrement())
-  description String
+  message     String
+  fileUrl     String?
   status      ProposalStatus  @default(PENDING)
   createdAt   DateTime        @default(now())
-
-  userId      Int
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  authorId    Int
+  author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
   challengeId Int
   challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
 
 model Submission {
   id          Int               @id @default(autoincrement())
-  content     String
+  fileUrl     String
+  notes       String?
   status      SubmissionStatus  @default(PENDING)
   createdAt   DateTime          @default(now())
-
-  userId      Int
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  authorId    Int
+  author      User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
   challengeId Int
   challenge   Challenge         @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
@@ -156,7 +137,7 @@ model Submission {
 model ChallengeImage {
   id          Int      @id @default(autoincrement())
   url         String
-
+  createdAt   DateTime @default(now())
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
@@ -167,18 +148,15 @@ model ForumPost {
   createdAt DateTime @default(now())
   fileUrl   String?
   fileType  String?
-
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  Int
 }
 
 model ChallengeView {
-  id          Int      @id @default(autoincrement())
-  viewedAt    DateTime @default(now())
-
   userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   challengeId Int
+  viewedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  @@id([userId, challengeId])
 }

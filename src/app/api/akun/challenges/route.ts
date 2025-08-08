@@ -49,11 +49,20 @@ export async function GET(request: Request) {
                 id: true,
                 name: true,
             }
+        },
+        _count: {
+            select: { views: true }
         }
       },
     });
 
-    return NextResponse.json(userChallenges);
+    // 5. Konversi BigInt 'reward' menjadi string sebelum mengirim respons JSON
+    const challengesWithStringReward = userChallenges.map(challenge => ({
+        ...challenge,
+        reward: challenge.reward.toString(),
+    }));
+
+    return NextResponse.json(challengesWithStringReward);
   } catch (error) {
     console.error('FETCH_USER_CHALLENGES_ERROR', error);
     return NextResponse.json({ message: 'Gagal mengambil data tantangan.' }, { status: 500 });

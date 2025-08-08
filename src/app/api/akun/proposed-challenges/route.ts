@@ -35,7 +35,16 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(proposals);
+    // Konversi BigInt 'reward' di dalam data tantangan menjadi string
+    const proposalsWithStringReward = proposals.map(proposal => ({
+        ...proposal,
+        challenge: {
+            ...proposal.challenge,
+            reward: proposal.challenge.reward.toString(),
+        }
+    }));
+
+    return NextResponse.json(proposalsWithStringReward);
   } catch (error) {
     console.error('Gagal mengambil tantangan yang diajukan:', error);
     return NextResponse.json({ message: 'Gagal mengambil data' }, { status: 500 });

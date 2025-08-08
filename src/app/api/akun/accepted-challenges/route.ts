@@ -39,7 +39,13 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(acceptedChallenges);
+    // Konversi BigInt 'reward' menjadi string sebelum mengirim respons
+    const challengesWithStringReward = acceptedChallenges.map(challenge => ({
+        ...challenge,
+        reward: challenge.reward.toString(),
+    }));
+
+    return NextResponse.json(challengesWithStringReward);
   } catch (error) {
     console.error('Gagal mengambil tantangan yang dikerjakan:', error);
     return NextResponse.json({ message: 'Gagal mengambil data' }, { status: 500 });

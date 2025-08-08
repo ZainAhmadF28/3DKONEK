@@ -8,11 +8,15 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { FaPaperPlane, FaArrowLeft } from 'react-icons/fa';
 
+// Tipe data untuk pesan, disesuaikan dengan respons API
 interface Message {
   id: number;
   content: string;
   createdAt: string;
-  author: {
+  // =======================================================
+  // == PERBAIKAN UTAMA ADA DI SINI: 'author' menjadi 'sender' ==
+  // =======================================================
+  sender: {
     id: number;
     name: string | null;
   };
@@ -105,9 +109,12 @@ const PrivateChatPage = () => {
             <div className="flex-grow p-4 overflow-y-auto space-y-4">
               {isLoading ? <p>Memuat pesan...</p> : error ? <p className="text-red-500">{error}</p> :
                 messages.map(msg => (
-                  <div key={msg.id} className={`flex gap-3 ${msg.author.id === session?.user?.id ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${msg.author.id === session?.user?.id ? 'bg-indigo-500 text-white' : 'bg-slate-200 text-slate-800'}`}>
-                      <p className="font-bold text-sm">{msg.author.name}</p>
+                  // =======================================================
+                  // == PERBAIKAN UTAMA ADA DI SINI: 'author' menjadi 'sender' ==
+                  // =======================================================
+                  <div key={msg.id} className={`flex gap-3 ${msg.sender.id === session?.user?.id ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${msg.sender.id === session?.user?.id ? 'bg-indigo-500 text-white' : 'bg-slate-200 text-slate-800'}`}>
+                      <p className="font-bold text-sm">{msg.sender.name}</p>
                       <p>{msg.content}</p>
                       <p className="text-xs opacity-70 mt-1 text-right">{new Date(msg.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
                     </div>

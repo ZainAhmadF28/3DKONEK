@@ -1,94 +1,139 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { 
-  FaCogs, FaUserPlus, FaSignInAlt, FaSignOutAlt, 
-  FaTachometerAlt, FaUserCircle, FaTools,
-  FaGraduationCap
+import {
+  FaCogs, FaUserPlus, FaSignInAlt, FaSignOutAlt,
+  FaTachometerAlt, FaUserCircle, FaTools, FaGraduationCap, FaBars, FaTimes
 } from 'react-icons/fa';
-import { useForum } from '@/context/ForumContext';
+import Image from 'next/image';
 
 const Header = () => {
   const { data: session, status } = useSession();
-  const {} = useForum();
+  const [open, setOpen] = useState(false);
+
+  const NavLinks = ({ onClick }: { onClick?: () => void }) => (
+    <ul className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+      <li><Link href="/" className="hover:text-lime-400 transition-colors" onClick={onClick}>Beranda</Link></li>
+      <li><Link href="/tantangan" className="hover:text-lime-400 transition-colors" onClick={onClick}>Tantangan</Link></li>
+      <li><Link href="/perpustakaan" className="hover:text-lime-400 transition-colors" onClick={onClick}>Perpustakaan</Link></li>
+      <li><Link href="/edukasi" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaGraduationCap /> Edukasi</Link></li>
+      {status === 'authenticated' && session?.user?.role !== 'ADMIN' && (
+        <li><Link href="/bengkel" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaTools /> Bengkel Saya</Link></li>
+      )}
+    </ul>
+  );
 
   return (
-    <header className="bg-gradient-to-r from-[#0052cc] to-[#00c6ff] text-white p-4 fixed w-full top-0 z-50 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center font-bold text-2xl">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <FaCogs className="text-[#ff6b35]" />
-            <span>KitaRekayasa</span>
-          </Link>
-        </div>
+    <header className="fixed top-0 inset-x-0 z-50">
+      <div className="backdrop-blur bg-gray-900/80 border-b border-white/10 text-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/logo.png"
+                alt="KitaRekayasa"
+                width={120}
+                height={120}
+                className="w-24 h-24 md:w-28 md:h-28 object-contain"
+                priority
+              />
+              <span className="sr-only">KitaRekayasa</span>
+            </Link>
+          </div>
 
-        <nav className="hidden md:flex">
-          <ul className="flex space-x-6 items-center">
-            <li><Link href="/" className="hover:text-gray-200">Beranda</Link></li>
-            <li><Link href="/tantangan" className="hover:text-gray-200">Tantangan</Link></li>
-            <li><Link href="/perpustakaan" className="hover:text-gray-200">Perpustakaan</Link></li>
-            
-            {/* 2. Tambahkan Link Edukasi Baru */}
-            <li>
-              <Link href="/edukasi" className="hover:text-gray-200 font-semibold flex items-center gap-2">
-                <FaGraduationCap /> Edukasi
-              </Link>
-            </li>
+          <nav className="hidden md:block">
+            <NavLinks />
+          </nav>
 
-
-            {status === 'authenticated' && session.user.role !== 'ADMIN' && (
-              <li>
-                <Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2">
-                  <FaTools /> Bengkel Saya
+          <div className="hidden md:flex items-center gap-3">
+            {status === 'loading' ? (
+              <div className="text-sm text-gray-300">Memuat...</div>
+            ) : session ? (
+              <>
+                {session.user.role === 'ADMIN' && (
+                  <Link href="/admin" className="inline-flex items-center gap-2 rounded-lg border border-yellow-400/40 bg-yellow-300/20 text-yellow-200 px-3 py-2 text-sm font-semibold hover:bg-yellow-300/30">
+                    <FaTachometerAlt /> Admin
+                  </Link>
+                )}
+                {session.user.role !== 'ADMIN' && (
+                  <Link href="/akun/dashboard" className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                    <FaUserCircle /> Dashboard
+                  </Link>
+                )}
+                <button onClick={() => signOut({ callbackUrl: '/' })} className="inline-flex items-center gap-2 rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                  <FaSignOutAlt /> Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                  <FaSignInAlt /> Login
                 </Link>
-              </li>
+                <Link href="/register" className="inline-flex items-center gap-2 rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                  <FaUserPlus /> Daftar
+                </Link>
+              </>
             )}
-          </ul>
-        </nav>
+          </div>
 
-        <div className="flex items-center gap-4">
-          {status === 'loading' ? (
-            <div className="text-sm">Memuat...</div>
-          ) : session ? (
-            <>
-              {session.user.role === 'ADMIN' && (
-                <Link href="/admin" className="bg-yellow-400 hover:bg-yellow-500 text-slate-800 font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
-                  <FaTachometerAlt className="mr-2" />
-                  Admin
-                </Link>
-              )}
-
-              {session.user.role !== 'ADMIN' && (
-                <Link href="/akun/dashboard" className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
-                  <FaUserCircle className="mr-2" />
-                  Dashboard Saya
-                </Link>
-              )}
-
-              <button 
-                onClick={() => signOut({ callbackUrl: '/' })}
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm"
-              >
-                <FaSignOutAlt className="mr-2" />
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="bg-transparent hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors">
-                <FaSignInAlt className="mr-2" />
-                Login
-              </Link>
-              <Link href="/register" className="bg-[#ff6b35] hover:bg-[#ff5500] text-white font-bold py-2 px-4 rounded-full flex items-center transition-colors shadow-md">
-                <FaUserPlus className="mr-2" />
-                Daftar
-              </Link>
-            </>
-          )}
+          <button
+            className="md:hidden inline-flex items-center justify-center h-12 w-12 rounded-md border border-white/15 text-gray-100"
+            onClick={() => setOpen(true)}
+            aria-label="Buka menu"
+          >
+            <FaBars />
+          </button>
         </div>
       </div>
+
+      {open && (
+        <div className="fixed inset-0 z-50 md:hidden" aria-modal="true" role="dialog">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-0 h-full w-80 max-w-[80%] bg-gray-900 text-gray-100 shadow-xl p-5 flex flex-col border-l border-white/10">
+            <div className="flex items-center justify-between mb-4">
+              <span className="font-extrabold text-lg">Menu</span>
+              <button className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-white/15" onClick={() => setOpen(false)} aria-label="Tutup menu">
+                <FaTimes />
+              </button>
+            </div>
+            <nav className="mb-6">
+              <NavLinks onClick={() => setOpen(false)} />
+            </nav>
+            <div className="mt-auto space-y-2">
+              {status === 'loading' ? (
+                <div className="text-sm text-gray-300">Memuat...</div>
+              ) : session ? (
+                <>
+                  {session.user.role === 'ADMIN' && (
+                    <Link href="/admin" onClick={() => setOpen(false)} className="block w-full text-left rounded-lg border border-yellow-400/40 bg-yellow-300/20 text-yellow-200 px-3 py-2 text-sm font-semibold hover:bg-yellow-300/30">
+                      <span className="inline-flex items-center gap-2"><FaTachometerAlt /> Admin</span>
+                    </Link>
+                  )}
+                  {session.user.role !== 'ADMIN' && (
+                    <Link href="/akun/dashboard" onClick={() => setOpen(false)} className="block w-full text-left rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                      <span className="inline-flex items-center gap-2"><FaUserCircle /> Dashboard</span>
+                    </Link>
+                  )}
+                  <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/' }); }} className="w-full rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                    <span className="inline-flex items-center gap-2"><FaSignOutAlt /> Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setOpen(false)} className="block w-full text-left rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                    <span className="inline-flex items-center gap-2"><FaSignInAlt /> Login</span>
+                  </Link>
+                  <Link href="/register" onClick={() => setOpen(false)} className="block w-full text-left rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                    <span className="inline-flex items-center gap-2"><FaUserPlus /> Daftar</span>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

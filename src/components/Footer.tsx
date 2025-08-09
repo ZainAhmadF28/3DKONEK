@@ -1,37 +1,42 @@
 // src/components/Footer.tsx
+'use client';
+
 import React from 'react';
-import { FaCogs, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
+import { FaCogs } from 'react-icons/fa';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#0a2540] text-white pt-16 pb-8 px-6">
-      <div className="container mx-auto grid md:grid-cols-4 gap-8 mb-8">
-        <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center font-bold text-2xl mb-4">
-                <FaCogs className="mr-2 text-[#ff6b35]" />
-                <span>KitaRekayasa</span>
-            </div>
-            <p className="text-gray-400">Kolaborasi Kita, Rekayasa Bangsa. Platform kolaborasi untuk kemandirian teknologi dan manufaktur Indonesia.</p>
+    <footer className="border-t border-white/10 bg-gray-900 text-gray-300">
+      <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-10">
+        <div className="md:col-span-2">
+          <div className="flex items-center font-extrabold text-xl mb-3 text-gray-100">
+            <FaCogs className="mr-2 text-lime-400" />
+            <span>Kita<span className="text-lime-400">Rekayasa</span></span>
+          </div>
+          <p className="text-gray-400">Kolaborasi Kita, Rekayasa Bangsa. Platform kolaborasi untuk kemandirian teknologi dan manufaktur Indonesia.</p>
         </div>
         <div>
-            <h3 className="font-bold text-lg mb-4">Tautan</h3>
-            <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Tantangan</a></li>
-                <li><a href="#" className="hover:text-white">Manufaktur</a></li>
-                <li><a href="#" className="hover:text-white">Blog</a></li>
-            </ul>
+          <h3 className="font-semibold text-gray-100 mb-3">Tautan</h3>
+          <ul className="space-y-2">
+            <li><Link href="/tantangan" className="hover:text-white">Tantangan</Link></li>
+            <li><Link href="/perpustakaan" className="hover:text-white">Perpustakaan</Link></li>
+            <li><Link href="/edukasi" className="hover:text-white">Edukasi</Link></li>
+          </ul>
         </div>
         <div>
-            <h3 className="font-bold text-lg mb-4">Perusahaan</h3>
-            <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Tentang Kami</a></li>
-                <li><a href="#" className="hover:text-white">Kontak</a></li>
-                <li><a href="#" className="hover:text-white">Karir</a></li>
-            </ul>
+          <h3 className="font-semibold text-gray-100 mb-3">Perusahaan</h3>
+          <ul className="space-y-2">
+            <li><a href="#" className="hover:text-white">Tentang Kami</a></li>
+            <li><a href="#" className="hover:text-white">Kontak</a></li>
+            <li><a href="#" className="hover:text-white">Karir</a></li>
+          </ul>
         </div>
       </div>
-      <div className="container mx-auto text-center border-t border-gray-700 pt-8">
-        <p className="text-gray-500">&copy; {new Date().getFullYear()} KitaRekayasa. Hak Cipta Dilindungi.</p>
+      <div className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-6 text-center text-gray-500 text-sm">
+          &copy; {new Date().getFullYear()} KitaRekayasa. Hak Cipta Dilindungi.
+        </div>
       </div>
     </footer>
   );

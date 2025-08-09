@@ -100,7 +100,7 @@ model PublicComment {
 
 model PrivateMessage {
   id        Int      @id @default(autoincrement())
-  content   String
+  content   String?
   createdAt DateTime @default(now())
   senderId  Int
   sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
@@ -108,6 +108,8 @@ model PrivateMessage {
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  fileUrl    String?
+  fileType   String?
 }
 
 model Proposal {

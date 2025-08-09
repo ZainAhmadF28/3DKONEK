@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
+import { writeFile, mkdir, stat } from 'fs/promises';
+import path from 'path';
 
 // Fungsi helper untuk memverifikasi akses pengguna ke chat
 async function verifyUserAccess(userId: number, challengeId: number) {
@@ -60,14 +62,43 @@ export async function POST(
 
   try {
     const challengeId = parseInt(params.challengeId, 10);
-    const { content } = await request.json();
+    const contentTypeHeader = request.headers.get('content-type') || '';
+    let content: string | null = null;
+    let fileUrl: string | undefined = undefined;
+    let fileType: string | undefined = undefined;
+
+    if (contentTypeHeader.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      content = (formData.get('content') as string) || null;
+      const file = formData.get('file') as File | null;
+      if (file) {
+        const uploadDir = path.join(process.cwd(), 'public/uploads/chat');
+        try {
+          await stat(uploadDir);
+        } catch (e: any) {
+          if (e.code === 'ENOENT') {
+            await mkdir(uploadDir, { recursive: true });
+          } else {
+            throw e;
+          }
+        }
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+        await writeFile(path.join(uploadDir, filename), buffer);
+        fileUrl = `/uploads/chat/${filename}`;
+        fileType = file.type;
+      }
+    } else {
+      const body = await request.json();
+      content = body.content as string;
+    }
     const hasAccess = await verifyUserAccess(session.user.id, challengeId);
     if (!hasAccess) {
         return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
     }
 
-    if (!content || content.trim() === '') {
-      return NextResponse.json({ message: 'Isi pesan tidak boleh kosong.' }, { status: 400 });
+    if ((!content || content.trim() === '') && !fileUrl) {
+      return NextResponse.json({ message: 'Isi pesan atau file wajib diisi.' }, { status: 400 });
     }
 
     // Tentukan siapa pengirim dan penerima
@@ -86,10 +117,12 @@ export async function POST(
     const newMessage = await prisma.privateMessage.create({
       // PERBAIKAN: Menggunakan 'senderId' dan 'receiverId'
       data: {
-        content,
+        content: content && content.trim() !== '' ? content : null,
         challengeId: challengeId,
         senderId: senderId,
         receiverId: receiverId,
+        fileUrl,
+        fileType,
       },
       // PERBAIKAN: Menggunakan relasi 'sender'
       include: { 

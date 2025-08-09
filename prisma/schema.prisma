@@ -59,6 +59,8 @@ model User {
   sentMessages       PrivateMessage[] @relation("SentMessages")
   receivedMessages   PrivateMessage[] @relation("ReceivedMessages")
   galleryItems       GalleryItem[]
+  galleryPurchases   GalleryPurchase[]
+  approvedGalleryItems GalleryItem[] @relation("GalleryApprover")
   communitiesOwned   Community[]      @relation("OwnedCommunities")
   communityMemberships CommunityMember[]
   categories         UserCategory[]
@@ -81,9 +83,27 @@ model GalleryItem {
   category    String
   fileUrl     String
   posterUrl   String?
+  isPaid      Boolean  @default(false)
+  price       Int      @default(0)
+  isApproved  Boolean  @default(false)
+  approvedById Int?
   createdAt   DateTime @default(now())
   authorId    Int
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  approvedBy  User?    @relation("GalleryApprover", fields: [approvedById], references: [id])
+  purchases   GalleryPurchase[]
+}
+
+model GalleryPurchase {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  galleryItemId Int
+  createdAt     DateTime @default(now())
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item          GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, galleryItemId])
 }
 
 model Challenge {

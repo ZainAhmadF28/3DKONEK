@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaTachometerAlt, FaUsers, FaTasks } from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers, FaTasks, FaImages, FaComments, FaBook, FaSitemap } from 'react-icons/fa';
 
 const AdminSidebar = () => {
   const pathname = usePathname();
@@ -10,6 +10,10 @@ const AdminSidebar = () => {
     { name: 'Dashboard', href: '/admin', icon: FaTachometerAlt },
     { name: 'Pengguna', href: '/admin/users', icon: FaUsers },
     { name: 'Tantangan', href: '/admin/challenges', icon: FaTasks },
+    { name: 'Perpustakaan', href: '/admin/library', icon: FaBook },
+    { name: 'Galeri', href: '/admin/gallery', icon: FaImages },
+    { name: 'Forum', href: '/admin/forum', icon: FaComments },
+    { name: 'Komunitas', href: '/admin/communities', icon: FaSitemap },
   ];
 
   return (

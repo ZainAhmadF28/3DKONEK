@@ -20,6 +20,20 @@ async function main() {
   });
   console.log(`Upserted admin user with id: ${adminUser.id}`);
 
+  // Tambah admin 3DKONEK (permintaan user)
+  const admin2Password = await bcrypt.hash('admin3Dkonek', 12);
+  const admin2 = await prisma.user.upsert({
+    where: { email: 'admin3DKonek@gmail.com' },
+    update: {},
+    create: {
+      email: 'admin3DKonek@gmail.com',
+      name: 'admin',
+      password: admin2Password,
+      role: UserRole.ADMIN,
+    },
+  });
+  console.log(`Upserted admin 3DKONEK with id: ${admin2.id}`);
+
   // 2. Buat atau perbarui user BIASA
   const userPassword = await bcrypt.hash('password123', 12);
   const regularUser = await prisma.user.upsert({

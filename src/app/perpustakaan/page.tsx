@@ -15,6 +15,8 @@ interface GalleryItem {
   category: string;
   fileUrl: string;
   posterUrl?: string | null;
+  isPaid: boolean;
+  price: number;
   author: { name: string | null };
 }
 
@@ -54,7 +56,7 @@ const PerpustakaanPage = () => {
             <p className="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">Jelajahi, bagikan, dan gunakan koleksi model 3D dari para perekayasa di seluruh Indonesia.</p>
           </div>
           
-          {status === 'authenticated' && (
+          {status === 'authenticated' && (session?.user.role === 'DESAINER' || session?.user.role === 'ADMIN') && (
             <div className="text-center mb-8">
               <Link href="/perpustakaan/upload" className="inline-block bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors shadow-lg">
                 <FaUpload className="inline mr-2" /> Unggah Model Anda
@@ -85,16 +87,24 @@ const PerpustakaanPage = () => {
                   {/* == PERBAIKAN UTAMA ADA DI SINI == */}
                   {/* ======================================================= */}
                   <div className="p-4 flex-grow flex flex-col">
-                    <h3 className="text-lg font-bold text-slate-800">{item.title}</h3>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-lg font-bold text-slate-800">{item.title}</h3>
+                      <span className={`text-xs font-bold px-2 py-1 rounded ${item.isPaid ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-700'}`}>
+                        {item.isPaid ? 'Berbayar' : 'Gratis'}
+                      </span>
+                    </div>
                     <p className="text-sm text-gray-500 mb-4">by {item.author.name || 'Anonim'}</p>
                     <div className="mt-auto">
-                      <a 
-                        href={item.fileUrl} 
-                        download // Atribut ini membuat link menjadi tombol unduh
-                        className="w-full text-center block bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
-                      >
-                        <FaDownload /> Unduh File (.glb)
-                      </a>
+                      {item.isPaid ? (
+                        <PaidDownload itemId={item.id} price={item.price} />
+                      ) : (
+                        <a 
+                          href={`/api/gallery/download?itemId=${item.id}`}
+                          className="w-full text-center block bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
+                        >
+                          <FaDownload /> Unduh Gratis (.glb)
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -104,6 +114,55 @@ const PerpustakaanPage = () => {
         </div>
       </main>
       <Footer />
+    </div>
+  );
+};
+
+const PaidDownload = ({ itemId, price }: { itemId: number; price: number }) => {
+  const { data: session } = useSession();
+  const [isBuying, setIsBuying] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const checkAccess = async () => {
+    try {
+      const res = await fetch(`/api/gallery/download?itemId=${itemId}`, { method: 'GET' });
+      if (res.status === 403) { setHasAccess(false); return; }
+      if (res.ok) { setHasAccess(true); return; }
+    } catch {}
+    setHasAccess(false);
+  };
+
+  useEffect(() => {
+    checkAccess();
+    // intentionally not including checkAccess in deps to avoid re-creation loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemId]);
+
+  const handleBuy = async () => {
+    if (!session) { window.location.href = '/login'; return; }
+    setIsBuying(true); setError('');
+    // Arahkan ke halaman checkout dummy
+    window.location.href = `/perpustakaan/checkout/${itemId}`;
+  };
+
+  if (hasAccess) {
+    return (
+      <a
+        href={`/api/gallery/download?itemId=${itemId}`}
+        className="w-full text-center block bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors text-sm flex items-center justify-center gap-2"
+      >
+        <FaDownload /> Unduh (.glb)
+      </a>
+    );
+  }
+
+  return (
+    <div>
+      {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
+      <button onClick={handleBuy} disabled={isBuying} className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg text-sm">
+        {isBuying ? 'Memproses...' : `Beli Rp ${new Intl.NumberFormat('id-ID').format(price)}`}
+      </button>
     </div>
   );
 };

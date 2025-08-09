@@ -14,14 +14,24 @@ export async function GET(request: Request) {
   const category = searchParams.get('category');
 
   try {
-    const whereClause = category && category !== 'Semua' ? { category: category } : {};
+    // Jika admin sedang login, tampilkan semua (pending maupun approved)
+    // Jika bukan admin / publik, hanya tampilkan yang sudah approved
+    const session = await getServerSession(authOptions);
+    const isAdmin = session?.user?.role === 'ADMIN';
+
+    const whereClause = (() => {
+      if (isAdmin) {
+        return category && category !== 'Semua' ? { category } : {};
+      }
+      return category && category !== 'Semua'
+        ? { category, isApproved: true }
+        : { isApproved: true };
+    })();
 
     const galleryItems = await prisma.galleryItem.findMany({
       where: whereClause,
       include: {
-        author: {
-          select: { name: true },
-        },
+        author: { select: { name: true } },
       },
       orderBy: {
         createdAt: 'desc',
@@ -43,12 +53,18 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ message: 'Tidak diotorisasi.' }, { status: 401 });
   }
+  // Hanya DESAINER/ADMIN yang boleh upload ke perpustakaan
+  if (session.user.role !== 'DESAINER' && session.user.role !== 'ADMIN') {
+    return NextResponse.json({ message: 'Hanya desainer yang dapat mengunggah model.' }, { status: 403 });
+  }
 
   try {
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const category = formData.get('category') as string;
     const description = formData.get('description') as string | null;
+    const isPaidRaw = formData.get('isPaid') as string | null;
+    const priceRaw = formData.get('price') as string | null;
     const file = formData.get('file') as File | null;
     const poster = formData.get('poster') as File | null;
 
@@ -89,6 +105,8 @@ export async function POST(request: Request) {
         fileUrl,
         authorId: session.user.id,
         posterUrl,
+        isPaid: isPaidRaw === 'true',
+        price: priceRaw ? parseInt(priceRaw, 10) : 0,
       },
     });
 

@@ -11,18 +11,25 @@ import path from 'path';
  */
 export async function GET(request: Request) {
   try {
-    const posts = await prisma.forumPost.findMany({
+    const { searchParams } = new URL(request.url);
+    const communityIdParam = searchParams.get('communityId');
+    const communityId = communityIdParam ? parseInt(communityIdParam, 10) : undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db: any = prisma;
+    const posts = await db.forumPost.findMany({
+      where: communityId ? { communityId } : undefined,
       include: {
         author: {
           select: { name: true },
         },
+        community: { select: { id: true, name: true } },
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
     return NextResponse.json(posts);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('FETCH_FORUM_ERROR', error);
     return NextResponse.json({ message: 'Gagal mengambil postingan forum.' }, { status: 500 });
   }
@@ -42,6 +49,8 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const content = formData.get('content') as string;
     const file = formData.get('file') as File | null;
+    const communityIdParam = formData.get('communityId') as string | null;
+    const communityId = communityIdParam ? parseInt(communityIdParam, 10) : undefined;
 
     if (!content || content.trim() === '') {
       return NextResponse.json({ message: 'Isi pesan tidak boleh kosong.' }, { status: 400 });
@@ -68,20 +77,27 @@ export async function POST(request: Request) {
       fileType = file.type;
     }
 
-    const newPost = await prisma.forumPost.create({
+    // Use a narrowed type to avoid any while the Prisma client types refresh
+    const newPost = await (prisma as unknown as {
+      forumPost: {
+        create: (args: unknown) => Promise<unknown>
+      }
+    }).forumPost.create({
       data: {
         content,
         fileUrl,
         fileType,
         authorId: session.user.id,
+        communityId,
       },
       include: {
         author: { select: { name: true } },
+        community: { select: { id: true, name: true } },
       },
     });
 
     return NextResponse.json(newPost, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('FORUM_POST_ERROR', error);
     return NextResponse.json({ message: 'Gagal mengirim postingan.' }, { status: 500 });
   }

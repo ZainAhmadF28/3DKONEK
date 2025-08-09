@@ -15,7 +15,10 @@ interface Post {
   fileType: string | null;
   createdAt: string;
   author: { name: string | null };
+  community?: { id: number; name: string } | null;
 }
+
+interface Community { id: number; name: string; description: string | null }
 
 const ForumSidebar = () => {
   const { isForumOpen, closeForum } = useForum(); // Gunakan context
@@ -27,20 +30,30 @@ const ForumSidebar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modelViewerSrc, setModelViewerSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<number | 'all'>('all');
+  const [isCreatingCommunity, setIsCreatingCommunity] = useState(false);
+  const [newCommunityName, setNewCommunityName] = useState('');
+  const [newCommunityDesc, setNewCommunityDesc] = useState('');
+  const [newCommunityAvatar, setNewCommunityAvatar] = useState<File | null>(null);
 
   useEffect(() => {
     if (isForumOpen) {
-      const fetchPosts = async () => {
+      const fetchData = async () => {
         setIsLoading(true);
         try {
-          const res = await fetch('/api/forum');
-          if (res.ok) setPosts(await res.json());
-        } catch (error) { console.error("Gagal memuat post:", error); } 
+          const [postsRes, commsRes] = await Promise.all([
+            fetch(`/api/forum${selectedCommunityId === 'all' ? '' : `?communityId=${selectedCommunityId}`}`),
+            fetch('/api/forum/communities'),
+          ]);
+          if (postsRes.ok) setPosts(await postsRes.json());
+          if (commsRes.ok) setCommunities(await commsRes.json());
+        } catch (error) { console.error('Gagal memuat forum:', error); }
         finally { setIsLoading(false); }
       };
-      fetchPosts();
+      fetchData();
     }
-  }, [isForumOpen]);
+  }, [isForumOpen, selectedCommunityId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +64,9 @@ const ForumSidebar = () => {
     formData.append('content', newPostContent);
     if (newPostFile) {
       formData.append('file', newPostFile);
+    }
+    if (selectedCommunityId !== 'all') {
+      formData.append('communityId', String(selectedCommunityId));
     }
 
     try {
@@ -82,6 +98,32 @@ const ForumSidebar = () => {
     return <a href={post.fileUrl} download className="mt-2 inline-flex items-center gap-2 p-2 bg-slate-200 rounded-lg hover:bg-slate-300"><FaFileAlt /><span className="text-sm font-semibold">Unduh Lampiran</span></a>;
   };
 
+  const handleCreateCommunity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newCommunityName.trim();
+    if (!name) return;
+    try {
+      const form = new FormData();
+      form.append('name', name);
+      if (newCommunityDesc.trim()) form.append('description', newCommunityDesc.trim());
+      if (newCommunityAvatar) form.append('avatar', newCommunityAvatar);
+      const res = await fetch('/api/forum/communities', { method: 'POST', body: form });
+      if (res.ok) {
+        const created: Community = await res.json();
+        setCommunities(prev => [created, ...prev]);
+        setSelectedCommunityId(created.id);
+        setIsCreatingCommunity(false);
+        setNewCommunityName('');
+        setNewCommunityDesc('');
+        setNewCommunityAvatar(null);
+      } else {
+        alert('Gagal membuat komunitas.');
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan.');
+    }
+  };
+
   if (!isForumOpen) return null;
 
   return (
@@ -92,8 +134,23 @@ const ForumSidebar = () => {
         
         {/* Sidebar Content */}
         <aside className="relative z-10 w-full max-w-md bg-white h-full flex flex-col shadow-xl transform transition-transform duration-300 ease-in-out translate-x-0">
-          <div className="flex justify-between items-center p-4 border-b">
-            <h2 className="text-xl font-bold text-slate-800">Forum Diskusi</h2>
+          <div className="flex justify-between items-center p-4 border-b gap-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-slate-800">Komunitas</h2>
+              <select
+                className="border rounded-md p-1 text-sm"
+                value={selectedCommunityId === 'all' ? 'all' : String(selectedCommunityId)}
+                onChange={(e) => setSelectedCommunityId(e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10))}
+              >
+                <option value="all">Semua</option>
+                {communities.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              {status === 'authenticated' && (
+                <button onClick={() => setIsCreatingCommunity(true)} className="text-indigo-600 text-sm font-semibold">+ Komunitas</button>
+              )}
+            </div>
             <button onClick={closeForum} className="text-gray-500 hover:text-gray-800"><FaTimes size={20} /></button>
           </div>
           
@@ -104,6 +161,9 @@ const ForumSidebar = () => {
                   <FaUserCircle size={28} className="text-gray-400 mt-1" />
                   <div className="flex-1">
                     <p className="font-bold text-sm text-slate-800">{post.author.name || 'Anonim'}</p>
+                    {post.community && (
+                      <p className="text-[11px] text-indigo-700 font-semibold">#{post.community.name}</p>
+                    )}
                     <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleString('id-ID')}</p>
                     <p className="mt-2 text-slate-700 whitespace-pre-wrap">{post.content}</p>
                     {renderAttachment(post)}
@@ -132,6 +192,25 @@ const ForumSidebar = () => {
       </div>
       {modelViewerSrc && (
         <ThreeDViewerModal src={modelViewerSrc} onClose={() => setModelViewerSrc(null)} />
+      )}
+      {isCreatingCommunity && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]" onClick={() => setIsCreatingCommunity(false)}>
+          <div className="bg-white rounded-lg p-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2">Buat Komunitas</h3>
+            <form onSubmit={handleCreateCommunity} className="space-y-2">
+              <input value={newCommunityName} onChange={(e) => setNewCommunityName(e.target.value)} className="w-full p-2 border rounded" placeholder="Nama komunitas" />
+              <textarea value={newCommunityDesc} onChange={(e) => setNewCommunityDesc(e.target.value)} className="w-full p-2 border rounded" rows={3} placeholder="Deskripsi (opsional)" />
+              <div>
+                <label className="text-sm font-semibold">Avatar (opsional)</label>
+                <input type="file" accept="image/*" onChange={(e) => setNewCommunityAvatar(e.target.files ? e.target.files[0] : null)} className="block mt-1" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setIsCreatingCommunity(false)} className="px-3 py-2 rounded border">Batal</button>
+                <button type="submit" className="px-3 py-2 rounded bg-indigo-600 text-white">Buat</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );

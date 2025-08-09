@@ -34,6 +34,12 @@ enum SubmissionStatus {
   REVISION_REQUESTED
 }
 
+enum CommunityRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
 model User {
   id                 Int              @id @default(autoincrement())
   email              String           @unique
@@ -52,6 +58,8 @@ model User {
   sentMessages       PrivateMessage[] @relation("SentMessages")
   receivedMessages   PrivateMessage[] @relation("ReceivedMessages")
   galleryItems       GalleryItem[]
+  communitiesOwned   Community[]      @relation("OwnedCommunities")
+  communityMemberships CommunityMember[]
 }
 
 model GalleryItem {
@@ -152,6 +160,8 @@ model ForumPost {
   fileType  String?
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  Int
+  communityId Int?
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 }
 
 model ChallengeView {
@@ -161,4 +171,28 @@ model ChallengeView {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   @@id([userId, challengeId])
+}
+
+model Community {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  ownerId     Int
+  owner       User       @relation("OwnedCommunities", fields: [ownerId], references: [id])
+  posts       ForumPost[]
+  avatarUrl   String?
+  members     CommunityMember[]
+}
+
+model CommunityMember {
+  communityId Int
+  userId      Int
+  role        CommunityRole @default(MEMBER)
+  joinedAt    DateTime @default(now())
+
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([communityId, userId])
 }

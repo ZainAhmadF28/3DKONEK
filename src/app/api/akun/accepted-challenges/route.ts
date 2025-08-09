@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
 import { ChallengeStatus } from '@prisma/client';
 
@@ -8,7 +8,7 @@ import { ChallengeStatus } from '@prisma/client';
  * Handler untuk GET request.
  * Mengambil semua tantangan yang sedang atau telah dikerjakan oleh pengguna yang login.
  */
-export async function GET(request: Request) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user || !session.user.id) {

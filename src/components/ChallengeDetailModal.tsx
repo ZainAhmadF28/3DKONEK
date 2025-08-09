@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { FaTimes, FaShareAlt, FaUser, FaEye, FaCogs, FaPaperPlane } from 'react-icons/fa';
 import { Challenge } from './ChallengeCard';
 import ImageCarousel from './ImageCarousel';
@@ -63,24 +62,15 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
       }
       alert('Proposal berhasil diajukan!');
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal mengajukan proposal.';
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const rewardFormatted = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(challenge.reward);
-
-  const deadlineFormatted = new Date(challenge.deadline).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  // formatters tidak digunakan di UI saat ini
 
   const handleShare = () => {
     const shareUrl = `${window.location.origin}/tantangan/${challenge.id}`;
@@ -89,7 +79,10 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
     });
   };
 
-  const canSubmitProposal = session && session.user.id !== challenge.challenger?.id && challenge.status === 'OPEN';
+  const canSubmitProposal =
+    !!session &&
+    (session.user.role === 'DESAINER' || session.user.role === 'ADMIN') &&
+    challenge.status === 'OPEN';
 
   return (
     <>

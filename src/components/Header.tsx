@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { 
   FaCogs, FaUserPlus, FaSignInAlt, FaSignOutAlt, 
-  FaTachometerAlt, FaUserCircle, FaTools, FaComments as FaForum,
-  FaBook, FaGraduationCap // 1. Import ikon baru
+  FaTachometerAlt, FaUserCircle, FaTools,
+  FaGraduationCap
 } from 'react-icons/fa';
 import { useForum } from '@/context/ForumContext';
 
 const Header = () => {
   const { data: session, status } = useSession();
-  const { openForum } = useForum();
+  const {} = useForum();
 
   return (
     <header className="bg-gradient-to-r from-[#0052cc] to-[#00c6ff] text-white p-4 fixed w-full top-0 z-50 shadow-lg">
@@ -38,7 +38,7 @@ const Header = () => {
             </li>
 
 
-            {status === 'authenticated' && session.user.role === 'USER' && (
+            {status === 'authenticated' && session.user.role !== 'ADMIN' && (
               <li>
                 <Link href="/bengkel" className="hover:text-gray-200 flex items-center gap-2">
                   <FaTools /> Bengkel Saya
@@ -60,7 +60,7 @@ const Header = () => {
                 </Link>
               )}
 
-              {session.user.role === 'USER' && (
+              {session.user.role !== 'ADMIN' && (
                 <Link href="/akun/dashboard" className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-full flex items-center transition-colors shadow-md text-sm">
                   <FaUserCircle className="mr-2" />
                   Dashboard Saya

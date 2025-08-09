@@ -10,9 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
+enum UserRole {
   ADMIN
+  UMUM
+  DESAINER
 }
 
 enum ChallengeStatus {
@@ -45,7 +46,7 @@ model User {
   email              String           @unique
   name               String?
   password           String
-  role               Role             @default(USER)
+  role               UserRole         @default(UMUM)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
   createdChallenges  Challenge[]      @relation("Challenger")
@@ -60,6 +61,17 @@ model User {
   galleryItems       GalleryItem[]
   communitiesOwned   Community[]      @relation("OwnedCommunities")
   communityMemberships CommunityMember[]
+  categories         UserCategory[]
+}
+
+model UserCategory {
+  id           Int    @id @default(autoincrement())
+  userId       Int
+  categoryName String
+
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryName])
 }
 
 model GalleryItem {

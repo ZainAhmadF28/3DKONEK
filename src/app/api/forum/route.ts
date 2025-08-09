@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
+
+type PostRecord = {
+  id: number;
+  content: string;
+  createdAt: Date;
+  fileUrl?: string | null;
+  fileType?: string | null;
+  authorId: number;
+  communityId?: number | null;
+  author?: { name: string | null };
+  community?: { id: number; name: string } | null;
+};
 import { writeFile, mkdir, stat } from 'fs/promises';
 import path from 'path';
 
@@ -14,20 +26,50 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const communityIdParam = searchParams.get('communityId');
     const communityId = communityIdParam ? parseInt(communityIdParam, 10) : undefined;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db: any = prisma;
+    const session = await getServerSession(authOptions);
+    const db = prisma as unknown as {
+      forumPost: {
+        findMany: (args: unknown) => Promise<PostRecord[]>;
+      };
+      userCategory: {
+        findMany: (args: unknown) => Promise<Array<{ categoryName: string; userId: number }>>;
+      };
+    };
+
     const posts = await db.forumPost.findMany({
-      where: communityId ? { communityId } : undefined,
+      where: {
+        ...(communityId ? { communityId } : {}),
+      },
       include: {
-        author: {
-          select: { name: true },
-        },
+        author: { select: { name: true } },
         community: { select: { id: true, name: true } },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { createdAt: 'desc' },
     });
+
+    // Prioritaskan postingan berdasarkan kategori minat user (berdasarkan kategori penulis)
+    if (session?.user?.id) {
+      const myCats = await db.userCategory.findMany({
+        where: { userId: session.user.id },
+        select: { categoryName: true },
+      });
+      const mySet = new Set(myCats.map((c: { categoryName: string }) => c.categoryName));
+      if (mySet.size > 0 && posts.length > 0) {
+        const authorIds = Array.from(new Set(posts.map((p) => p.authorId)));
+        const overlaps = await db.userCategory.findMany({
+          where: { userId: { in: authorIds }, categoryName: { in: Array.from(mySet) } },
+          select: { userId: true },
+        });
+        const prioritizedAuthorIds = new Set(overlaps.map((o: { userId: number }) => o.userId));
+        const sorted = [...posts].sort((a: PostRecord, b: PostRecord) => {
+          const aPrio = prioritizedAuthorIds.has(a.authorId) ? 1 : 0;
+          const bPrio = prioritizedAuthorIds.has(b.authorId) ? 1 : 0;
+          return bPrio - aPrio; // yang prioritas (1) muncul duluan
+        });
+        return NextResponse.json(sorted);
+      }
+    }
+
     return NextResponse.json(posts);
   } catch (error: unknown) {
     console.error('FETCH_FORUM_ERROR', error);

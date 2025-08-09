@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
 import { writeFile, mkdir, stat } from 'fs/promises';
 import path from 'path';
@@ -12,6 +12,11 @@ export async function POST(
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.id) {
     return NextResponse.json({ message: 'Tidak diotorisasi.' }, { status: 401 });
+  }
+
+  // Hanya DESAINER (dan ADMIN) yang boleh mengajukan proposal
+  if (session.user.role !== 'DESAINER' && session.user.role !== 'ADMIN') {
+    return NextResponse.json({ message: 'Hanya desainer yang dapat mengajukan proposal pada tantangan.' }, { status: 403 });
   }
 
   try {
@@ -30,8 +35,8 @@ export async function POST(
       const uploadDir = path.join(process.cwd(), 'public/uploads/proposals');
       try {
         await stat(uploadDir);
-      } catch (e: any) {
-        if (e.code === 'ENOENT') {
+      } catch (e: unknown) {
+        if (typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 'ENOENT') {
           await mkdir(uploadDir, { recursive: true });
         } else {
           throw e;

@@ -8,10 +8,10 @@ const Hero = () => {
       <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center px-6">
         <div className="hero-text text-center md:text-left">
           <h1 className="font-extrabold text-4xl md:text-5xl leading-tight mb-4" style={{ fontFamily: "'Raleway', sans-serif" }}>
-            Kolaborasi Kita, Rekayasa Bangsa.
+            3DKONEK: Platform Koneksi dan Edukasi Desain 3D untuk Semua Kalangan
           </h1>
           <p className="text-lg md:text-xl mb-8 opacity-90">
-            Menjadi tulang punggung digital bagi kemandirian teknologi dan manufaktur Indonesia.
+            Belajar, berkolaborasi, dan berkarya di dunia desain 3D. Terhubung dengan komunitas, akses tantangan, dan kembangkan portofolio Anda.
           </p>
           <div className="flex justify-center md:justify-start gap-4">
             <button className="bg-[#ff6b35] hover:bg-[#ff5500] text-white font-bold py-3 px-8 rounded-full flex items-center transition-transform transform hover:-translate-y-1 shadow-lg">

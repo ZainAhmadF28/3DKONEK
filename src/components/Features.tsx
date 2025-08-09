@@ -3,12 +3,12 @@ import React from 'react';
 import { FaTasks, FaComments, FaBook, FaMapMarkedAlt, FaBoxOpen, FaStar } from 'react-icons/fa';
 
 const featureData = [
-    { icon: <FaTasks />, title: "Papan Tantangan & Imbalan", description: "Temukan tantangan desain dan perbaikan mesin dengan imbalan menarik." },
-    { icon: <FaComments />, title: "Ruang Kolaborasi Virtual", description: "Kolaborasi real-time dengan alat diskusi dan kontrol versi desain." },
-    { icon: <FaBook />, title: "Pustaka Komponen Nasional", description: "Akses database komponen terverifikasi untuk digunakan kembali." },
-    { icon: <FaMapMarkedAlt />, title: "Direktori Manufaktur", description: "Temukan bengkel dan manufaktur lokal terverifikasi kualitasnya." },
-    { icon: <FaBoxOpen />, title: "Database Material Lokal", description: "Informasi material lokal yang tersedia untuk kebutuhan desain." },
-    { icon: <FaStar />, title: "Sistem Reputasi & Portofolio", description: "Bangun reputasi digital dari setiap kontribusi yang berhasil." }
+    { icon: <FaTasks />, title: "Tantangan Desain 3D & Imbalan", description: "Ikuti tantangan desain 3D, selesaikan brief, dan raih poin maupun imbalan." },
+    { icon: <FaComments />, title: "Kolaborasi & Komunitas", description: "Diskusi, berbagi file 3D, dan bangun jaringan dengan desainer lain." },
+    { icon: <FaBook />, title: "Pustaka & Edukasi 3D", description: "Akses model, referensi, dan materi belajar desain 3D terbaru." },
+    { icon: <FaMapMarkedAlt />, title: "Galeri & Portofolio", description: "Pamerkan karya terbaik untuk meningkatkan eksposur dan reputasi." },
+    { icon: <FaBoxOpen />, title: "Asset & Resource", description: "Temukan aset siap pakai untuk mempercepat proses kreatif Anda." },
+    { icon: <FaStar />, title: "Rekomendasi Personal", description: "Konten dipersonalisasi berdasarkan minat kategori yang Anda pilih." }
 ];
 
 const Features = () => {

@@ -1,5 +1,4 @@
-import NextAuth, { DefaultSession, DefaultUser } from 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import { DefaultSession, DefaultUser } from 'next-auth';
 
 // Perluas tipe data bawaan dari NextAuth
 declare module 'next-auth' {
@@ -10,8 +9,8 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: number;
-      role: string; // Menambahkan peran (role) ke sesi
-    } & DefaultSession['user']; // Menggabungkan dengan properti default (name, email, image)
+      role: 'ADMIN' | 'UMUM' | 'DESAINER';
+    } & DefaultSession['user'];
   }
 
   /**
@@ -20,7 +19,7 @@ declare module 'next-auth' {
    */
   interface User extends DefaultUser {
     id: number;
-    role: string; // Menambahkan peran (role) ke objek user
+    role: 'ADMIN' | 'UMUM' | 'DESAINER';
   }
 }
 
@@ -31,6 +30,6 @@ declare module 'next-auth/jwt' {
    */
   interface JWT {
     id: number;
-    role: string;
+    role: 'ADMIN' | 'UMUM' | 'DESAINER';
   }
 }

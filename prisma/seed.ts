@@ -1,4 +1,4 @@
-import { PrismaClient, Role, ChallengeStatus } from '@prisma/client';
+import { PrismaClient, UserRole, ChallengeStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ async function main() {
       email: 'admin@example.com',
       name: 'Admin KitaRekayasa',
       password: adminPassword,
-      role: Role.ADMIN,
+      role: UserRole.ADMIN,
     },
   });
   console.log(`Upserted admin user with id: ${adminUser.id}`);
@@ -29,7 +29,7 @@ async function main() {
       email: 'user@example.com',
       name: 'User Contoh',
       password: userPassword,
-      role: Role.USER,
+      role: UserRole.UMUM,
     },
   });
   console.log(`Upserted regular user with id: ${regularUser.id}`);

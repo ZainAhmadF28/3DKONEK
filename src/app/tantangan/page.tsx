@@ -17,12 +17,13 @@ const ChallengesPage = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string>('Semua');
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
-        const q = categoryFilter === 'Semua' ? '' : `?category=${encodeURIComponent(categoryFilter)}`;
+        const q = categoryFilters.length === 0 ? '' : `?categories=${encodeURIComponent(categoryFilters.join(','))}`;
         const response = await fetch(`/api/challenges${q}`);
         if (!response.ok) {
           throw new Error('Gagal mengambil data tantangan');
@@ -41,7 +42,24 @@ const ChallengesPage = () => {
     };
 
     fetchChallenges();
-  }, [categoryFilter]);
+  }, [categoryFilters]);
+
+  // Ambil kategori default pengguna setelah login
+  useEffect(() => {
+    const loadUserCategories = async () => {
+      if (status !== 'authenticated') return;
+      try {
+        const res = await fetch('/api/akun/categories');
+        if (res.ok) {
+          const cats: string[] = await res.json();
+          setCategoryFilters(cats);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    loadUserCategories();
+  }, [status]);
 
   const handleCardClick = (challenge: Challenge) => {
     setSelectedChallenge(challenge);
@@ -113,17 +131,49 @@ const ChallengesPage = () => {
             </div>
           )}
 
-          <div className="flex justify-center mb-10">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full max-w-xl border rounded-lg p-2 bg-white"
-            >
-              <option value="Semua">Semua</option>
-              {CHALLENGE_CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
+          <div className="mb-10 max-w-4xl mx-auto bg-white p-4 rounded-lg shadow">
+            <p className="font-semibold mb-2">Filter Kategori (opsional)</p>
+            <div className="flex flex-wrap gap-3">
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={categoryFilters.length === 0}
+                  onChange={(e) => {
+                    if (e.target.checked) setCategoryFilters([]);
+                  }}
+                />
+                Semua
+              </label>
+              {(showAllCategories ? CHALLENGE_CATEGORIES : CHALLENGE_CATEGORIES.slice(0, 10)).map((cat) => {
+                const checked = categoryFilters.includes(cat);
+                return (
+                  <label key={cat} className="inline-flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCategoryFilters((prev) => Array.from(new Set([...prev, cat])));
+                        } else {
+                          setCategoryFilters((prev) => prev.filter((c) => c !== cat));
+                        }
+                      }}
+                    />
+                    {cat}
+                  </label>
+                );
+              })}
+            </div>
+            {CHALLENGE_CATEGORIES.length > 10 && (
+              <div className="mt-3">
+                <button
+                  onClick={() => setShowAllCategories((v) => !v)}
+                  className="text-indigo-600 text-sm font-semibold hover:underline"
+                >
+                  {showAllCategories ? 'Show less' : 'Show more'}
+                </button>
+              </div>
+            )}
           </div>
 
           {renderContent()}

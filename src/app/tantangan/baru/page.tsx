@@ -1,13 +1,57 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-// ... (imports lainnya tetap sama)
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { FaFileImage } from 'react-icons/fa';
+import { FaFileImage, FaEye } from 'react-icons/fa';
 import { CHALLENGE_CATEGORIES } from '@/constants/categories';
+
+// Komponen untuk Kartu Pratinjau Langsung
+const LivePreviewCard = ({ formData, imageFiles }) => {
+    const rewardFormatted = new Intl.NumberFormat('id-ID', {
+        style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+    }).format(Number(formData.reward) || 0);
+
+    const previewImage = imageFiles.length > 0 ? URL.createObjectURL(imageFiles[0]) : null;
+
+    return (
+        <div className="glass-card p-6 rounded-2xl border-t-2 border-lime-400 flex flex-col group">
+            <div className="relative w-full h-48 bg-gray-700 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                {previewImage ? (
+                    <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                    <FaEye className="text-gray-500 text-4xl" />
+                )}
+                 <div className="absolute inset-0 bg-black/20"></div>
+            </div>
+            <h3 className="font-display text-2xl font-bold text-white mb-2 truncate group-hover:text-lime-400 transition-colors">
+                {formData.title || 'Judul Tantangan Anda'}
+            </h3>
+            <p className="text-gray-300 mb-4 text-sm leading-relaxed flex-grow line-clamp-2">
+                {formData.description || 'Deskripsi lengkap tantangan akan muncul di sini.'}
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+                {formData.category && (
+                    <span className="text-xs bg-gray-700 text-lime-400 font-semibold py-1 px-3 rounded-full">
+                        {formData.category}
+                    </span>
+                )}
+            </div>
+            <div className="mt-auto pt-4 border-t border-white/10 flex items-end justify-between">
+                <div>
+                    <p className="text-sm text-gray-400 mb-1">Imbalan</p>
+                    <p className="text-xl font-bold text-white">{rewardFormatted}</p>
+                </div>
+                <span className="text-xs font-semibold px-3 py-1 rounded-full border bg-lime-400/20 text-lime-300 border-lime-400/30">
+                    OPEN
+                </span>
+            </div>
+        </div>
+    );
+};
+
 
 const CreateChallengePage = () => {
   const router = useRouter();
@@ -17,16 +61,14 @@ const CreateChallengePage = () => {
     title: '',
     category: CHALLENGE_CATEGORIES[0],
     description: '',
-    material: '', // State baru untuk material
+    material: '',
     reward: '',
     deadline: '',
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  // ... (state error dan submitting tetap sama)
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ... (useEffect dan handleTextChange tetap sama)
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -54,17 +96,11 @@ const CreateChallengePage = () => {
     setError('');
 
     const data = new FormData();
-    data.append('title', formData.title);
-    data.append('category', formData.category);
-    data.append('description', formData.description);
-    data.append('material', formData.material); // Tambahkan material ke FormData
-    data.append('reward', formData.reward);
-    data.append('deadline', formData.deadline);
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
     for (const file of imageFiles) {
         data.append('imageFiles', file);
     }
 
-    // ... (logika fetch tetap sama)
     try {
       const res = await fetch('/api/challenges', { method: 'POST', body: data });
       if (!res.ok) {
@@ -73,91 +109,125 @@ const CreateChallengePage = () => {
       }
       router.push('/tantangan');
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Terjadi kesalahan yang tidak diketahui.');
-      }
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (status === 'loading' || status === 'unauthenticated') {
-    return <div className="flex justify-center items-center min-h-screen">Memuat...</div>;
+  if (status === 'loading') {
+    return <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">Memuat...</div>;
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="bg-gray-900 min-h-screen text-gray-50 flex flex-col">
       <Header />
-      <main className="flex-grow pt-24 pb-20 bg-gray-50">
-        <div className="container mx-auto px-6 max-w-3xl">
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h1 className="text-3xl font-bold mb-6 text-center">Buat Tantangan Baru</h1>
-            <form onSubmit={handleSubmit} encType="multipart/form-data">
-              {error && <p className="text-red-500 text-center mb-4 bg-red-100 p-3 rounded-lg">{error}</p>}
+      <main className="flex-grow pt-28 pb-20">
+        <div className="container mx-auto px-6">
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
+            <div className="text-center mb-12">
+                <h1 className="font-display text-4xl md:text-5xl font-bold text-white">Buat Tantangan Baru</h1>
+                <p className="text-lg text-gray-400 mt-2">Bagikan masalah rekayasa Anda dan temukan solusinya.</p>
+            </div>
+            
+            {/* Layout 2 Kolom */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               
-              {/* ... input title dan category tetap sama ... */}
-              <div className="mb-4">
-                <label htmlFor="title" className="block text-gray-700 font-semibold">Judul Tantangan</label>
-                <input type="text" name="title" id="title" value={formData.title} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg" required />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="category" className="block text-gray-700 font-semibold">Kategori</label>
-                <select name="category" id="category" value={formData.category} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg bg-white">
-                  {CHALLENGE_CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Input Material Baru */}
-              <div className="mb-4">
-                <label htmlFor="material" className="block text-gray-700 font-semibold">Material yang Diinginkan (Opsional)</label>
-                <input type="text" name="material" id="material" value={formData.material} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg" placeholder="Contoh: Baja S45C, ABS Plastik, dll." />
-              </div>
-
-              {/* ... sisa form tetap sama ... */}
-              <div className="mb-4">
-                <label htmlFor="imageFiles" className="block text-gray-700 font-semibold">Gambar Tantangan</label>
-                <p className="text-sm text-gray-500">Unggah satu atau lebih file gambar (JPG/PNG).</p>
-                <input type="file" name="imageFiles" id="imageFiles" onChange={handleFileChange} className="w-full mt-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/png, image/jpeg" required multiple />
-              </div>
-              {imageFiles.length > 0 && (
-                <div className="mb-4 p-3 bg-slate-50 rounded-lg border">
-                  <h4 className="font-semibold text-sm text-slate-600 mb-2">File yang dipilih:</h4>
-                  <ul className="space-y-2">
-                    {imageFiles.map((file, index) => (
-                      <li key={index} className="flex items-center justify-between text-sm text-slate-800">
-                        <div className="flex items-center gap-2"><FaFileImage className="text-indigo-500"/><span>{file.name}</span></div>
-                        <span className="text-slate-500">{(file.size / 1024).toFixed(2)} KB</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-gray-700 font-semibold">Deskripsi Lengkap</label>
-                <textarea name="description" id="description" rows={5} value={formData.description} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg" required></textarea>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Kolom Kiri: Form Input */}
+              <div className="space-y-6">
                 <div>
-                  <label htmlFor="reward" className="block text-gray-700 font-semibold">Imbalan (Rp)</label>
-                  <input type="number" name="reward" id="reward" value={formData.reward} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg" placeholder="e.g. 2000000" required />
+                  <label htmlFor="title" className="block text-gray-300 font-semibold mb-2">Judul Tantangan</label>
+                  <input type="text" name="title" id="title" value={formData.title} onChange={handleTextChange} className="form-input" required />
                 </div>
                 <div>
-                  <label htmlFor="deadline" className="block text-gray-700 font-semibold">Batas Waktu</label>
-                  <input type="date" name="deadline" id="deadline" value={formData.deadline} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg" required />
+                  <label htmlFor="category" className="block text-gray-300 font-semibold mb-2">Kategori</label>
+                  <select name="category" id="category" value={formData.category} onChange={handleTextChange} className="form-input">
+                    {CHALLENGE_CATEGORIES.map(cat => ( <option key={cat} value={cat}>{cat}</option> ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="description" className="block text-gray-300 font-semibold mb-2">Deskripsi Lengkap</label>
+                  <textarea name="description" id="description" rows={5} value={formData.description} onChange={handleTextChange} className="form-input" required></textarea>
+                </div>
+                <div>
+                  <label htmlFor="material" className="block text-gray-300 font-semibold mb-2">Material yang Diinginkan (Opsional)</label>
+                  <input type="text" name="material" id="material" value={formData.material} onChange={handleTextChange} className="form-input" placeholder="Contoh: Baja S45C, Plastik ABS" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="reward" className="block text-gray-300 font-semibold mb-2">Imbalan (Rp)</label>
+                      <input type="number" name="reward" id="reward" value={formData.reward} onChange={handleTextChange} className="form-input" placeholder="e.g. 2000000" required />
+                    </div>
+                    <div>
+                      <label htmlFor="deadline" className="block text-gray-300 font-semibold mb-2">Batas Waktu</label>
+                      <input type="date" name="deadline" id="deadline" value={formData.deadline} onChange={handleTextChange} className="form-input" required />
+                    </div>
                 </div>
               </div>
-              <button type="submit" disabled={isSubmitting} className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400">
-                {isSubmitting ? 'Memproses...' : 'Publikasikan Tantangan'}
-              </button>
-            </form>
-          </div>
+
+              {/* Kolom Kanan: Upload & Preview */}
+              <div className="space-y-8">
+                <div>
+                  <label htmlFor="imageFiles" className="block text-gray-300 font-semibold mb-2">Gambar Referensi</label>
+                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-600 px-6 py-10">
+                    <div className="text-center">
+                      <FaFileImage className="mx-auto h-12 w-12 text-gray-500" />
+                      <div className="mt-4 flex text-sm leading-6 text-gray-400">
+                        <label htmlFor="imageFiles" className="relative cursor-pointer rounded-md font-semibold text-lime-400 focus-within:outline-none hover:text-lime-300">
+                          <span>Unggah file</span>
+                          <input id="imageFiles" name="imageFiles" type="file" className="sr-only" onChange={handleFileChange} accept="image/png, image/jpeg" required multiple />
+                        </label>
+                        <p className="pl-1">atau seret dan lepas</p>
+                      </div>
+                      <p className="text-xs leading-5 text-gray-500">PNG, JPG hingga 10MB</p>
+                    </div>
+                  </div>
+                  {imageFiles.length > 0 && (
+                    <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                      <h4 className="font-semibold text-sm text-gray-300 mb-2">File yang dipilih:</h4>
+                      <ul className="space-y-2">
+                        {imageFiles.map((file, index) => (
+                          <li key={index} className="text-sm text-gray-400">{file.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <div>
+                    <label className="block text-gray-300 font-semibold mb-2">Pratinjau Langsung</label>
+                    <LivePreviewCard formData={formData} imageFiles={imageFiles} />
+                </div>
+              </div>
+            </div>
+
+            {/* Tombol Submit */}
+            <div className="mt-12 border-t border-white/10 pt-8">
+                {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+                <button type="submit" disabled={isSubmitting} className="w-full max-w-md mx-auto flex justify-center bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-300 disabled:bg-gray-500 transition-transform duration-300 hover:scale-105">
+                    {isSubmitting ? 'Memproses...' : 'Publikasikan Tantangan'}
+                </button>
+            </div>
+          </form>
         </div>
       </main>
       <Footer />
+      {/* Menambahkan style untuk input form */}
+      <style jsx>{`
+        .form-input {
+            width: 100%;
+            background-color: #1f2937; /* bg-gray-800 */
+            border: 1px solid #4b5563; /* border-gray-600 */
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #9EFF00; /* lime-400 */
+            box-shadow: 0 0 0 2px #9EFF0040;
+        }
+      `}</style>
     </div>
   );
 };

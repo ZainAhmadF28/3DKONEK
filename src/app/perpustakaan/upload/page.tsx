@@ -16,6 +16,7 @@ const UploadGalleryPage = () => {
   const [category, setCategory] = useState('Komponen Mesin');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [poster, setPoster] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,6 +29,12 @@ const UploadGalleryPage = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handlePosterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPoster(e.target.files[0]);
     }
   };
 
@@ -45,6 +52,7 @@ const UploadGalleryPage = () => {
     data.append('category', category);
     data.append('description', description);
     data.append('file', file);
+    if (poster) data.append('poster', poster);
 
     try {
       const res = await fetch('/api/gallery', { method: 'POST', body: data });
@@ -93,6 +101,10 @@ const UploadGalleryPage = () => {
               <div className="mb-4">
                 <label htmlFor="file" className="block text-gray-700 font-semibold">File Model (.glb)</label>
                 <input type="file" onChange={handleFileChange} className="w-full mt-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".glb" required />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="poster" className="block text-gray-700 font-semibold">Poster (gambar pratinjau, opsional)</label>
+                <input type="file" onChange={handlePosterChange} className="w-full mt-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*" />
               </div>
               <div className="mb-6">
                 <label htmlFor="description" className="block text-gray-700 font-semibold">Deskripsi (Opsional)</label>

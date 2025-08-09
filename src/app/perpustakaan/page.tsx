@@ -5,7 +5,8 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ModelViewer from '@/components/ModelViewer';
+import HoverModelViewer from '@/components/HoverModelViewer';
+import { LIBRARY_CATEGORIES } from '@/constants/categories';
 import { FaUpload, FaDownload } from 'react-icons/fa'; // 1. Import ikon Download
 
 interface GalleryItem {
@@ -13,10 +14,11 @@ interface GalleryItem {
   title: string;
   category: string;
   fileUrl: string;
+  posterUrl?: string | null;
   author: { name: string | null };
 }
 
-const KATEGORI = ["Semua", "Komponen Mesin", "Prototipe Produk", "Arsitektur", "Karakter", "Lainnya"];
+const KATEGORI = ["Semua", ...LIBRARY_CATEGORIES];
 
 const PerpustakaanPage = () => {
   const { data: session, status } = useSession();
@@ -60,12 +62,16 @@ const PerpustakaanPage = () => {
             </div>
           )}
 
-          <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-12">
-            {KATEGORI.map(cat => (
-              <button key={cat} onClick={() => setSelectedCategory(cat)} className={`font-semibold py-2 px-5 rounded-full border-2 transition-colors ${selectedCategory === cat ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}>
-                {cat}
-              </button>
-            ))}
+          <div className="flex justify-center mb-8">
+            <select
+              className="w-full max-w-xl border rounded-lg p-2 bg-white"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {KATEGORI.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
 
           {loading ? (
@@ -74,7 +80,7 @@ const PerpustakaanPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {items.map(item => (
                 <div key={item.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-                  <ModelViewer src={item.fileUrl} alt={item.title} />
+                  <HoverModelViewer src={item.fileUrl} alt={item.title} posterUrl={item.posterUrl || undefined} />
                   {/* ======================================================= */}
                   {/* == PERBAIKAN UTAMA ADA DI SINI == */}
                   {/* ======================================================= */}

@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     const category = formData.get('category') as string;
     const description = formData.get('description') as string | null;
     const file = formData.get('file') as File | null;
+    const poster = formData.get('poster') as File | null;
 
     if (!title || !category || !file) {
       return NextResponse.json({ message: 'Judul, kategori, dan file .glb wajib diisi.' }, { status: 400 });
@@ -71,6 +72,14 @@ export async function POST(request: Request) {
     await writeFile(path.join(uploadDir, filename), buffer);
     const fileUrl = `/uploads/gallery/${filename}`;
 
+    let posterUrl: string | undefined = undefined;
+    if (poster) {
+      const posterBuffer = Buffer.from(await poster.arrayBuffer());
+      const posterName = `${Date.now()}-${poster.name.replace(/\s/g, '_')}`;
+      await writeFile(path.join(uploadDir, posterName), posterBuffer);
+      posterUrl = `/uploads/gallery/${posterName}`;
+    }
+
     // Buat entri baru di database
     const newGalleryItem = await prisma.galleryItem.create({
       data: {
@@ -79,6 +88,7 @@ export async function POST(request: Request) {
         description,
         fileUrl,
         authorId: session.user.id,
+        posterUrl,
       },
     });
 

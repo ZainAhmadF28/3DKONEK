@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { FaFileImage } from 'react-icons/fa';
+import { CHALLENGE_CATEGORIES } from '@/constants/categories';
 
 const CreateChallengePage = () => {
   const router = useRouter();
@@ -14,7 +15,7 @@ const CreateChallengePage = () => {
   
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Gear & Transmisi',
+    category: CHALLENGE_CATEGORIES[0],
     description: '',
     material: '', // State baru untuk material
     reward: '',
@@ -104,11 +105,9 @@ const CreateChallengePage = () => {
               <div className="mb-4">
                 <label htmlFor="category" className="block text-gray-700 font-semibold">Kategori</label>
                 <select name="category" id="category" value={formData.category} onChange={handleTextChange} className="w-full mt-1 px-3 py-2 border rounded-lg bg-white">
-                  <option>Gear & Transmisi</option>
-                  <option>Komponen Mesin</option>
-                  <option>Moulding & Cetakan</option>
-                  <option>Prototipe Produk</option>
-                  <option>Elektronika</option>
+                  {CHALLENGE_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
               </div>
 

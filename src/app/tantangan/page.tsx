@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChallengeCard, { Challenge } from '@/components/ChallengeCard';
 import ChallengeDetailModal from '@/components/ChallengeDetailModal';
+import { CHALLENGE_CATEGORIES } from '@/constants/categories';
 
 const ChallengesPage = () => {
   const { data: session, status } = useSession();
@@ -16,12 +17,13 @@ const ChallengesPage = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>('Semua');
 
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
-        // Mengambil data dari API internal, bukan lagi dari file JSON statis
-        const response = await fetch('/api/challenges');
+        const q = categoryFilter === 'Semua' ? '' : `?category=${encodeURIComponent(categoryFilter)}`;
+        const response = await fetch(`/api/challenges${q}`);
         if (!response.ok) {
           throw new Error('Gagal mengambil data tantangan');
         }
@@ -39,7 +41,7 @@ const ChallengesPage = () => {
     };
 
     fetchChallenges();
-  }, []); // Dependensi kosong agar hanya berjalan sekali saat komponen dimuat
+  }, [categoryFilter]);
 
   const handleCardClick = (challenge: Challenge) => {
     setSelectedChallenge(challenge);
@@ -111,12 +113,17 @@ const ChallengesPage = () => {
             </div>
           )}
 
-          <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-12">
-              <button className="bg-indigo-600 text-white font-semibold py-2 px-5 rounded-full">Semua</button>
-              <button className="bg-white hover:bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full border">Gear & Transmisi</button>
-              <button className="bg-white hover:bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full border">Komponen Mesin</button>
-              <button className="bg-white hover:bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full border">Moulding</button>
-              <button className="bg-white hover:bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full border">Prototipe</button>
+          <div className="flex justify-center mb-10">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full max-w-xl border rounded-lg p-2 bg-white"
+            >
+              <option value="Semua">Semua</option>
+              {CHALLENGE_CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
 
           {renderContent()}

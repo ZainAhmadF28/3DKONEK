@@ -68,6 +68,7 @@ model GalleryItem {
   description String?
   category    String
   fileUrl     String
+  posterUrl   String?
   createdAt   DateTime @default(now())
   authorId    Int
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)

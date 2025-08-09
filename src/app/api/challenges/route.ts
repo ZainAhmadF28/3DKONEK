@@ -7,7 +7,10 @@ import path from 'path';
 
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
     const challengesFromDb = await prisma.challenge.findMany({
+      where: category ? { category } : undefined,
       orderBy: { createdAt: 'desc' },
       include: {
         challenger: { select: { name: true } },
@@ -88,7 +91,7 @@ export async function POST(request: Request) {
         description,
         material,
         // Konversi string dari form menjadi BigInt untuk disimpan
-        reward: BigInt(reward),
+        reward: BigInt(reward) as unknown as number,
         deadline: new Date(deadline),
         challengerId: session.user.id,
         images: {

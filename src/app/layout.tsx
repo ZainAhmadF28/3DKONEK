@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { ForumProvider } from "@/context/ForumContext"; // 1. Import Provider
 import ForumSidebar from "@/components/ForumSidebar"; // 2. Import Sidebar
+import ForumFab from "@/components/ForumFab";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,6 +35,8 @@ export default function RootLayout({
             {children}
             {/* 4. Render Sidebar */}
             <ForumSidebar />
+             {/* Floating action button to open forum */}
+             <ForumFab />
           </ForumProvider>
         </AuthProvider>
       </body>

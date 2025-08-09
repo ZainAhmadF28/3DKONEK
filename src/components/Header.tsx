@@ -37,11 +37,6 @@ const Header = () => {
               </Link>
             </li>
 
-            <li>
-              <button onClick={openForum} className="hover:text-gray-200 font-semibold flex items-center gap-2">
-                <FaForum /> Forum
-              </button>
-            </li>
 
             {status === 'authenticated' && session.user.role === 'USER' && (
               <li>

@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import { FaEye, FaUser } from 'react-icons/fa';
+import ImageCarousel from './ImageCarousel';
 
 // Perbarui tipe Challenge untuk menyertakan data baru
 export interface Challenge {
@@ -15,10 +14,8 @@ export interface Challenge {
   reward: number;
   deadline: string | Date;
   status: string;
-  challenger?: { name: string | null; };
-  _count?: { // Data agregat dari Prisma
-    views: number;
-  };
+  challenger?: { name: string | null };
+  _count?: { views: number };
 }
 
 interface ChallengeCardProps {
@@ -27,58 +24,61 @@ interface ChallengeCardProps {
 }
 
 const statusStyles: { [key: string]: string } = {
-  Open: 'bg-green-100 text-green-800',
-  Judging: 'bg-blue-100 text-blue-800',
-  Completed: 'bg-gray-100 text-gray-800',
+  OPEN: 'bg-lime-400/20 text-lime-300 border border-lime-400/30',
+  JUDGING: 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/30',
+  COMPLETED: 'bg-gray-500/20 text-gray-400 border border-gray-500/30',
 };
 
 const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => {
   const rewardFormatted = new Intl.NumberFormat('id-ID', {
-    style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
   }).format(challenge.reward);
 
-  const thumbnailUrl = challenge.images && challenge.images.length > 0 ? challenge.images[0].url : null;
+  const statusKey = (challenge.status || '').toUpperCase();
 
   return (
-    <div 
+    <div
       onClick={onClick}
-      className="bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer group"
+      className="glass-card p-6 rounded-2xl border-t-2 border-lime-400 transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer flex flex-col group"
     >
-      <div className="relative h-56 w-full overflow-hidden bg-gray-200">
-        {thumbnailUrl ? (
-          <Image src={thumbnailUrl} alt={`Gambar untuk ${challenge.title}`} layout="fill" objectFit="cover" className="group-hover:scale-105 transition-transform duration-300" />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">Tidak Ada Gambar</div>
+      <div className="rounded-xl overflow-hidden mb-4">
+        <ImageCarousel images={challenge.images} onImageClick={() => {}} />
+      </div>
+
+      {/* Judul */}
+      <h3 className="font-display text-2xl font-bold text-white mb-2 group-hover:text-lime-400 transition-colors duration-300">
+        {challenge.title}
+      </h3>
+
+      {/* Deskripsi */}
+      <p className="text-gray-300 mb-4 text-sm leading-relaxed flex-grow line-clamp-3">
+        {challenge.description}
+      </p>
+
+      {/* Kategori */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {challenge.category && (
+          <span className="text-xs bg-gray-700 text-lime-400 font-semibold py-1 px-3 rounded-full">
+            {challenge.category}
+          </span>
         )}
       </div>
 
-      <div className="p-6 flex-grow flex flex-col">
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-sm font-semibold text-indigo-600">{challenge.category}</span>
-          <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusStyles[challenge.status] || 'bg-gray-100 text-gray-800'}`}>
-            {challenge.status}
-          </span>
+      {/* Footer: Imbalan & Status */}
+      <div className="mt-auto pt-4 border-t border-white/10 flex items-end justify-between">
+        <div>
+          <p className="text-sm text-gray-400 mb-1">Imbalan</p>
+          <p className="text-xl font-bold text-white">{rewardFormatted}</p>
         </div>
-        <h3 className="text-xl font-bold text-[#0a2540] mb-2 h-14 overflow-hidden">{challenge.title}</h3>
-        
-        {/* Tampilkan nama pembuat dan jumlah view */}
-        <div className="flex items-center text-sm text-gray-500 gap-4 mb-4">
-            <span className="flex items-center gap-1.5" title="Dibuat oleh">
-                <FaUser /> {challenge.challenger?.name || 'Anonim'}
-            </span>
-            <span className="flex items-center gap-1.5" title="Dilihat oleh">
-                <FaEye /> {challenge._count?.views || 0}
-            </span>
-        </div>
-
-        <div className="text-2xl font-bold text-[#ff6b35] mt-auto pt-2">
-          {rewardFormatted}
-        </div>
-      </div>
-      
-      <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
-        <span>ID: {challenge.id}</span>
-        <span className="font-semibold text-indigo-600">Lihat Detail &rarr;</span>
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+            statusStyles[statusKey] || statusStyles.COMPLETED
+          }`}
+        >
+          {challenge.status}
+        </span>
       </div>
     </div>
   );

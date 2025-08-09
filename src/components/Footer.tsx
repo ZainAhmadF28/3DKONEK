@@ -12,7 +12,7 @@ const Footer = () => {
         <div className="md:col-span-2">
           <div className="flex items-center font-extrabold text-xl mb-3 text-gray-100">
             <FaCogs className="mr-2 text-lime-400" />
-            <span>Kita<span className="text-lime-400">Rekayasa</span></span>
+            <span>3D<span className="text-lime-400">KONEK</span></span>
           </div>
           <p className="text-gray-400">Kolaborasi Kita, Rekayasa Bangsa. Platform kolaborasi untuk kemandirian teknologi dan manufaktur Indonesia.</p>
         </div>
@@ -35,7 +35,7 @@ const Footer = () => {
       </div>
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-6 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} KitaRekayasa. Hak Cipta Dilindungi.
+          &copy; {new Date().getFullYear()} 3DKONEK. Hak Cipta Dilindungi.
         </div>
       </div>
     </footer>

@@ -11,7 +11,7 @@ const ChallengeDetailModal = dynamic(() => import('@/components/ChallengeDetailM
 import { CHALLENGE_CATEGORIES } from '@/constants/categories';
 
 const ChallengesPage = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,93 +62,93 @@ const ChallengesPage = () => {
   }, [selectedChallenge]);
 
   const renderContent = () => {
-    if (isLoading) return <p className="text-center text-gray-400">Memuat tantangan...</p>;
-    if (error) return <p className="text-center text-red-400">Error: {error}</p>;
-    if (challenges.length === 0) return <p className="text-center text-gray-400">Belum ada tantangan yang tersedia.</p>;
+    if (isLoading) return <p className="text-center text-gray-400 col-span-full">Memuat tantangan...</p>;
+    if (error) return <p className="text-center text-red-400 col-span-full">Error: {error}</p>;
+    if (challenges.length === 0) return <p className="text-center text-gray-400 col-span-full">Belum ada tantangan yang tersedia.</p>;
 
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {challenges.map((challenge) => (
-          <ChallengeCard key={challenge.id} challenge={challenge} onClick={() => handleCardClick(challenge)} />
-        ))}
-      </div>
-    );
+    return challenges.map((challenge) => (
+      <ChallengeCard key={challenge.id} challenge={challenge} onClick={() => handleCardClick(challenge)} />
+    ));
   };
 
+  const GlobalStyles = () => (
+    <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .glass-card { background: rgba(31, 41, 55, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+      `}</style>
+  );
+
   return (
-    <div className="bg-gray-900 min-h-screen text-gray-100 flex flex-col">
-      <Header />
-      <main className="pt-24 pb-20 flex-grow">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white">Papan Tantangan</h1>
-            <p className="text-lg text-gray-300 mt-4 max-w-2xl mx-auto">
-              Temukan masalah industri, ajukan solusi rekayasa Anda, dan dapatkan imbalan.
-            </p>
-          </div>
+    <>
+      <GlobalStyles />
+      <div className="bg-gray-900 min-h-screen text-gray-100 flex flex-col">
+        <Header />
+        <main className="flex-grow pt-28 pb-20">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+              <aside className="lg:col-span-1 lg:sticky lg:top-28 h-fit">
+                <div className="glass-card rounded-2xl p-6">
+                  <h1 className="font-display text-4xl md:text-5xl font-bold text-white leading-tight">Papan Tantangan</h1>
+                  <p className="text-gray-300 mt-4 mb-8">Temukan masalah industri, ajukan solusi rekayasa Anda, dan dapatkan imbalan.</p>
 
-          {status === 'authenticated' && (
-            <div className="text-center mb-10">
-              <Link
-                href="/tantangan/baru"
-                className="inline-block bg-lime-400 text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-lime-300 transition-colors"
-              >
-                + Buat Tantangan Baru
-              </Link>
-            </div>
-          )}
+                  {status === 'authenticated' && (
+                    <div className="mb-8">
+                      <Link
+                        href="/tantangan/baru"
+                        className="w-full text-center inline-block bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-300 transition-colors"
+                      >
+                        + Buat Tantangan Baru
+                      </Link>
+                    </div>
+                  )}
 
-          <div className="mb-10 max-w-4xl mx-auto bg-gray-800 border border-white/10 rounded-lg p-4">
-            <p className="font-semibold mb-3 text-gray-100">Filter Kategori (opsional)</p>
-            <div className="flex flex-wrap gap-4">
-              <label className="inline-flex items-center gap-2 text-sm text-gray-200">
-                <input
-                  type="checkbox"
-                  className="accent-lime-400"
-                  checked={categoryFilters.length === 0}
-                  onChange={(e) => { if (e.target.checked) setCategoryFilters([]); }}
-                />
-                Semua
-              </label>
-              {(showAllCategories ? CHALLENGE_CATEGORIES : CHALLENGE_CATEGORIES.slice(0, 10)).map((cat) => {
-                const checked = categoryFilters.includes(cat);
-                return (
-                  <label key={cat} className="inline-flex items-center gap-2 text-sm text-gray-200">
-                    <input
-                      type="checkbox"
-                      className="accent-lime-400"
-                      checked={checked}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setCategoryFilters((prev) => Array.from(new Set([...prev, cat])));
-                        } else {
-                          setCategoryFilters((prev) => prev.filter((c) => c !== cat));
-                        }
-                      }}
-                    />
-                    {cat}
-                  </label>
-                );
-              })}
-            </div>
-            {CHALLENGE_CATEGORIES.length > 10 && (
-              <div className="mt-3">
-                <button
-                  onClick={() => setShowAllCategories((v) => !v)}
-                  className="text-lime-400 text-sm font-semibold hover:underline"
-                >
-                  {showAllCategories ? 'Tampilkan lebih sedikit' : 'Tampilkan lebih banyak'}
-                </button>
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-white mb-4">Filter Kategori</h3>
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-3 text-gray-200 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="category"
+                          className="accent-lime-400 w-4 h-4 bg-gray-700 border-gray-600"
+                          checked={categoryFilters.length === 0}
+                          onChange={() => setCategoryFilters([])}
+                        />
+                        <span>Semua Kategori</span>
+                      </label>
+                      {CHALLENGE_CATEGORIES.slice(0, 6).map((cat) => (
+                        <label key={cat} className="flex items-center gap-3 text-gray-200 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="accent-lime-400 w-4 h-4 rounded bg-gray-700 border-gray-600"
+                            checked={categoryFilters.includes(cat)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setCategoryFilters((prev) => Array.from(new Set([...prev, cat])));
+                              } else {
+                                setCategoryFilters((prev) => prev.filter((c) => c !== cat));
+                              }
+                            }}
+                          />
+                          <span>{cat}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                {renderContent()}
               </div>
-            )}
+            </div>
           </div>
-
-          {renderContent()}
-        </div>
-      </main>
-      <Footer />
-      <ChallengeDetailModal challenge={selectedChallenge} onClose={handleCloseModal} />
-    </div>
+        </main>
+        <Footer />
+        <ChallengeDetailModal challenge={selectedChallenge} onClose={handleCloseModal} />
+      </div>
+    </>
   );
 };
 

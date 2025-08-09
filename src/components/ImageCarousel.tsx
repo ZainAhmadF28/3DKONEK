@@ -6,10 +6,19 @@ import { FaChevronLeft, FaChevronRight, FaExpand } from 'react-icons/fa';
 
 interface ImageCarouselProps {
   images: { url: string }[];
-  onImageClick: (imageUrl: string) => void; // Prop baru untuk menangani klik
+  onImageClick: (imageUrl: string) => void;
+  heightClassName?: string; // default: h-80
+  fit?: 'cover' | 'contain'; // default: cover
+  roundedClassName?: string; // default: rounded-t-lg
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, onImageClick }) => {
+const ImageCarousel: React.FC<ImageCarouselProps> = ({
+  images,
+  onImageClick,
+  heightClassName = 'h-80',
+  fit = 'cover',
+  roundedClassName = 'rounded-t-lg',
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goToPrevious = (e: React.MouseEvent) => {
@@ -28,15 +37,15 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, onImageClick }) =
 
   if (!images || images.length === 0) {
     return (
-      <div className="relative w-full h-80 bg-gray-200 rounded-t-lg flex items-center justify-center text-gray-500">
+      <div className={`relative w-full ${heightClassName} bg-gray-200 ${roundedClassName} flex items-center justify-center text-gray-500`}>
         Tidak Ada Gambar
       </div>
     );
   }
 
   return (
-    <div 
-      className="relative w-full h-80 rounded-t-lg overflow-hidden group cursor-pointer"
+    <div
+      className={`relative w-full ${heightClassName} ${roundedClassName} overflow-hidden group cursor-pointer bg-black/40`}
       // Tambahkan onClick di sini untuk membuka lightbox
       onClick={() => onImageClick(images[currentIndex].url)}
     >
@@ -44,7 +53,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, onImageClick }) =
         src={images[currentIndex].url}
         alt={`Gambar tantangan ${currentIndex + 1}`}
         layout="fill"
-        objectFit="cover"
+        objectFit={fit}
         className="transition-opacity duration-500 ease-in-out"
       />
       

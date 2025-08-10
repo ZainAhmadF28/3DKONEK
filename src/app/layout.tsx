@@ -12,8 +12,11 @@ import CaptureMode from "@/components/CaptureMode";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "KitaRekayasa",
+  title: "3DKONEK",
   description: "Kolaborasi Kita, Rekayasa Bangsa",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

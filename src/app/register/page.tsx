@@ -1,19 +1,18 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CHALLENGE_CATEGORIES } from '@/constants/categories';
+import { FaUser, FaPaintBrush, FaList, FaCheckCircle } from 'react-icons/fa';
 
 type RoleOption = 'UMUM' | 'DESAINER';
 
-const tabs = ['PILIH ROLE', 'FORM DAFTAR', 'PILIH KATEGORI', 'LOGIN'] as const;
-
 const RegisterPage = () => {
   const router = useRouter();
-  const [activeTabIdx, setActiveTabIdx] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
 
-  // State global antar langkah
+  // State global
   const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,34 +23,16 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Flag penyelesaian tahap
-  const [completedStep1, setCompletedStep1] = useState(false);
-  const [completedStep2, setCompletedStep2] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
-
-  // Tahap 1 langsung otomatis saat pilih role, tak perlu tombol lanjut
-  const canProceedStep2 = useMemo(() => {
-    return (
-      name.trim().length > 0 &&
-      email.trim().length > 0 &&
-      password.length >= 8 &&
-      password === confirmPassword
-    );
+  const canProceedToStep2 = useMemo(() => {
+    return name.trim().length > 0 && email.includes('@') && password.length >= 8 && password === confirmPassword;
   }, [name, email, password, confirmPassword]);
 
   const handleSubmitAll = async () => {
-    setError('');
-    if (!selectedRole) {
-      setError('Silakan pilih role terlebih dahulu.');
-      setActiveTabIdx(0);
-      return;
-    }
-    if (!canProceedStep2) {
-      setError('Lengkapi form dan pastikan password valid.');
-      setActiveTabIdx(1);
-      return;
-    }
+    if (!selectedRole) { setError('Pilih role Anda.'); setActiveStep(0); return; }
+    if (!canProceedToStep2) { setError('Lengkapi data diri dan pastikan password valid.'); setActiveStep(1); return; }
+    
     setIsSubmitting(true);
+    setError('');
     try {
       const res = await fetch('/api/register', {
         method: 'POST',
@@ -59,151 +40,134 @@ const RegisterPage = () => {
         body: JSON.stringify({ name, email, password, role: selectedRole, categories: selectedCategories }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.message || 'Gagal mendaftar');
-      }
-      setRegistrationSuccess(true);
-      setActiveTabIdx(3);
-      // Auto redirect ke login setelah 1.5s
-      setTimeout(() => router.push('/login'), 1500);
+      if (!res.ok) throw new Error(data?.message || 'Gagal mendaftar');
+      setActiveStep(3); // Pindah ke halaman sukses
+      setTimeout(() => router.push('/login'), 2000);
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Gagal mendaftar';
-      setError(message);
+      setError(e instanceof Error ? e.message : 'Gagal mendaftar');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const renderStep1 = () => (
-    <div className="space-y-4">
-      <p className="text-sm text-slate-600">Pilih role untuk melanjutkan registrasi.</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {(['UMUM', 'DESAINER'] as RoleOption[]).map((role) => (
-          <button
-            key={role}
-            onClick={() => {
-              setSelectedRole(role);
-              setCompletedStep1(true);
-              // otomatis lanjut ke form daftar
-              setActiveTabIdx(1);
-            }}
-            className={`border rounded-lg p-6 text-left hover:shadow ${selectedRole === role ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-slate-200'}`}
-          >
-            <p className="text-lg font-bold">{role}</p>
-            <p className="text-sm text-slate-600 mt-1">
-              {role === 'UMUM' ? 'Pengguna umum yang ingin belajar dan berkolaborasi.' : 'Desainer 3D yang ingin berbagi karya dan menerima tantangan.'}
-            </p>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <form onSubmit={(e) => { e.preventDefault(); if (canProceedStep2) { setCompletedStep2(true); setActiveTabIdx(2); } }}>
-      <div className="grid gap-4">
-        <div>
-          <label className="block font-semibold text-slate-800 mb-1">Nama Lengkap</label>
-          <input className="w-full border rounded px-3 py-2" value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
-        <div>
-          <label className="block font-semibold text-slate-800 mb-1">Email</label>
-          <input type="email" className="w-full border rounded px-3 py-2" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div>
-          <label className="block font-semibold text-slate-800 mb-1">Password (min 8)</label>
-          <input type="password" className="w-full border rounded px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
-        <div>
-          <label className="block font-semibold text-slate-800 mb-1">Konfirmasi Password</label>
-          <input type="password" className="w-full border rounded px-3 py-2" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-          {password && confirmPassword && password !== confirmPassword && (
-            <p className="text-xs text-red-600 mt-1">Password tidak cocok.</p>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-between mt-6">
-        <button type="button" onClick={() => setActiveTabIdx(0)} className="px-4 py-2 rounded border">Kembali</button>
-        <button type="submit" disabled={!canProceedStep2} className="px-5 py-2 rounded bg-indigo-600 text-white disabled:bg-indigo-300">Lanjut</button>
-      </div>
-    </form>
-  );
-
-  const renderStep3 = () => (
-    <div>
-      <p className="text-sm text-slate-600 mb-3">Pilih kategori minatmu (boleh lebih dari 1). Ini akan mempersonalisasi rekomendasi.</p>
-      <div className="grid md:grid-cols-2 gap-3 max-h-80 overflow-auto p-2 border rounded">
-        {CHALLENGE_CATEGORIES.map((cat) => {
-          const checked = selectedCategories.includes(cat);
-          return (
-            <label key={cat} className="inline-flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={(e) => {
-                  if (e.target.checked) setSelectedCategories((prev) => Array.from(new Set([...prev, cat])));
-                  else setSelectedCategories((prev) => prev.filter((c) => c !== cat));
-                }}
-              />
-              {cat}
-            </label>
-          );
-        })}
-      </div>
-      <div className="flex justify-between mt-6">
-        <button onClick={() => setActiveTabIdx(1)} className="px-4 py-2 rounded border">Kembali</button>
-        <button onClick={handleSubmitAll} disabled={isSubmitting} className="px-5 py-2 rounded bg-indigo-600 text-white disabled:bg-indigo-300">
-          {isSubmitting ? 'Menyimpan...' : 'Selesai & Daftar'}
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="text-center space-y-2">
-      <p className="font-semibold">Registrasi berhasil!</p>
-      <p className="text-sm text-slate-600">Mengalihkan ke halaman login...</p>
-      <p className="text-sm">Atau <Link href="/login" className="text-indigo-600 hover:underline">klik di sini</Link></p>
-    </div>
-  );
+  const steps = [
+    { name: 'Pilih Role', icon: <FaUser /> },
+    { name: 'Isi Data', icon: <FaPaintBrush /> },
+    { name: 'Pilih Minat', icon: <FaList /> },
+    { name: 'Selesai', icon: <FaCheckCircle /> },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold mb-2 text-center">Daftar Akun</h1>
-        <p className="text-center text-slate-600 mb-6">Lengkapi 4 langkah berikut.</p>
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 font-sans text-gray-200">
+      <div className="w-full max-w-3xl glass-card rounded-2xl p-8 shadow-2xl">
+        <h1 className="font-display text-3xl font-bold text-center text-white">Buat Akun Baru</h1>
+        <p className="text-center text-gray-400 mb-8">Bergabunglah dengan komunitas perekayasa Indonesia.</p>
 
-        {error && <p className="text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-4 text-sm">{error}</p>}
+        {/* Stepper Grafis */}
+        <div className="flex items-center justify-center mb-8">
+          {steps.map((step, index) => (
+            <Fragment key={step.name}>
+              <div className="flex flex-col items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${activeStep >= index ? 'bg-lime-400 border-lime-400 text-gray-900' : 'border-gray-600 text-gray-500'}`}>
+                  {step.icon}
+                </div>
+                <p className={`text-xs mt-2 transition-colors ${activeStep >= index ? 'text-lime-400' : 'text-gray-500'}`}>{step.name}</p>
+              </div>
+              {index < steps.length - 1 && (
+                <div className={`flex-auto border-t-2 transition-colors duration-300 mx-4 ${activeStep > index ? 'border-lime-400' : 'border-gray-600'}`}></div>
+              )}
+            </Fragment>
+          ))}
+        </div>
+        
+        {error && <p className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg p-3 mb-6 text-sm text-center">{error}</p>}
 
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
-          {tabs.map((t, i) => {
-            const enabled =
-              i === 0 ||
-              (i === 1 && completedStep1) ||
-              (i === 2 && completedStep2) ||
-              (i === 3 && registrationSuccess);
-            return (
-              <button
-                key={t}
-                onClick={() => enabled && setActiveTabIdx(i)}
-                disabled={!enabled}
-                className={`text-xs md:text-sm px-3 py-1 rounded-full border ${activeTabIdx === i ? 'bg-indigo-600 text-white border-indigo-600' : enabled ? 'bg-white text-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
-              >
-                {`${i + 1}. ${t}`}
-              </button>
-            );
-          })}
+        {/* Konten Step */}
+        <div className="min-h-[300px]">
+          {activeStep === 0 && ( // Step 1: Pilih Role
+            <div className="space-y-4 animate-fade-in">
+              <p className="text-center text-gray-400">Pilih peran yang paling sesuai dengan Anda.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(['UMUM', 'DESAINER'] as RoleOption[]).map((role) => (
+                  <button key={role} onClick={() => { setSelectedRole(role); setActiveStep(1); }}
+                    className={`glass-card p-6 text-left rounded-xl border-2 transition-all duration-300 ${selectedRole === role ? 'border-lime-400 ring-2 ring-lime-400/20' : 'border-transparent hover:border-gray-600'}`}>
+                    <h3 className="font-display text-lg font-bold text-white">{role}</h3>
+                    <p className="text-sm text-gray-400 mt-1">{role === 'UMUM' ? 'Belajar, berkolaborasi, dan melihat karya.' : 'Berbagi karya dan menerima tantangan.'}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeStep === 1 && ( // Step 2: Form Daftar
+             <form onSubmit={(e) => { e.preventDefault(); if (canProceedToStep2) setActiveStep(2); }} className="space-y-4 animate-fade-in">
+                <input className="form-input" placeholder="Nama Lengkap" value={name} onChange={(e) => setName(e.target.value)} required />
+                <input type="email" className="form-input" placeholder="Alamat Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <input type="password" className="form-input" placeholder="Password (minimal 8 karakter)" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <input type="password" className="form-input" placeholder="Konfirmasi Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                {password && confirmPassword && password !== confirmPassword && <p className="text-xs text-red-400">Password tidak cocok.</p>}
+                <div className="flex justify-between pt-4">
+                    <button type="button" onClick={() => setActiveStep(0)} className="btn-secondary">Kembali</button>
+                    <button type="submit" disabled={!canProceedToStep2} className="btn-primary">Lanjut</button>
+                </div>
+             </form>
+          )}
+
+          {activeStep === 2 && ( // Step 3: Pilih Kategori
+            <div className="animate-fade-in">
+                <p className="text-center text-gray-400 mb-4">Pilih kategori minat untuk personalisasi konten.</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-2 rounded-lg bg-gray-800/50">
+                    {CHALLENGE_CATEGORIES.map((cat) => {
+                        const isChecked = selectedCategories.includes(cat);
+                        return (
+                            <label key={cat} className={`p-3 rounded-lg text-sm text-center cursor-pointer transition-all duration-200 ${isChecked ? 'bg-lime-400 text-gray-900 font-bold' : 'bg-gray-700/50 hover:bg-gray-700'}`}>
+                                <input type="checkbox" className="sr-only" checked={isChecked} onChange={(e) => {
+                                    if (e.target.checked) setSelectedCategories(prev => [...prev, cat]);
+                                    else setSelectedCategories(prev => prev.filter(c => c !== cat));
+                                }} />
+                                {cat}
+                            </label>
+                        );
+                    })}
+                </div>
+                <div className="flex justify-between pt-6">
+                    <button onClick={() => setActiveStep(1)} className="btn-secondary">Kembali</button>
+                    <button onClick={handleSubmitAll} disabled={isSubmitting} className="btn-primary">
+                        {isSubmitting ? 'Mendaftar...' : 'Selesai & Daftar'}
+                    </button>
+                </div>
+            </div>
+          )}
+
+          {activeStep === 3 && ( // Step 4: Sukses
+            <div className="text-center animate-fade-in py-10">
+                <FaCheckCircle className="mx-auto text-5xl text-lime-400 mb-4" />
+                <h2 className="font-display text-2xl font-bold text-white">Registrasi Berhasil!</h2>
+                <p className="text-gray-400">Anda akan dialihkan ke halaman login...</p>
+            </div>
+          )}
         </div>
 
-        {activeTabIdx === 0 && renderStep1()}
-        {activeTabIdx === 1 && renderStep2()}
-        {activeTabIdx === 2 && renderStep3()}
-        {activeTabIdx === 3 && renderStep4()}
-
-        <p className="text-center mt-6 text-sm">
-          Sudah punya akun? <Link href="/login" className="text-indigo-600 hover:underline">Login di sini</Link>
+        <p className="text-center mt-8 text-sm text-gray-400">
+          Sudah punya akun? <Link href="/login" className="font-semibold text-lime-400 hover:underline">Login di sini</Link>
         </p>
       </div>
+
+      <style jsx>{`
+        .glass-card { background: rgba(31, 41, 55, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        body { font-family: 'Inter', sans-serif; }
+        .form-input { width: 100%; background-color: #1f2937; border: 1px solid #4b5563; color: white; border-radius: 0.5rem; padding: 0.75rem 1rem; transition: all 0.2s; }
+        .form-input::placeholder { color: #6b7280; }
+        .form-input:focus { outline: none; border-color: #9EFF00; box-shadow: 0 0 0 2px #9EFF0040; }
+        .btn-primary { background-color: #9EFF00; color: #111827; font-weight: 700; padding: 0.6rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-primary:hover { transform: scale(1.05); }
+        .btn-primary:disabled { background-color: #4b5563; color: #9ca3af; cursor: not-allowed; }
+        .btn-secondary { background-color: transparent; border: 1px solid #4b5563; color: #d1d5db; font-weight: 600; padding: 0.6rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-secondary:hover { background-color: #374151; border-color: #6b7280; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+      `}</style>
     </div>
   );
 };

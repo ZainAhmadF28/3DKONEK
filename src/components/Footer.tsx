@@ -14,7 +14,7 @@ const Footer = () => {
             <FaCogs className="mr-2 text-lime-400" />
             <span>3D<span className="text-lime-400">KONEK</span></span>
           </div>
-          <p className="text-gray-400">Kolaborasi Kita, Rekayasa Bangsa. Platform kolaborasi untuk kemandirian teknologi dan manufaktur Indonesia.</p>
+          <p className="text-gray-400">Kolaborasi Kita, Rekayasa Bangsa. Platform kolaborasi untuk kemandirian komponen 3D Indonesia.</p>
         </div>
         <div>
           <h3 className="font-semibold text-gray-100 mb-3">Tautan</h3>

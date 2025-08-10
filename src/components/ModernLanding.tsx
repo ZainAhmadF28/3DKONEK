@@ -71,10 +71,10 @@ const Hero = () => (
   <section className="min-h-screen flex items-center justify-center text-center pt-20">
     <div className="relative z-10 max-w-4xl mx-auto px-4">
       <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight mb-6">
-        Rekayasa Masa Depan, <span className="text-lime-400">Bersama</span>.
+        3D<span className="text-lime-400">KONEK</span>
       </h1>
       <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-300 mb-10">
-        Platform kolaborasi untuk talenta rekayasa Indonesia. Selesaikan tantangan industri nyata, bangun portofolio, dan ciptakan dampak.
+      Platform Koneksi dan Edukasi Desain 3D untuk Semua Kalangan<br></br>Belajar, berkolaborasi, dan berkarya di dunia desain 3D. Terhubung dengan komunitas, akses tantangan, dan kembangkan
       </p>
       <div className="flex justify-center gap-4">
         <Link href="#fitur" className="bg-lime-400 text-gray-900 font-bold py-3 px-8 rounded-full flex items-center transition-transform duration-300 hover:scale-105 lime-glow">

@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import {
-  FaCogs, FaUserPlus, FaSignInAlt, FaSignOutAlt,
-  FaTachometerAlt, FaUserCircle, FaTools, FaGraduationCap, FaBars, FaTimes
+  FaUserPlus, FaSignInAlt, FaSignOutAlt,
+  FaTachometerAlt, FaUserCircle, FaTools, FaGraduationCap, FaBars, FaTimes,
+  FaHome, FaTasks, FaBook
 } from 'react-icons/fa';
 import Image from 'next/image';
+import { ThemeSwitcher } from '@/context/ThemeContext'; // PERUBAHAN: Impor ThemeSwitcher
 
 const Header = () => {
   const { data: session, status } = useSession();
@@ -15,9 +17,9 @@ const Header = () => {
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <ul className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-      <li><Link href="/" className="hover:text-lime-400 transition-colors" onClick={onClick}>Beranda</Link></li>
-      <li><Link href="/tantangan" className="hover:text-lime-400 transition-colors" onClick={onClick}>Tantangan</Link></li>
-      <li><Link href="/perpustakaan" className="hover:text-lime-400 transition-colors" onClick={onClick}>Perpustakaan</Link></li>
+      <li><Link href="/" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaHome /> Beranda</Link></li>
+      <li><Link href="/tantangan" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaTasks /> Tantangan</Link></li>
+      <li><Link href="/perpustakaan" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaBook /> Perpustakaan</Link></li>
       <li><Link href="/edukasi" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaGraduationCap /> Edukasi</Link></li>
       {status === 'authenticated' && session?.user?.role !== 'ADMIN' && (
         <li><Link href="/bengkel" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaTools /> Bengkel Saya</Link></li>
@@ -26,8 +28,9 @@ const Header = () => {
   );
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50">
-      <div className="backdrop-blur bg-gray-900/80 border-b border-white/10 text-gray-100">
+    <header className="w-full fixed top-0 z-50">
+      {/* PERUBAHAN: Menghapus style hardcode, akan dikontrol oleh class 'dark' */}
+      <div className="backdrop-blur bg-white/80 dark:bg-gray-900/80 border-b border-black/10 dark:border-white/10 text-gray-800 dark:text-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
@@ -44,12 +47,13 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:block">
-            <NavLinks />
+             <NavLinks />
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <ThemeSwitcher /> {/* PERUBAHAN: Menambahkan tombol pengalih tema */}
             {status === 'loading' ? (
-              <div className="text-sm text-gray-300">Memuat...</div>
+              <div className="text-sm">Memuat...</div>
             ) : session ? (
               <>
                 {session.user.role === 'ADMIN' && (
@@ -68,7 +72,7 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link href="/login" className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                 <Link href="/login" className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
                   <FaSignInAlt /> Login
                 </Link>
                 <Link href="/register" className="inline-flex items-center gap-2 rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
@@ -79,7 +83,7 @@ const Header = () => {
           </div>
 
           <button
-            className="md:hidden inline-flex items-center justify-center h-12 w-12 rounded-md border border-white/15 text-gray-100"
+            className="md:hidden inline-flex items-center justify-center h-12 w-12 rounded-md border border-black/15 dark:border-white/15"
             onClick={() => setOpen(true)}
             aria-label="Buka menu"
           >

@@ -34,6 +34,35 @@ body {
   margin: 0;
 }
 
+  .card-light {
+    @apply bg-white border border-slate-200 shadow-lg;
+  }
+
+  /* Gaya Kartu untuk Mode Gelap (tetap sama) */
+  .glass-card {
+    @apply bg-gray-800/60 backdrop-blur-lg border border-white/10;
+  }
+
+  /* Gaya Tombol Utama (dengan varian terang/gelap) */
+  .btn-primary {
+    @apply bg-lime-500 text-slate-900 font-bold py-3 px-6 rounded-full transition-transform duration-300 hover:scale-105 dark:bg-lime-400;
+  }
+  
+  /* Gaya Tombol Sekunder (dengan varian terang/gelap) */
+  .btn-secondary {
+    @apply bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-300;
+  }
+
+  /* Gaya Form Input (dengan varian terang/gelap) */
+  .form-input {
+    @apply w-full bg-slate-100 dark:bg-gray-800 border border-slate-300 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg px-4 py-3 transition-all duration-200;
+  }
+  .form-input:focus {
+    @apply outline-none border-lime-500 dark:border-lime-400 ring-2 ring-lime-500/20 dark:ring-lime-400/20;
+  }
+
+
+
 a {
   color: inherit;
   text-decoration: none;
@@ -43,4 +72,78 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+/* Global utility classes migrated from styled-jsx blocks */
+.glass-card {
+  background: rgba(31, 41, 55, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.font-display {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.form-input {
+  width: 100%;
+  background-color: #1f2937; /* gray-800 */
+  border: 1px solid #4b5563; /* gray-600 */
+  color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #9EFF00;
+  box-shadow: 0 0 0 2px #9EFF0040;
+}
+
+.btn-primary {
+  background-color: #9EFF00;
+  color: #111827; /* gray-900 */
+  font-weight: 700;
+  padding: 0.6rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover {
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid #4b5563; /* gray-600 */
+  color: #d1d5db; /* gray-300 */
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-secondary:hover {
+  background-color: #374151; /* gray-700 */
+  border-color: #6b7280; /* gray-500 */
+}
+
+/* Capture mode to ease full-page screenshots */
+.capture-mode *,
+.capture-mode *::before,
+.capture-mode *::after { animation: none !important; transition: none !important; }
+.capture-mode [data-overlay="true"] { display: none !important; }
+.capture-mode [data-fixed="true"],
+.capture-mode header,
+.capture-mode nav,
+.capture-mode .sticky,
+.capture-mode [style*="position: fixed"],
+.capture-mode [style*="position: sticky"] {
+  position: static !important;
+  top: auto !important;
 }

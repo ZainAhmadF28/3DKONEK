@@ -1,12 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FaTimes, FaPaperPlane, FaComments, FaFileArchive, FaCube, FaDownload } from 'react-icons/fa'; // Import FaDownload
+import { FaTimes, FaPaperPlane, FaComments, FaFileArchive, FaCube, FaDownload, FaFileUpload } from 'react-icons/fa';
 import { Challenge } from './ChallengeCard';
-import ImageCarousel from './ImageCarousel';
+import Link from 'next/link';
+
+type SubmissionItem = {
+  id: number;
+  fileUrl: string;
+  createdAt: string | Date;
+  status: 'PENDING' | 'APPROVED' | 'REVISION_REQUESTED';
+  notes?: string | null;
+};
 
 interface ModalProps {
-  challenge: Challenge & { submissions?: any[] };
+  challenge: Challenge & { submissions?: SubmissionItem[] };
   onClose: () => void;
   onSubmissionSuccess: () => void;
   onView3D: (fileUrl: string) => void;
@@ -52,8 +60,8 @@ const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmis
       alert('Hasil pekerjaan berhasil dikirim!');
       onSubmissionSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Gagal mengirimkan hasil.');
     } finally {
       setIsSubmitting(false);
     }
@@ -62,58 +70,57 @@ const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmis
   const isWorkDone = challenge.status === 'DONE' || challenge.status === 'COMPLETED';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <ImageCarousel images={challenge.images} onImageClick={() => {}} />
-        <div className="flex justify-between items-start p-5">
-          <div><span className="text-sm font-semibold text-indigo-600">{challenge.category}</span><h2 className="text-2xl font-bold text-[#0a2540] mt-1">{challenge.title}</h2></div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-800 text-2xl p-1 -mt-2 -mr-2"><FaTimes /></button>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4" onClick={onClose}>
+      <div className="glass-card rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Header Modal */}
+        <div className="flex justify-between items-start p-6 border-b border-white/10">
+            <div>
+                <p className="text-sm font-semibold text-lime-400">{challenge.category}</p>
+                <h2 className="font-display text-3xl font-bold text-white mt-1">{challenge.title}</h2>
+            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-lime-400 transition-colors text-2xl p-1"><FaTimes /></button>
         </div>
-        <div className="px-5 pb-5 overflow-y-auto">
+
+        {/* Konten Scrollable */}
+        <div className="px-6 py-4 overflow-y-auto">
+          {/* Form Pengumpulan Hasil */}
           {!isWorkDone && (
-            <div className="border-t pt-4">
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Kumpulkan Hasil Pekerjaan</h3>
-              <div className="mb-4">
-                <label htmlFor="submissionFile" className="block text-gray-700 font-semibold text-sm mb-1">File Hasil Desain (.glb)</label>
-                <input type="file" name="submissionFile" id="submissionFile" onChange={handleFileChange} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".glb" required/>
-                {submissionFile && <p className="text-sm text-gray-600 mt-2">File dipilih: {submissionFile.name}</p>}
+            <div className="mb-6">
+              <h3 className="font-display text-xl font-bold text-white mb-3">Kumpulkan Hasil Pekerjaan</h3>
+              <div className="space-y-4">
+                <div>
+                    <label className="text-sm font-semibold text-gray-300 mb-2 block">File Hasil Desain (.glb)</label>
+                    <div className="flex items-center gap-4 p-3 rounded-lg bg-gray-800 border border-gray-700">
+                        <FaFileUpload className="text-lime-400 text-xl flex-shrink-0" />
+                        <input type="file" onChange={handleFileChange} className="file-input" accept=".glb" required/>
+                    </div>
+                    {submissionFile && <p className="text-sm text-lime-300 mt-2">File dipilih: {submissionFile.name}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-1">Catatan (Opsional)</label>
+                  <textarea value={submissionNotes} onChange={(e) => setSubmissionNotes(e.target.value)} rows={3} className="form-input" placeholder="Tulis catatan untuk pemberi tantangan..."/>
+                </div>
+                {error && <p className="text-red-400 text-sm">{error}</p>}
               </div>
-              <div className="mb-4">
-                <label htmlFor="submissionNotes" className="block text-gray-700 font-semibold text-sm mb-1">Catatan (Opsional)</label>
-                <textarea value={submissionNotes} onChange={(e) => setSubmissionNotes(e.target.value)} rows={3} className="w-full p-2 border rounded-lg" placeholder="Tulis catatan untuk pemberi tantangan..."/>
-              </div>
-              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
             </div>
           )}
 
-          <div className="mt-4 border-t pt-4">
-             <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2"><FaFileArchive /> Riwayat Pengumpulan</h4>
+          {/* Riwayat Pengumpulan */}
+          <div className="border-t border-white/10 pt-6">
+             <h4 className="font-display text-xl font-bold text-white mb-3 flex items-center gap-2"><FaFileArchive /> Riwayat Pengumpulan</h4>
              {challenge.submissions && challenge.submissions.length > 0 ? (
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-3 text-sm max-h-48 overflow-y-auto pr-2">
                     {challenge.submissions.map(sub => (
-                        <li key={sub.id} className="p-3 bg-slate-50 rounded-md border flex justify-between items-center">
+                        <li key={sub.id} className="p-3 bg-gray-800/50 rounded-lg border border-gray-700 flex justify-between items-center">
                             <div>
-                                <p className="text-gray-500 text-xs mb-1">Dikirim pada: {new Date(sub.createdAt).toLocaleString('id-ID')}</p>
+                                <p className="text-gray-400 text-xs mb-1">Dikirim pada: {new Date(sub.createdAt).toLocaleString('id-ID')}</p>
                                 <div className="flex items-center gap-4">
-                                    <button 
-                                      onClick={() => onView3D(sub.fileUrl)}
-                                      className="text-indigo-600 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"
-                                    >
-                                      <FaCube /> Lihat Model 3D
-                                    </button>
-                                    {/* ======================================================= */}
-                                    {/* == TOMBOL UNDUH BARU == */}
-                                    {/* ======================================================= */}
-                                    <a 
-                                      href={sub.fileUrl} 
-                                      download 
-                                      className="text-gray-600 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"
-                                    >
-                                      <FaDownload /> Unduh
-                                    </a>
+                                    <button onClick={() => onView3D(sub.fileUrl)} className="text-lime-400 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"><FaCube /> Lihat 3D</button>
+                                    <a href={sub.fileUrl} download className="text-gray-400 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"><FaDownload /> Unduh</a>
                                 </div>
                             </div>
-                            <span className={`font-bold px-2 py-0.5 rounded-full text-xs ${sub.status === 'APPROVED' ? 'bg-green-100 text-green-800' : sub.status === 'REVISION_REQUESTED' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>{sub.status}</span>
+                            <span className={`font-bold px-2 py-0.5 rounded-full text-xs ${sub.status === 'APPROVED' ? 'bg-green-500/20 text-green-300' : sub.status === 'REVISION_REQUESTED' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-blue-500/20 text-blue-300'}`}>{sub.status}</span>
                         </li>
                     ))}
                 </ul>
@@ -122,15 +129,31 @@ const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmis
              )}
           </div>
         </div>
-        <div className="flex justify-between items-center p-4 border-t bg-gray-50 rounded-b-lg gap-4 mt-auto">
-          <button className="flex items-center gap-2 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-200"><FaComments /><span>Diskusi</span></button>
+        
+        {/* Footer Modal */}
+        <div className="flex justify-between items-center p-4 border-t border-white/10 bg-gray-900/50 rounded-b-2xl mt-auto">
+          <Link href={`/chat/${challenge.id}`} className="btn-secondary"><FaComments /><span>Diskusi</span></Link>
           {!isWorkDone && (
-            <button onClick={handleSubmit} disabled={isSubmitting} className="flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400">
+            <button onClick={handleSubmit} disabled={isSubmitting} className="btn-primary">
               <FaPaperPlane /><span>{isSubmitting ? 'Mengirim...' : 'Kirim Hasil'}</span>
             </button>
           )}
         </div>
       </div>
+      <style jsx>{`
+        .glass-card { background: rgba(31, 41, 55, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .form-input { width: 100%; background-color: #1f2937; border: 1px solid #4b5563; color: white; border-radius: 0.5rem; padding: 0.75rem 1rem; transition: all 0.2s; }
+        .form-input::placeholder { color: #6b7280; }
+        .form-input:focus { outline: none; border-color: #9EFF00; box-shadow: 0 0 0 2px #9EFF0040; }
+        .btn-primary { background-color: #9EFF00; color: #111827; font-weight: 700; padding: 0.6rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary:hover { transform: scale(1.05); }
+        .btn-primary:disabled { background-color: #4b5563; color: #9ca3af; cursor: not-allowed; }
+        .btn-secondary { background-color: transparent; border: 1px solid #4b5563; color: #d1d5db; font-weight: 600; padding: 0.6rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-secondary:hover { background-color: #374151; border-color: #6b7280; }
+        .file-input::file-selector-button { background-color: #374151; border: none; color: #9EFF00; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.375rem; margin-right: 1rem; cursor: pointer; transition: background-color 0.2s; }
+        .file-input::file-selector-button:hover { background-color: #4b5563; }
+      `}</style>
     </div>
   );
 };

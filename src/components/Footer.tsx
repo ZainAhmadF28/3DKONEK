@@ -29,7 +29,6 @@ const Footer = () => {
           <ul className="space-y-2">
             <li><a href="#" className="hover:text-white">Tentang Kami</a></li>
             <li><a href="#" className="hover:text-white">Kontak</a></li>
-            <li><a href="#" className="hover:text-white">Karir</a></li>
           </ul>
         </div>
       </div>

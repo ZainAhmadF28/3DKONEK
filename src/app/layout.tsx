@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
-import { ForumProvider } from "@/context/ForumContext"; // 1. Import Provider
-import ForumSidebar from "@/components/ForumSidebar"; // 2. Import Sidebar
+import { ForumProvider } from "@/context/ForumContext";
+import ForumSidebar from "@/components/ForumSidebar";
 import ForumFab from "@/components/ForumFab";
+import CaptureMode from "@/components/CaptureMode";
+import { ThemeProvider } from "@/context/ThemeContext"; // PERUBAHAN: Impor ThemeProvider
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,24 +21,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" className="dark"> {/* PERUBAHAN: Menambahkan 'dark' sebagai default untuk menghindari FOUC */}
       <head>
-        {/* Script untuk Google <model-viewer> */}
         <script
           type="module"
-          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+          src="[https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js](https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js)"
           async
         ></script>
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          {/* 3. Bungkus semua dengan ForumProvider */}
           <ForumProvider>
-            {children}
-            {/* 4. Render Sidebar */}
-            <ForumSidebar />
-             {/* Floating action button to open forum */}
-             <ForumFab />
+            {/* PERUBAHAN: Membungkus semua konten dengan ThemeProvider */}
+            <ThemeProvider>
+              <CaptureMode />
+              {children}
+              <ForumSidebar />
+              <ForumFab />
+            </ThemeProvider>
           </ForumProvider>
         </AuthProvider>
       </body>

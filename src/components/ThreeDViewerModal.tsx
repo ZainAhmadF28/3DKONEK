@@ -16,7 +16,7 @@ const ThreeDViewerModal: React.FC<ThreeDViewerModalProps> = ({ src, onClose }) =
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-2xl w-full max-w-4xl p-4 relative"
+        className="bg-white rounded-lg shadow-2xl w-full max-w-4xl p-4 relative z-10"
         onClick={(e) => e.stopPropagation()}
       >
         <button

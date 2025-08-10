@@ -9,7 +9,7 @@ import {
   FaHome, FaTasks, FaBook
 } from 'react-icons/fa';
 import Image from 'next/image';
-import { ThemeSwitcher } from '@/context/ThemeContext'; // PERUBAHAN: Impor ThemeSwitcher
+// PERUBAHAN: Impor ThemeSwitcher
 
 const Header = () => {
   const { data: session, status } = useSession();
@@ -51,7 +51,7 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <ThemeSwitcher /> {/* PERUBAHAN: Menambahkan tombol pengalih tema */}
+             {/* PERUBAHAN: Menambahkan tombol pengalih tema */}
             {status === 'loading' ? (
               <div className="text-sm">Memuat...</div>
             ) : session ? (

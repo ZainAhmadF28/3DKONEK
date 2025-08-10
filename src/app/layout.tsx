@@ -15,24 +15,19 @@ export const metadata: Metadata = {
   description: "Kolaborasi Kita, Rekayasa Bangsa",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className="dark"> {/* PERUBAHAN: Menambahkan 'dark' sebagai default untuk menghindari FOUC */}
+    <html lang="id" className="dark">
       <head>
         <script
           type="module"
-          src="[https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js](https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js)"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
           async
         ></script>
       </head>
       <body className={inter.className}>
         <AuthProvider>
           <ForumProvider>
-            {/* PERUBAHAN: Membungkus semua konten dengan ThemeProvider */}
             <ThemeProvider>
               <CaptureMode />
               {children}

@@ -6,7 +6,8 @@ import { ForumProvider } from "@/context/ForumContext";
 import ForumSidebar from "@/components/ForumSidebar";
 import ForumFab from "@/components/ForumFab";
 import CaptureMode from "@/components/CaptureMode";
-import { ThemeProvider } from "@/context/ThemeContext"; // PERUBAHAN: Impor ThemeProvider
+// HAPUS: Impor ThemeProvider tidak lagi dibutuhkan
+// import { ThemeProvider } from "@/context/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
+    // Kelas "dark" di sini akan membuat mode gelap menjadi default permanen
     <html lang="id" className="dark">
       <head>
         <script
@@ -28,12 +30,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <AuthProvider>
           <ForumProvider>
-            <ThemeProvider>
-              <CaptureMode />
-              {children}
-              <ForumSidebar />
-              <ForumFab />
-            </ThemeProvider>
+            {/* HAPUS: Komponen <ThemeProvider> telah dihapus */}
+            <CaptureMode />
+            {children}
+            <ForumSidebar />
+            <ForumFab />
           </ForumProvider>
         </AuthProvider>
       </body>

@@ -9,7 +9,7 @@ import {
   FaHome, FaTasks, FaBook
 } from 'react-icons/fa';
 import Image from 'next/image';
-// PERUBAHAN: Impor ThemeSwitcher
+import { ThemeSwitcher } from '@/context/ThemeContext';
 
 const Header = () => {
   const { data: session, status } = useSession();
@@ -29,8 +29,7 @@ const Header = () => {
 
   return (
     <header className="w-full fixed top-0 z-50">
-      {/* PERUBAHAN: Menghapus style hardcode, akan dikontrol oleh class 'dark' */}
-      <div className="backdrop-blur bg-white/80 dark:bg-gray-900/80 border-b border-black/10 dark:border-white/10 text-gray-800 dark:text-gray-100">
+      <div className="backdrop-blur bg-white/90 dark:bg-gray-900/90 border-b border-gray-200/50 dark:border-white/10 text-gray-800 dark:text-gray-100 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
@@ -51,31 +50,31 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-             {/* PERUBAHAN: Menambahkan tombol pengalih tema */}
+            <ThemeSwitcher />
             {status === 'loading' ? (
               <div className="text-sm">Memuat...</div>
             ) : session ? (
               <>
                 {session.user.role === 'ADMIN' && (
-                  <Link href="/admin" className="inline-flex items-center gap-2 rounded-lg border border-yellow-400/40 bg-yellow-300/20 text-yellow-200 px-3 py-2 text-sm font-semibold hover:bg-yellow-300/30">
+                  <Link href="/admin" className="inline-flex items-center gap-2 rounded-lg border border-yellow-500/50 bg-yellow-100 dark:bg-yellow-300/20 text-yellow-700 dark:text-yellow-200 px-3 py-2 text-sm font-semibold hover:bg-yellow-200 dark:hover:bg-yellow-300/30">
                     <FaTachometerAlt /> Admin
                   </Link>
                 )}
                 {session.user.role !== 'ADMIN' && (
-                  <Link href="/akun/dashboard" className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                  <Link href="/akun/dashboard" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-white/15 bg-gray-100 dark:bg-transparent text-gray-700 dark:text-gray-100 px-3 py-2 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-white/10">
                     <FaUserCircle /> Dashboard
                   </Link>
                 )}
-                <button onClick={() => signOut({ callbackUrl: '/' })} className="inline-flex items-center gap-2 rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                <button onClick={() => signOut({ callbackUrl: '/' })} className="inline-flex items-center gap-2 rounded-lg bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-green-700 dark:hover:bg-lime-300">
                   <FaSignOutAlt /> Logout
                 </button>
               </>
             ) : (
               <>
-                 <Link href="/login" className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
+                 <Link href="/login" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-white/15 bg-gray-100 dark:bg-transparent text-gray-700 dark:text-gray-100 px-3 py-2 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-white/10">
                   <FaSignInAlt /> Login
                 </Link>
-                <Link href="/register" className="inline-flex items-center gap-2 rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                <Link href="/register" className="inline-flex items-center gap-2 rounded-lg bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-green-700 dark:hover:bg-lime-300">
                   <FaUserPlus /> Daftar
                 </Link>
               </>
@@ -105,6 +104,9 @@ const Header = () => {
             <nav className="mb-6">
               <NavLinks onClick={() => setOpen(false)} />
             </nav>
+            <div className="mb-4">
+              <ThemeSwitcher />
+            </div>
             <div className="mt-auto space-y-2">
               {status === 'loading' ? (
                 <div className="text-sm text-gray-300">Memuat...</div>

@@ -74,10 +74,10 @@ export const ThemeSwitcher = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 shadow-lg hover:scale-110 transition-transform"
+            className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-lg hover:scale-110 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 border border-gray-200 dark:border-gray-600"
             aria-label="Toggle theme"
         >
-            {theme === 'light' ? <FaMoon /> : <FaSun />}
+            {theme === 'light' ? <FaMoon size={18} /> : <FaSun size={18} />}
         </button>
     );
 }

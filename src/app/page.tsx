@@ -6,8 +6,7 @@ import ModernLanding from '@/components/ModernLanding';
 
 export default function Home() {
   return (
-    // Latar belakang utama untuk mode terang dan gelap
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-900 text-slate-800 dark:text-gray-200 transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-gray-200 transition-colors duration-300">
       <Header />
       <main>
         <ModernLanding />

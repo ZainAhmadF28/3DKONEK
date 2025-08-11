@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaPaperPlane, FaUserCircle, FaFileAlt, FaCube, FaTimes, FaPlus, FaImage, FaArrowLeft, FaBars } from 'react-icons/fa';
+import { FaPaperPlane, FaUserCircle, FaFileAlt, FaCube, FaTimes, FaPlus, FaImage, FaArrowLeft } from 'react-icons/fa';
 import ThreeDViewerModal from './ThreeDViewerModal';
 import ModelViewer from './ModelViewer';
 import { useForum } from '@/context/ForumContext';
@@ -153,17 +153,17 @@ const ForumSidebar = () => {
       <div key={post.id} className={`mb-3 flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
         <div className={`max-w-[85%] flex ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} items-start gap-2`}>
           {!isOwnMessage && (
-            <FaUserCircle size={32} className="text-gray-500 mt-1 flex-shrink-0" />
+            <FaUserCircle size={32} className="text-gray-500 dark:text-gray-400 mt-1 flex-shrink-0" />
           )}
           <div className={`rounded-lg p-3 shadow-sm ${
             isOwnMessage 
-              ? 'bg-lime-400 text-gray-900' 
-              : 'bg-gray-900/50 text-white'
+              ? 'bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900' 
+              : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600'
           }`}>
             {!isOwnMessage && (
               <div className="flex items-center gap-2 mb-1">
                 <p className="font-bold text-sm truncate">{post.author.name || 'Anonim'}</p>
-                <span className="text-xs text-gray-400 flex-shrink-0">
+                <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                   {new Date(post.createdAt).toLocaleString('id-ID', { 
                     hour: '2-digit', 
                     minute: '2-digit',
@@ -174,19 +174,19 @@ const ForumSidebar = () => {
               </div>
             )}
             {post.community && selectedCommunityId === 'all' && (
-              <p className={`text-xs font-semibold mb-1 ${isOwnMessage ? 'text-gray-700' : 'text-lime-400'}`}>
+              <p className={`text-xs font-semibold mb-1 ${isOwnMessage ? 'text-green-100 dark:text-gray-700' : 'text-green-600 dark:text-lime-400'}`}>
                 #{post.community.name}
               </p>
             )}
             <p className={`whitespace-pre-wrap text-sm leading-relaxed ${
-              isOwnMessage ? 'text-gray-900' : 'text-gray-200'
+              isOwnMessage ? 'text-white dark:text-gray-900' : 'text-gray-800 dark:text-gray-200'
             }`}>
               {post.content}
             </p>
             {renderAttachment(post)}
             {isOwnMessage && (
               <div className="flex justify-end mt-1">
-                <span className="text-xs text-gray-700">
+                <span className="text-xs text-green-100 dark:text-gray-700">
                   {new Date(post.createdAt).toLocaleString('id-ID', { 
                     hour: '2-digit', 
                     minute: '2-digit'
@@ -196,7 +196,7 @@ const ForumSidebar = () => {
             )}
           </div>
           {isOwnMessage && (
-            <FaUserCircle size={32} className="text-lime-500 mt-1 flex-shrink-0" />
+            <FaUserCircle size={32} className="text-green-600 dark:text-lime-500 mt-1 flex-shrink-0" />
           )}
         </div>
       </div>
@@ -231,16 +231,16 @@ const ForumSidebar = () => {
 
   // Mobile view - Show communities or chat based on state
   const MobileCommunitiesView = () => (
-    <div className="h-full flex flex-col bg-gray-900/90">
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h3 className="font-display font-bold text-white text-lg">Komunitas</h3>
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
+        <h3 className="font-display font-bold text-gray-900 dark:text-white text-lg">Komunitas</h3>
         <div className="flex items-center gap-2">
           {status === 'authenticated' && (
-            <button onClick={() => setIsCreatingCommunity(true)} className="p-2 text-lime-400 hover:text-lime-300">
+            <button onClick={() => setIsCreatingCommunity(true)} className="p-2 text-green-600 dark:text-lime-400 hover:text-green-500 dark:hover:text-lime-300">
               <FaPlus size={18} />
             </button>
           )}
-          <button onClick={closeForum} className="p-2 text-gray-400 hover:text-lime-400">
+          <button onClick={closeForum} className="p-2 text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-lime-400">
             <FaTimes size={18} />
           </button>
         </div>
@@ -248,40 +248,40 @@ const ForumSidebar = () => {
       
       <div className="flex-1 overflow-y-auto">
         <button
-          className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-800/50 ${selectedCommunityId === 'all' ? 'bg-lime-400/10' : 'hover:bg-gray-800/30'}`}
+          className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-200 dark:border-gray-800/50 ${selectedCommunityId === 'all' ? 'bg-green-100 dark:bg-lime-400/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800/30'}`}
           onClick={() => {
             setSelectedCommunityId('all');
             setIsMobileCommunitiesView(false);
           }}
         >
-          <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold">A</div>
+          <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">A</div>
           <div className="flex-1">
-            <p className="font-semibold text-white">Semua Postingan</p>
-            <p className="text-sm text-gray-400">Lihat semua diskusi</p>
+            <p className="font-semibold text-gray-900 dark:text-white">Semua Postingan</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Lihat semua diskusi</p>
           </div>
         </button>
         
         {communities.map(c => (
           <button
             key={c.id}
-            className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-800/50 ${selectedCommunityId === c.id ? 'bg-lime-400/10' : 'hover:bg-gray-800/30'}`}
+            className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-200 dark:border-gray-800/50 ${selectedCommunityId === c.id ? 'bg-green-100 dark:bg-lime-400/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800/30'}`}
             onClick={() => {
               setSelectedCommunityId(c.id);
               setIsMobileCommunitiesView(false);
             }}
           >
             {c.avatarUrl ? (
-              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700">
                 <Image src={c.avatarUrl} alt={c.name} fill className="object-cover" />
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-lime-400 font-bold text-lg">
+              <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-green-600 dark:text-lime-400 font-bold text-lg">
                 {c.name.charAt(0).toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white truncate">{c.name}</p>
-              {c.description && <p className="text-sm text-gray-400 truncate">{c.description}</p>}
+              <p className="font-semibold text-gray-900 dark:text-white truncate">{c.name}</p>
+              {c.description && <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{c.description}</p>}
             </div>
           </button>
         ))}
@@ -290,11 +290,11 @@ const ForumSidebar = () => {
   );
 
   const MobileChatView = () => (
-    <div className="h-full flex flex-col bg-gray-800/90">
-      <div className="flex items-center gap-3 p-4 border-b border-white/10">
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-800">
+      <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-white/10">
         <button 
           onClick={() => setIsMobileCommunitiesView(true)} 
-          className="p-2 text-gray-400 hover:text-lime-400 -ml-2"
+          className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-lime-400 -ml-2"
         >
           <FaArrowLeft size={18} />
         </button>
@@ -302,7 +302,7 @@ const ForumSidebar = () => {
           {selectedCommunityId !== 'all' && (
             <>
               {communities.find(c => c.id === selectedCommunityId)?.avatarUrl ? (
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700">
+                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700">
                   <Image 
                     src={communities.find(c => c.id === selectedCommunityId)?.avatarUrl || ''} 
                     alt="Community" 
@@ -311,27 +311,24 @@ const ForumSidebar = () => {
                   />
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lime-400 font-bold">
+                <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-green-600 dark:text-lime-400 font-bold">
                   {(communities.find(c => c.id === selectedCommunityId)?.name?.charAt(0).toUpperCase()) || 'C'}
                 </div>
               )}
             </>
           )}
           <div className="flex-1">
-            <p className="font-display font-bold text-white text-lg">
+            <p className="font-display font-bold text-gray-900 dark:text-white text-lg">
               {selectedCommunityId === 'all' ? 'Semua Postingan' : communities.find(c => c.id === selectedCommunityId)?.name || 'Komunitas'}
             </p>
           </div>
         </div>
-        <button onClick={() => setIsMobileCommunitiesView(true)} className="p-2 text-gray-400 hover:text-lime-400">
-          <FaBars size={18} />
-        </button>
       </div>
 
       <div className="flex-1 p-3 overflow-y-auto space-y-3">
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
-            <p className="text-gray-400">Memuat postingan...</p>
+            <p className="text-gray-600 dark:text-gray-400">Memuat postingan...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="flex items-center justify-center h-32">
@@ -343,13 +340,13 @@ const ForumSidebar = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-3 border-t border-white/10 bg-gray-900/50">
+      <div className="p-3 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900/50">
         {status === 'authenticated' ? (
           <form onSubmit={handleSubmit} className="space-y-2">
             <textarea 
               value={newPostContent} 
               onChange={(e) => setNewPostContent(e.target.value)} 
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/20" 
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-green-500 dark:focus:border-lime-400 focus:ring-1 focus:ring-green-500/20 dark:focus:ring-lime-400/20" 
               rows={2} 
               placeholder="Tulis sesuatu..."
             />
@@ -358,12 +355,12 @@ const ForumSidebar = () => {
                 type="file" 
                 ref={fileInputRef} 
                 onChange={(e) => setNewPostFile(e.target.files ? e.target.files[0] : null)} 
-                className="text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-gray-700 file:text-lime-400 hover:file:bg-gray-600"
+                className="text-xs text-gray-600 dark:text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-gray-200 dark:file:bg-gray-700 file:text-green-600 dark:file:text-lime-400 hover:file:bg-gray-300 dark:hover:file:bg-gray-600"
               />
               <button 
                 type="submit" 
                 disabled={isSubmitting || (!newPostContent.trim() && !newPostFile)} 
-                className="bg-lime-400 text-gray-900 p-2 rounded-full disabled:bg-gray-600 disabled:text-gray-400 transition-colors"
+                className="bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900 p-2 rounded-full disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:text-gray-600 dark:disabled:text-gray-400 transition-colors"
               >
                 {isSubmitting ? (
                   <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
@@ -375,8 +372,8 @@ const ForumSidebar = () => {
           </form>
         ) : (
           <div className="text-center py-4">
-            <p className="text-sm text-gray-400">
-              <Link href="/login" className="font-semibold text-lime-400 hover:underline">Login</Link> untuk berdiskusi.
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              <Link href="/login" className="font-semibold text-green-600 dark:text-lime-400 hover:underline">Login</Link> untuk berdiskusi.
             </p>
           </div>
         )}
@@ -395,41 +392,41 @@ const ForumSidebar = () => {
         </div>
 
         {/* Desktop Layout */}
-        <aside className="hidden md:flex relative z-10 w-full max-w-4xl h-full glass-card rounded-l-2xl border-l border-white/10">
+        <aside className="hidden md:flex relative z-10 w-full max-w-4xl h-full glass-card rounded-l-2xl border-l border-gray-300 dark:border-white/10">
           {/* Kolom Kiri: Daftar Komunitas */}
-          <div className="w-64 bg-gray-900/50 h-full flex flex-col rounded-l-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h3 className="font-display font-bold text-white">Komunitas</h3>
+          <div className="w-64 bg-gray-100 dark:bg-gray-900/50 h-full flex flex-col rounded-l-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
+              <h3 className="font-display font-bold text-gray-900 dark:text-white">Komunitas</h3>
               {status === 'authenticated' && (
-                <button onClick={() => setIsCreatingCommunity(true)} className="inline-flex items-center gap-1 text-lime-400 text-sm font-semibold hover:text-lime-300">
+                <button onClick={() => setIsCreatingCommunity(true)} className="inline-flex items-center gap-1 text-green-600 dark:text-lime-400 text-sm font-semibold hover:text-green-500 dark:hover:text-lime-300">
                   <FaPlus /> Baru
                 </button>
               )}
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
               <button
-                className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === 'all' ? 'bg-lime-400/20' : 'hover:bg-gray-700/50'}`}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === 'all' ? 'bg-green-100 dark:bg-lime-400/20' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
                 onClick={() => setSelectedCommunityId('all')}
               >
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold">A</div>
+                <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">A</div>
                 <div>
-                  <p className="font-semibold text-sm text-white">Semua Postingan</p>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">Semua Postingan</p>
                 </div>
               </button>
               {communities.map(c => (
                 <button
                   key={c.id}
-                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === c.id ? 'bg-lime-400/20' : 'hover:bg-gray-700/50'}`}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === c.id ? 'bg-green-100 dark:bg-lime-400/20' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
                   onClick={() => setSelectedCommunityId(c.id)}
                 >
                   {c.avatarUrl ? (
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700"><Image src={c.avatarUrl} alt={c.name} fill className="object-cover" /></div>
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700"><Image src={c.avatarUrl} alt={c.name} fill className="object-cover" /></div>
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lime-400 font-bold">{c.name.charAt(0).toUpperCase()}</div>
+                    <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-green-600 dark:text-lime-400 font-bold">{c.name.charAt(0).toUpperCase()}</div>
                   )}
                   <div className="min-w-0">
-                    <p className="font-semibold text-sm truncate text-white">{c.name}</p>
-                    {c.description && <p className="text-xs text-gray-400 truncate">{c.description}</p>}
+                    <p className="font-semibold text-sm truncate text-gray-900 dark:text-white">{c.name}</p>
+                    {c.description && <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{c.description}</p>}
                   </div>
                 </button>
               ))}
@@ -437,22 +434,22 @@ const ForumSidebar = () => {
           </div>
 
           {/* Kolom Kanan: Percakapan */}
-          <div className="flex-1 h-full flex flex-col bg-gray-800/70">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <div className="flex-1 h-full flex flex-col bg-gray-50 dark:bg-gray-800/70">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
               <div>
-                <p className="font-display font-bold text-white text-lg">
+                <p className="font-display font-bold text-gray-900 dark:text-white text-lg">
                   {selectedCommunityId === 'all' ? 'Semua Postingan' : communities.find(c => c.id === selectedCommunityId)?.name || 'Komunitas'}
                 </p>
               </div>
-              <button onClick={closeForum} className="text-gray-400 hover:text-lime-400"><FaTimes size={20} /></button>
+              <button onClick={closeForum} className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-lime-400"><FaTimes size={20} /></button>
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto space-y-3">
               {isLoading ? (
-                <p className="text-center text-gray-400">Memuat postingan...</p>
+                <p className="text-center text-gray-600 dark:text-gray-400">Memuat postingan...</p>
               ) : posts.length === 0 ? (
                 <div className="flex items-center justify-center h-32">
-                  <p className="text-gray-400">Belum ada postingan</p>
+                  <p className="text-gray-600 dark:text-gray-400">Belum ada postingan</p>
                 </div>
               ) : (
                 posts.map(post => renderMessage(post))
@@ -460,13 +457,28 @@ const ForumSidebar = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-gray-200 dark:border-white/10">
               {status === 'authenticated' ? (
                 <form onSubmit={handleSubmit}>
-                  <textarea value={newPostContent} onChange={(e) => setNewPostContent(e.target.value)} className="form-input" rows={2} placeholder="Tulis sesuatu..." />
+                  <textarea 
+                    value={newPostContent} 
+                    onChange={(e) => setNewPostContent(e.target.value)} 
+                    className="form-input" 
+                    rows={2} 
+                    placeholder="Tulis sesuatu..." 
+                  />
                   <div className="flex justify-between items-center mt-2">
-                    <input type="file" ref={fileInputRef} onChange={(e) => setNewPostFile(e.target.files ? e.target.files[0] : null)} className="file-input"/>
-                    <button type="submit" disabled={isSubmitting || (!newPostContent.trim() && !newPostFile)} className="btn-primary p-3 rounded-full">
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={(e) => setNewPostFile(e.target.files ? e.target.files[0] : null)} 
+                      className="text-xs text-gray-600 dark:text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-gray-200 dark:file:bg-gray-700 file:text-green-600 dark:file:text-lime-400 hover:file:bg-gray-300 dark:hover:file:bg-gray-600"
+                    />
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting || (!newPostContent.trim() && !newPostFile)} 
+                      className="btn-primary p-3 rounded-full"
+                    >
                       {isSubmitting ? '...' : <FaPaperPlane />}
                     </button>
                   </div>

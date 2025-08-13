@@ -14,8 +14,8 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-10">
         <div className="md:col-span-2">
           <div className="flex items-center font-extrabold text-xl mb-3 text-slate-900 dark:text-gray-100">
-            <FaCogs className={`mr-2 ${theme === 'light' ? 'text-green-600' : 'text-lime-400'}`} />
-            <span>3D<span className={theme === 'light' ? 'text-green-600' : 'text-lime-400'}>KONEK</span></span>
+            <FaCogs className={`mr-2 ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'}`} />
+            <span>3D<span className={theme === 'light' ? 'text-blue-600' : 'text-lime-400'}>KONEK</span></span>
           </div>
           <p className="text-slate-600 dark:text-gray-400">Kolaborasi Kita, Rekayasa Bangsa. Platform kolaborasi untuk kemandirian komponen 3D Indonesia.</p>
         </div>

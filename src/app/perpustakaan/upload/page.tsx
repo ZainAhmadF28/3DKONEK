@@ -8,14 +8,15 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { FaCube, FaImage, FaDollarSign } from 'react-icons/fa';
 import { LIBRARY_CATEGORIES } from '@/constants/categories';
+import { useTheme } from '@/context/ThemeContext';
 
 // Komponen untuk Pratinjau Langsung
-const ModelPreviewer = ({ posterFile }) => {
+const ModelPreviewer = ({ posterFile, theme }: { posterFile: File | null, theme: string }) => {
     const previewImage = posterFile ? URL.createObjectURL(posterFile) : null;
 
     return (
-        <div className="glass-card p-4 rounded-2xl aspect-square flex flex-col">
-            <div className="relative w-full flex-grow bg-gray-900/50 rounded-lg flex items-center justify-center overflow-hidden">
+        <div className={`${theme === 'light' ? 'bg-white border border-gray-200 shadow-lg' : 'glass-card'} p-4 rounded-2xl aspect-square flex flex-col`}>
+            <div className={`relative w-full flex-grow ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-900/50'} rounded-lg flex items-center justify-center overflow-hidden`}>
                 {previewImage ? (
                     <img src={previewImage} alt="Pratinjau Poster" className="w-full h-full object-cover" />
                 ) : (
@@ -31,6 +32,7 @@ const ModelPreviewer = ({ posterFile }) => {
 
 const UploadLibraryPage = () => {
     const { data: session, status } = useSession();
+    const { theme } = useTheme();
     const router = useRouter();
     
     const [title, setTitle] = useState('');
@@ -82,52 +84,52 @@ const UploadLibraryPage = () => {
     };
 
     if (status === 'loading') {
-        return <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">Memuat...</div>;
+        return <div className={`flex justify-center items-center min-h-screen ${theme === 'light' ? 'bg-gray-50 text-slate-900' : 'bg-gray-900 text-white'}`}>Memuat...</div>;
     }
     
     if (status === 'authenticated' && session.user.role !== 'DESAINER' && session.user.role !== 'ADMIN') {
-        return <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">Hanya desainer yang dapat mengunggah model.</div>;
+        return <div className={`flex justify-center items-center min-h-screen ${theme === 'light' ? 'bg-gray-50 text-slate-900' : 'bg-gray-900 text-white'}`}>Hanya desainer yang dapat mengunggah model.</div>;
     }
 
     return (
-        <div className="bg-gray-900 min-h-screen text-gray-50 flex flex-col">
+        <div className={`${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900'} min-h-screen ${theme === 'light' ? 'text-gray-900' : 'text-gray-50'} flex flex-col`}>
             <Header />
             <main className="flex-grow pt-28 pb-20">
                 <div className="container mx-auto px-6">
                     <form onSubmit={handleSubmit}>
                         <div className="text-center mb-12">
-                            <h1 className="font-display text-4xl md:text-5xl font-bold text-white">Unggah Aset 3D</h1>
-                            <p className="text-lg text-gray-400 mt-2">Bagikan karya Anda ke perpustakaan komunitas.</p>
+                            <h1 className={`font-display text-4xl md:text-5xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Unggah Aset 3D</h1>
+                            <p className={`text-lg ${theme === 'light' ? 'text-slate-600' : 'text-gray-400'} mt-2`}>Bagikan karya Anda ke perpustakaan komunitas.</p>
                         </div>
                         
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                             {/* Kolom Kiri: Form Input */}
                             <div className="space-y-6">
                                 <div>
-                                    <label htmlFor="title" className="block text-gray-300 font-semibold mb-2">Judul Aset</label>
-                                    <input type="text" name="title" id="title" value={title} onChange={e => setTitle(e.target.value)} className="form-input" required />
+                                    <label htmlFor="title" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Judul Aset</label>
+                                    <input type="text" name="title" id="title" value={title} onChange={e => setTitle(e.target.value)} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} required />
                                 </div>
                                 <div>
-                                    <label htmlFor="category" className="block text-gray-300 font-semibold mb-2">Kategori</label>
-                                    <select name="category" id="category" value={category} onChange={e => setCategory(e.target.value)} className="form-input">
+                                    <label htmlFor="category" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Kategori</label>
+                                    <select name="category" id="category" value={category} onChange={e => setCategory(e.target.value)} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`}>
                                         {LIBRARY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label htmlFor="description" className="block text-gray-300 font-semibold mb-2">Deskripsi (Opsional)</label>
-                                    <textarea name="description" id="description" rows={4} value={description} onChange={e => setDescription(e.target.value)} className="form-input"></textarea>
+                                    <label htmlFor="description" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Deskripsi (Opsional)</label>
+                                    <textarea name="description" id="description" rows={4} value={description} onChange={e => setDescription(e.target.value)} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all resize-none`}></textarea>
                                 </div>
-                                <div className="glass-card p-6 rounded-2xl">
-                                    <label className="flex items-center gap-3 text-gray-200 cursor-pointer">
-                                        <input type="checkbox" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} className="h-5 w-5 rounded accent-lime-400 bg-gray-700 border-gray-600" />
+                                <div className={`${theme === 'light' ? 'bg-white border border-gray-200 shadow-lg' : 'glass-card'} p-6 rounded-2xl`}>
+                                    <label className={`flex items-center gap-3 ${theme === 'light' ? 'text-slate-700' : 'text-gray-200'} cursor-pointer`}>
+                                        <input type="checkbox" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} className={`h-5 w-5 rounded ${theme === 'light' ? 'accent-blue-600 bg-white border-gray-300' : 'accent-lime-400 bg-gray-700 border-gray-600'}`} />
                                         <span className="font-semibold">Jadikan Aset Berbayar</span>
                                     </label>
                                     {isPaid && (
                                         <div className="mt-4">
-                                            <label htmlFor="price" className="block text-gray-300 font-semibold mb-2">Harga (Rp)</label>
+                                            <label htmlFor="price" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Harga (Rp)</label>
                                             <div className="relative">
-                                                <FaDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                                <input type="number" id="price" min={1000} step={500} value={price} onChange={(e) => setPrice(parseInt(e.target.value || '0', 10))} className="form-input pl-9" />
+                                                <FaDollarSign className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`} />
+                                                <input type="number" id="price" min={1000} step={500} value={price} onChange={(e) => setPrice(parseInt(e.target.value || '0', 10))} className={`w-full p-4 pl-9 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} />
                                             </div>
                                         </div>
                                     )}
@@ -138,30 +140,30 @@ const UploadLibraryPage = () => {
                             <div className="space-y-8">
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-gray-300 font-semibold mb-2">File Model (.glb)</label>
-                                        <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-800 border border-gray-700">
-                                            <FaCube className="text-lime-400 text-2xl flex-shrink-0" />
-                                            <input name="file" type="file" onChange={e => setModelFile(e.target.files ? e.target.files[0] : null)} accept="model/gltf-binary" className="file-input" required />
+                                        <label className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>File Model (.glb)</label>
+                                        <div className={`flex items-center gap-4 p-4 rounded-lg ${theme === 'light' ? 'bg-gray-100 border border-gray-300' : 'bg-gray-800 border border-gray-700'}`}>
+                                            <FaCube className={`${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} text-2xl flex-shrink-0`} />
+                                            <input name="file" type="file" onChange={e => setModelFile(e.target.files ? e.target.files[0] : null)} accept="model/gltf-binary" className={`flex-1 text-sm ${theme === 'light' ? 'text-slate-700 file:bg-blue-100 file:text-blue-900 hover:file:bg-blue-200' : 'text-gray-200 file:bg-lime-100 file:text-gray-900 hover:file:bg-lime-200'} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold`} required />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-gray-300 font-semibold mb-2">Gambar Poster (Opsional)</label>
-                                        <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-800 border border-gray-700">
-                                            <FaImage className="text-lime-400 text-2xl flex-shrink-0" />
-                                            <input name="poster" type="file" onChange={e => setPosterFile(e.target.files ? e.target.files[0] : null)} accept="image/*" className="file-input" />
+                                        <label className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Gambar Poster (Opsional)</label>
+                                        <div className={`flex items-center gap-4 p-4 rounded-lg ${theme === 'light' ? 'bg-gray-100 border border-gray-300' : 'bg-gray-800 border border-gray-700'}`}>
+                                            <FaImage className={`${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} text-2xl flex-shrink-0`} />
+                                            <input name="poster" type="file" onChange={e => setPosterFile(e.target.files ? e.target.files[0] : null)} accept="image/*" className={`flex-1 text-sm ${theme === 'light' ? 'text-slate-700 file:bg-blue-100 file:text-blue-900 hover:file:bg-blue-200' : 'text-gray-200 file:bg-lime-100 file:text-gray-900 hover:file:bg-lime-200'} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold`} />
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-gray-300 font-semibold mb-2">Pratinjau</label>
-                                    <ModelPreviewer posterFile={posterFile} />
+                                    <label className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Pratinjau</label>
+                                    <ModelPreviewer posterFile={posterFile} theme={theme} />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-12 border-t border-white/10 pt-8">
+                        <div className={`mt-12 border-t ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} pt-8`}>
                             {error && <p className="text-red-400 text-center mb-4">{error}</p>}
-                            <button type="submit" disabled={isSubmitting} className="w-full max-w-md mx-auto flex justify-center bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-300 disabled:bg-gray-500 transition-transform duration-300 hover:scale-105">
+                            <button type="submit" disabled={isSubmitting} className={`w-full max-w-md mx-auto flex justify-center ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg disabled:bg-gray-500 transition-transform duration-300 hover:scale-105`}>
                                 {isSubmitting ? 'Mengunggah...' : 'Unggah ke Perpustakaan'}
                             </button>
                         </div>

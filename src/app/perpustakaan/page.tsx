@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import HoverModelViewer from '@/components/HoverModelViewer';
 import { LIBRARY_CATEGORIES } from '@/constants/categories';
 import { FaUpload, FaDownload, FaDollarSign, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useTheme } from '@/context/ThemeContext';
 
 interface GalleryItem {
   id: number;
@@ -25,21 +26,23 @@ const CATEGORY_DISPLAY_LIMIT = 7; // Batas jumlah kategori yang ditampilkan awal
 
 // Komponen untuk Kartu Item di Perpustakaan
 const LibraryItemCard = ({ item }: { item: GalleryItem }) => {
+    const { theme } = useTheme();
+    
     return (
-        <div className="glass-card rounded-2xl overflow-hidden flex flex-col group">
+        <div className={`${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} rounded-2xl overflow-hidden flex flex-col group`}>
             <div className="aspect-square">
                 <HoverModelViewer src={item.fileUrl} alt={item.title} posterUrl={item.posterUrl || undefined} />
             </div>
             <div className="p-4 flex-grow flex flex-col">
-                <h3 className="font-display text-xl font-bold text-white mb-1 truncate">{item.title}</h3>
-                <p className="text-sm text-gray-400 mb-4">by {item.author.name || 'Anonim'}</p>
+                <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white mb-1 truncate">{item.title}</h3>
+                <p className="text-sm text-slate-600 dark:text-gray-400 mb-4">by {item.author.name || 'Anonim'}</p>
                 <div className="mt-auto">
                     {item.isPaid ? (
                         <PaidDownloadButton itemId={item.id} price={item.price} />
                     ) : (
                         <a 
                           href={`/api/gallery/download?itemId=${item.id}`}
-                          className="w-full text-center block bg-lime-400/80 text-lime-50 font-bold py-2 px-4 rounded-lg hover:bg-lime-400/100 transition-colors text-sm flex items-center justify-center gap-2"
+                          className={`w-full text-center block ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400/80 hover:bg-lime-400/100 text-lime-50'} font-bold py-2 px-4 rounded-lg transition-colors text-sm flex items-center justify-center gap-2`}
                         >
                           <FaDownload /> Unduh Gratis
                         </a>
@@ -52,10 +55,11 @@ const LibraryItemCard = ({ item }: { item: GalleryItem }) => {
 
 // Komponen untuk Tombol Unduh Berbayar
 const PaidDownloadButton = ({ itemId, price }: { itemId: number; price: number }) => {
+    const { theme } = useTheme();
     // Logika untuk cek akses dan pembelian bisa ditambahkan di sini
     // Untuk saat ini, kita buat tombol statis
     return (
-        <button className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2">
+        <button className={`w-full ${theme === 'light' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-amber-500 hover:bg-amber-600'} text-white font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors`}>
             <FaDollarSign /> Beli Rp {new Intl.NumberFormat('id-ID').format(price)}
         </button>
     );
@@ -63,6 +67,7 @@ const PaidDownloadButton = ({ itemId, price }: { itemId: number; price: number }
 
 const PerpustakaanPage = () => {
   const { data: session, status } = useSession();
+  const { theme } = useTheme();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
@@ -87,7 +92,7 @@ const PerpustakaanPage = () => {
   const displayedCategories = showAllCategories ? ALL_CATEGORIES : ALL_CATEGORIES.slice(0, CATEGORY_DISPLAY_LIMIT);
 
   return (
-    <div className="bg-gray-900 min-h-screen text-gray-50 flex flex-col">
+    <div className="bg-white dark:bg-gray-900 min-h-screen text-slate-900 dark:text-gray-50 flex flex-col transition-colors duration-300">
       <Header />
       <main className="flex-grow pt-28 pb-20">
         {/* PERBAIKAN: Menambahkan padding horizontal (px-8) yang lebih lega */}
@@ -99,18 +104,18 @@ const PerpustakaanPage = () => {
             <aside className="lg:col-span-1 lg:sticky lg:top-28 h-fit z-10">
               <div className="space-y-10">
                 <div>
-                    <h1 className="font-display text-3xl md:text-3xl font-bold text-white">Perpustakaan 3D</h1>
-                    <p className="text-lg text-gray-400 mt-2">Jelajahi koleksi aset dari komunitas perekayasa.</p>
+                    <h1 className="font-display text-3xl md:text-3xl font-bold text-slate-900 dark:text-white">Perpustakaan 3D</h1>
+                    <p className="text-lg text-slate-600 dark:text-gray-400 mt-2">Jelajahi koleksi aset dari komunitas perekayasa.</p>
                 </div>
 
                 {status === 'authenticated' && (session?.user.role === 'DESAINER' || session?.user.role === 'ADMIN') && (
-                    <Link href="/perpustakaan/upload" className="w-full flex items-center justify-center gap-2 bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-300 transition-transform duration-300 hover:scale-105">
+                    <Link href="/perpustakaan/upload" className={`w-full flex items-center justify-center gap-2 ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg transition-transform duration-300 hover:scale-105`}>
                         <FaUpload /> Unggah Model Anda
                     </Link>
                 )}
 
                 <div>
-                    <h3 className="font-display text-xl font-bold text-white mb-4">Kategori</h3>
+                    <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white mb-4">Kategori</h3>
                     <div className="space-y-2">
                         {displayedCategories.map(cat => (
                             <button
@@ -118,8 +123,12 @@ const PerpustakaanPage = () => {
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`w-full text-left p-3 rounded-lg transition-colors text-sm font-semibold ${
                                     selectedCategory === cat 
-                                    ? 'bg-lime-400/20 text-lime-300' 
-                                    : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                                    ? theme === 'light'
+                                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                      : 'bg-lime-400/20 text-lime-300' 
+                                    : theme === 'light'
+                                      ? 'text-slate-600 hover:bg-gray-100 hover:text-slate-900'
+                                      : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
                                 }`}
                             >
                                 {cat}
@@ -129,7 +138,7 @@ const PerpustakaanPage = () => {
                     {ALL_CATEGORIES.length > CATEGORY_DISPLAY_LIMIT && (
                         <button
                             onClick={() => setShowAllCategories(!showAllCategories)}
-                            className="text-lime-400/80 hover:text-lime-400 text-sm font-semibold mt-4 flex items-center gap-2"
+                            className={`${theme === 'light' ? 'text-blue-600 hover:text-blue-700' : 'text-lime-400/80 hover:text-lime-400'} text-sm font-semibold mt-4 flex items-center gap-2 transition-colors`}
                         >
                             {showAllCategories ? (
                                 <> <FaChevronUp /> Tampilkan lebih sedikit </>
@@ -148,11 +157,11 @@ const PerpustakaanPage = () => {
                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                     {/* Skeleton Loader */}
                     {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="glass-card rounded-2xl flex flex-col animate-pulse">
-                            <div className="aspect-square bg-gray-700"></div>
+                        <div key={i} className={`${theme === 'dark' ? 'glass-card' : 'bg-white border border-gray-200'} rounded-2xl flex flex-col animate-pulse`}>
+                            <div className={`aspect-square ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
                             <div className="p-4">
-                                <div className="h-6 bg-gray-700 rounded w-3/4 mb-2"></div>
-                                <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                                <div className={`h-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded w-3/4 mb-2`}></div>
+                                <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded w-1/2`}></div>
                             </div>
                         </div>
                     ))}
@@ -165,9 +174,9 @@ const PerpustakaanPage = () => {
                 </div>
               )}
               {!loading && items.length === 0 && (
-                <div className="text-center py-16 glass-card rounded-2xl">
-                    <h3 className="font-display text-2xl font-bold text-white">Tidak Ada Model</h3>
-                    <p className="text-gray-400 mt-2">Belum ada model 3D dalam kategori ini.</p>
+                <div className={`text-center py-16 ${theme === 'dark' ? 'glass-card' : 'bg-white border border-gray-200'} rounded-2xl`}>
+                    <h3 className={`font-display text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Tidak Ada Model</h3>
+                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-2`}>Belum ada model 3D dalam kategori ini.</p>
                 </div>
               )}
             </div>
@@ -181,6 +190,10 @@ const PerpustakaanPage = () => {
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
                 border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            [data-theme="light"] .glass-card {
+                background: rgba(255, 255, 255, 0.8);
+                border: 1px solid rgba(0, 0, 0, 0.1);
             }
             .font-display {
                 font-family: 'Space Grotesk', sans-serif;

@@ -7,6 +7,7 @@ import { Challenge } from './ChallengeCard';
 import ImageCarousel from './ImageCarousel';
 import ImageLightbox from './ImageLightbox';
 import PublicComments from './PublicComments'; // Menggunakan komponen Komentar Publik yang baru
+import { useTheme } from '@/context/ThemeContext';
 
 interface ModalProps {
   challenge: Challenge | null;
@@ -15,6 +16,7 @@ interface ModalProps {
 
 const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
   const { data: session } = useSession();
+  const { theme } = useTheme();
   const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [proposalMessage, setProposalMessage] = useState('');
@@ -91,25 +93,25 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
         onClick={onClose}
       >
         <div
-          className="bg-gray-800 border border-white/10 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
+          className={`${theme === 'light' ? 'bg-white border border-gray-200' : 'bg-gray-800 border border-white/10'} rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] flex flex-col`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex justify-between items-start p-6 border-b border-white/10">
+          <div className={`flex justify-between items-start p-6 border-b ${theme === 'light' ? 'border-gray-200' : 'border-white/10'}`}>
             <div>
-              <h2 className="font-display text-3xl font-bold text-white">{challenge.title}</h2>
+              <h2 className={`font-display text-3xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{challenge.title}</h2>
               <div className="flex flex-wrap gap-2 mt-2">
-                <span className="text-xs bg-gray-700 text-lime-400 font-semibold py-1 px-3 rounded-full">{challenge.category}</span>
+                <span className={`text-xs ${theme === 'light' ? 'bg-blue-100 text-blue-700' : 'bg-gray-700 text-lime-400'} font-semibold py-1 px-3 rounded-full`}>{challenge.category}</span>
               </div>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-lime-400 transition-colors text-2xl p-1">
+            <button onClick={onClose} className={`${theme === 'light' ? 'text-gray-500 hover:text-blue-600' : 'text-gray-400 hover:text-lime-400'} transition-colors text-2xl p-1`}>
               <FaTimes />
             </button>
           </div>
 
           {/* Carousel gambar dirapikan: tinggi lebih kecil, contain, dan center */}
           <div className="px-6 pt-4">
-            <div className="rounded-xl overflow-hidden bg-gray-900/40">
+            <div className={`rounded-xl overflow-hidden ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-900/40'}`}>
               <ImageCarousel
                 images={challenge.images}
                 onImageClick={(url) => setLightboxImageUrl(url)}
@@ -121,30 +123,30 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
           </div>
 
           {/* Konten */}
-          <div className="px-6 py-4 overflow-y-auto">
-            <h3 className="font-display text-xl font-bold text-white mb-2">Deskripsi Tantangan</h3>
-            <p className="text-gray-300 leading-relaxed mb-6">{challenge.description}</p>
+          <div className="px-6 py-4 overflow-y-auto flex-1 min-h-0">
+            <h3 className={`font-display text-xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'} mb-2`}>Deskripsi Tantangan</h3>
+            <p className={`${theme === 'light' ? 'text-slate-600' : 'text-gray-300'} leading-relaxed mb-6`}>{challenge.description}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="glass-card p-4 rounded-lg">
-                <h4 className="font-semibold text-gray-400 text-sm mb-1">Imbalan</h4>
-                <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(challenge.reward)}</p>
+              <div className={`${theme === 'light' ? 'bg-gray-50 border border-gray-200' : 'glass-card'} p-4 rounded-lg`}>
+                <h4 className={`font-semibold ${theme === 'light' ? 'text-slate-500' : 'text-gray-400'} text-sm mb-1`}>Imbalan</h4>
+                <p className={`text-2xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(challenge.reward)}</p>
               </div>
-              <div className="glass-card p-4 rounded-lg">
-                <h4 className="font-semibold text-gray-400 text-sm mb-1">Status</h4>
-                <p className="text-2xl font-bold text-white">{challenge.status}</p>
+              <div className={`${theme === 'light' ? 'bg-gray-50 border border-gray-200' : 'glass-card'} p-4 rounded-lg`}>
+                <h4 className={`font-semibold ${theme === 'light' ? 'text-slate-500' : 'text-gray-400'} text-sm mb-1`}>Status</h4>
+                <p className={`text-2xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{challenge.status}</p>
               </div>
             </div>
 
             {challenge.material && (
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-200 mb-2 flex items-center gap-2">Material yang Diinginkan</h4>
-                <p className="text-gray-200/80 bg-gray-700/50 p-3 rounded-lg border border-white/10">{challenge.material}</p>
+                <h4 className={`font-semibold ${theme === 'light' ? 'text-slate-700' : 'text-gray-200'} mb-2 flex items-center gap-2`}>Material yang Diinginkan</h4>
+                <p className={`${theme === 'light' ? 'text-slate-600 bg-gray-50 border border-gray-200' : 'text-gray-200/80 bg-gray-700/50 border border-white/10'} p-3 rounded-lg`}>{challenge.material}</p>
               </div>
             )}
 
-            <div className="mt-6 border-t border-white/10 pt-4">
-              <div className="flex items-center text-sm text-gray-300 gap-4 mb-4">
+            <div className={`mt-6 border-t ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} pt-4`}>
+              <div className={`flex items-center text-sm ${theme === 'light' ? 'text-slate-600' : 'text-gray-300'} gap-4 mb-4`}>
                 <span className="flex items-center gap-1.5"><FaUser /> Dibuat oleh {challenge.challenger?.name || 'Anonim'}</span>
                 <span className="flex items-center gap-1.5"><FaEye /> Dilihat oleh {challenge._count?.views || 0} pengguna</span>
               </div>
@@ -153,28 +155,28 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
               <PublicComments challengeId={challenge.id} />
 
               {canSubmitProposal && (
-                <div className="mt-6 border-t border-white/10 pt-4">
-                  <h4 className="font-display text-xl font-bold text-white mb-3">Ajukan Proposal</h4>
-                  <p className="text-sm text-gray-400 mb-2">Tulis pesan singkat dan unggah file proposal (PDF) jika ada.</p>
+                <div className={`mt-6 border-t ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} pt-4`}>
+                  <h4 className={`font-display text-xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'} mb-3`}>Ajukan Proposal</h4>
+                  <p className={`text-sm ${theme === 'light' ? 'text-slate-500' : 'text-gray-400'} mb-2`}>Tulis pesan singkat dan unggah file proposal (PDF) jika ada.</p>
                   <textarea
                     value={proposalMessage}
                     onChange={(e) => setProposalMessage(e.target.value)}
                     rows={4}
-                    className="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-lime-400 focus:border-lime-400 transition"
+                    className={`w-full p-3 border rounded-lg transition focus:ring-2 ${theme === 'light' ? 'border-gray-300 bg-white text-slate-900 focus:ring-blue-500 focus:border-blue-500' : 'border-gray-600 bg-gray-700 text-white focus:ring-lime-400 focus:border-lime-400'}`}
                     placeholder="Tuliskan pesan singkat mengenai proposal Anda..."
                   />
                   <div className="mt-2">
-                    <label htmlFor="proposalFile" className="block text-gray-300 font-semibold text-sm mb-1">File Proposal (PDF, Opsional)</label>
+                    <label htmlFor="proposalFile" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold text-sm mb-1`}>File Proposal (PDF, Opsional)</label>
                     <input
                       type="file"
                       name="proposalFile"
                       id="proposalFile"
                       onChange={handleFileChange}
-                      className="w-full text-sm text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-lime-100 file:text-gray-900 hover:file:bg-lime-200"
+                      className={`w-full text-sm ${theme === 'light' ? 'text-slate-700' : 'text-gray-200'} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${theme === 'light' ? 'file:bg-blue-100 file:text-blue-900 hover:file:bg-blue-200' : 'file:bg-lime-100 file:text-gray-900 hover:file:bg-lime-200'}`}
                       accept=".pdf"
                     />
                   </div>
-                  {proposalFile && <p className="text-sm text-gray-300 mt-2">File dipilih: {proposalFile.name}</p>}
+                  {proposalFile && <p className={`text-sm ${theme === 'light' ? 'text-slate-600' : 'text-gray-300'} mt-2`}>File dipilih: {proposalFile.name}</p>}
                   {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
                 </div>
               )}
@@ -182,9 +184,9 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
           </div>
 
           {/* Footer */}
-          <div className="flex justify-between items-center p-4 border-t border-white/10 bg-gray-900/50 rounded-b-2xl gap-4 mt-auto">
+          <div className={`flex justify-between items-center border-t ${theme === 'light' ? 'border-gray-200 bg-gray-50' : 'border-white/10 bg-gray-900/50'} rounded-b-2xl gap-4 mt-auto`}>
             <div>
-              <button onClick={handleShare} className="flex items-center gap-2 text-gray-300 font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition-colors">
+              <button onClick={handleShare} className={`flex items-center gap-2 ${theme === 'light' ? 'text-slate-600 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-700'} font-semibold py-2 px-5 rounded-lg transition-colors`}>
                 <FaShareAlt /><span>Bagikan</span>
               </button>
             </div>
@@ -193,7 +195,7 @@ const ChallengeDetailModal: React.FC<ModalProps> = ({ challenge, onClose }) => {
                 <button
                   onClick={handleProposalSubmit}
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 bg-lime-400 text-gray-900 font-bold py-2 px-5 rounded-lg hover:bg-lime-300 disabled:opacity-70 transition-transform duration-300 hover:scale-105"
+                  className={`flex items-center gap-2 ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-2 px-5 rounded-lg disabled:opacity-70 transition-transform duration-300 hover:scale-105`}
                 >
                   <FaPaperPlane /><span>{isSubmitting ? 'Mengirim...' : 'Ajukan Proposal'}</span>
                 </button>

@@ -7,9 +7,10 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { FaFileImage, FaEye } from 'react-icons/fa';
 import { CHALLENGE_CATEGORIES } from '@/constants/categories';
+import { useTheme } from '@/context/ThemeContext';
 
 // Komponen untuk Kartu Pratinjau Langsung
-const LivePreviewCard = ({ formData, imageFiles }) => {
+const LivePreviewCard = ({ formData, imageFiles, theme }: { formData: any, imageFiles: File[], theme: string }) => {
     const rewardFormatted = new Intl.NumberFormat('id-ID', {
         style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
     }).format(Number(formData.reward) || 0);
@@ -17,34 +18,34 @@ const LivePreviewCard = ({ formData, imageFiles }) => {
     const previewImage = imageFiles.length > 0 ? URL.createObjectURL(imageFiles[0]) : null;
 
     return (
-        <div className="glass-card p-6 rounded-2xl border-t-2 border-lime-400 flex flex-col group">
-            <div className="relative w-full h-48 bg-gray-700 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+        <div className={`${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} p-6 rounded-2xl border-t-2 ${theme === 'light' ? 'border-blue-500' : 'border-lime-400'} flex flex-col group`}>
+            <div className={`relative w-full h-48 ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'} rounded-lg mb-4 flex items-center justify-center overflow-hidden`}>
                 {previewImage ? (
                     <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
-                    <FaEye className="text-gray-500 text-4xl" />
+                    <FaEye className={`${theme === 'light' ? 'text-gray-400' : 'text-gray-500'} text-4xl`} />
                 )}
                  <div className="absolute inset-0 bg-black/20"></div>
             </div>
-            <h3 className="font-display text-2xl font-bold text-white mb-2 truncate group-hover:text-lime-400 transition-colors">
+            <h3 className={`font-display text-2xl font-bold ${theme === 'light' ? 'text-slate-900 group-hover:text-blue-600' : 'text-white group-hover:text-lime-400'} mb-2 truncate transition-colors`}>
                 {formData.title || 'Judul Tantangan Anda'}
             </h3>
-            <p className="text-gray-300 mb-4 text-sm leading-relaxed flex-grow line-clamp-2">
+            <p className={`${theme === 'light' ? 'text-slate-600' : 'text-gray-300'} mb-4 text-sm leading-relaxed flex-grow line-clamp-2`}>
                 {formData.description || 'Deskripsi lengkap tantangan akan muncul di sini.'}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
                 {formData.category && (
-                    <span className="text-xs bg-gray-700 text-lime-400 font-semibold py-1 px-3 rounded-full">
+                    <span className={`text-xs ${theme === 'light' ? 'bg-blue-100 text-blue-700' : 'bg-gray-700 text-lime-400'} font-semibold py-1 px-3 rounded-full`}>
                         {formData.category}
                     </span>
                 )}
             </div>
-            <div className="mt-auto pt-4 border-t border-white/10 flex items-end justify-between">
+            <div className={`mt-auto pt-4 border-t ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} flex items-end justify-between`}>
                 <div>
-                    <p className="text-sm text-gray-400 mb-1">Imbalan</p>
-                    <p className="text-xl font-bold text-white">{rewardFormatted}</p>
+                    <p className={`text-sm ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'} mb-1`}>Imbalan</p>
+                    <p className={`text-xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{rewardFormatted}</p>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full border bg-lime-400/20 text-lime-300 border-lime-400/30">
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${theme === 'light' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-lime-400/20 text-lime-300 border-lime-400/30'}`}>
                     OPEN
                 </span>
             </div>
@@ -54,6 +55,7 @@ const LivePreviewCard = ({ formData, imageFiles }) => {
 
 
 const CreateChallengePage = () => {
+  const { theme } = useTheme();
   const router = useRouter();
   const { data: session, status } = useSession();
   
@@ -116,18 +118,18 @@ const CreateChallengePage = () => {
   };
 
   if (status === 'loading') {
-    return <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">Memuat...</div>;
+    return <div className={`flex justify-center items-center min-h-screen ${theme === 'light' ? 'bg-gray-50 text-slate-900' : 'bg-gray-900 text-white'}`}>Memuat...</div>;
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen text-gray-50 flex flex-col">
+    <div className={`${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900'} min-h-screen ${theme === 'light' ? 'text-gray-900' : 'text-gray-50'} flex flex-col`}>
       <Header />
       <main className="flex-grow pt-28 pb-20">
         <div className="container mx-auto px-6">
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div className="text-center mb-12">
-                <h1 className="font-display text-4xl md:text-5xl font-bold text-white">Buat Tantangan Baru</h1>
-                <p className="text-lg text-gray-400 mt-2">Bagikan masalah rekayasa Anda dan temukan solusinya.</p>
+                <h1 className={`font-display text-4xl md:text-5xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Buat Tantangan Baru</h1>
+                <p className={`text-lg ${theme === 'light' ? 'text-slate-600' : 'text-gray-400'} mt-2`}>Bagikan masalah rekayasa Anda dan temukan solusinya.</p>
             </div>
             
             {/* Layout 2 Kolom */}
@@ -136,31 +138,31 @@ const CreateChallengePage = () => {
               {/* Kolom Kiri: Form Input */}
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="title" className="block text-gray-300 font-semibold mb-2">Judul Tantangan</label>
-                  <input type="text" name="title" id="title" value={formData.title} onChange={handleTextChange} className="form-input" required />
+                  <label htmlFor="title" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Judul Tantangan</label>
+                  <input type="text" name="title" id="title" value={formData.title} onChange={handleTextChange} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} required />
                 </div>
                 <div>
-                  <label htmlFor="category" className="block text-gray-300 font-semibold mb-2">Kategori</label>
-                  <select name="category" id="category" value={formData.category} onChange={handleTextChange} className="form-input">
+                  <label htmlFor="category" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Kategori</label>
+                  <select name="category" id="category" value={formData.category} onChange={handleTextChange} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`}>
                     {CHALLENGE_CATEGORIES.map(cat => ( <option key={cat} value={cat}>{cat}</option> ))}
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="description" className="block text-gray-300 font-semibold mb-2">Deskripsi Lengkap</label>
-                  <textarea name="description" id="description" rows={5} value={formData.description} onChange={handleTextChange} className="form-input" required></textarea>
+                  <label htmlFor="description" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Deskripsi Lengkap</label>
+                  <textarea name="description" id="description" rows={5} value={formData.description} onChange={handleTextChange} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all resize-none`} required></textarea>
                 </div>
                 <div>
-                  <label htmlFor="material" className="block text-gray-300 font-semibold mb-2">Material yang Diinginkan (Opsional)</label>
-                  <input type="text" name="material" id="material" value={formData.material} onChange={handleTextChange} className="form-input" placeholder="Contoh: Baja S45C, Plastik ABS" />
+                  <label htmlFor="material" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Material yang Diinginkan (Opsional)</label>
+                  <input type="text" name="material" id="material" value={formData.material} onChange={handleTextChange} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} placeholder="Contoh: Baja S45C, Plastik ABS" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="reward" className="block text-gray-300 font-semibold mb-2">Imbalan (Rp)</label>
-                      <input type="number" name="reward" id="reward" value={formData.reward} onChange={handleTextChange} className="form-input" placeholder="e.g. 2000000" required />
+                      <label htmlFor="reward" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Imbalan (Rp)</label>
+                      <input type="number" name="reward" id="reward" value={formData.reward} onChange={handleTextChange} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} placeholder="e.g. 2000000" required />
                     </div>
                     <div>
-                      <label htmlFor="deadline" className="block text-gray-300 font-semibold mb-2">Batas Waktu</label>
-                      <input type="date" name="deadline" id="deadline" value={formData.deadline} onChange={handleTextChange} className="form-input" required />
+                      <label htmlFor="deadline" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Batas Waktu</label>
+                      <input type="date" name="deadline" id="deadline" value={formData.deadline} onChange={handleTextChange} className={`w-full p-4 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} required />
                     </div>
                 </div>
               </div>
@@ -168,42 +170,42 @@ const CreateChallengePage = () => {
               {/* Kolom Kanan: Upload & Preview */}
               <div className="space-y-8">
                 <div>
-                  <label htmlFor="imageFiles" className="block text-gray-300 font-semibold mb-2">Gambar Referensi</label>
-                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-600 px-6 py-10">
+                  <label htmlFor="imageFiles" className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Gambar Referensi</label>
+                  <div className={`mt-2 flex justify-center rounded-lg border border-dashed ${theme === 'light' ? 'border-gray-300 bg-gray-50' : 'border-gray-600'} px-6 py-10`}>
                     <div className="text-center">
-                      <FaFileImage className="mx-auto h-12 w-12 text-gray-500" />
-                      <div className="mt-4 flex text-sm leading-6 text-gray-400">
-                        <label htmlFor="imageFiles" className="relative cursor-pointer rounded-md font-semibold text-lime-400 focus-within:outline-none hover:text-lime-300">
+                      <FaFileImage className={`mx-auto h-12 w-12 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`} />
+                      <div className={`mt-4 flex text-sm leading-6 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                        <label htmlFor="imageFiles" className={`relative cursor-pointer rounded-md font-semibold ${theme === 'light' ? 'text-blue-600 hover:text-blue-500' : 'text-lime-400 hover:text-lime-300'} focus-within:outline-none`}>
                           <span>Unggah file</span>
                           <input id="imageFiles" name="imageFiles" type="file" className="sr-only" onChange={handleFileChange} accept="image/png, image/jpeg" required multiple />
                         </label>
                         <p className="pl-1">atau seret dan lepas</p>
                       </div>
-                      <p className="text-xs leading-5 text-gray-500">PNG, JPG hingga 10MB</p>
+                      <p className={`text-xs leading-5 ${theme === 'light' ? 'text-gray-500' : 'text-gray-500'}`}>PNG, JPG hingga 10MB</p>
                     </div>
                   </div>
                   {imageFiles.length > 0 && (
-                    <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
-                      <h4 className="font-semibold text-sm text-gray-300 mb-2">File yang dipilih:</h4>
+                    <div className={`mt-4 p-3 ${theme === 'light' ? 'bg-gray-100 border-gray-200' : 'bg-gray-800 border-gray-700'} rounded-lg border`}>
+                      <h4 className={`font-semibold text-sm ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} mb-2`}>File yang dipilih:</h4>
                       <ul className="space-y-2">
                         {imageFiles.map((file, index) => (
-                          <li key={index} className="text-sm text-gray-400">{file.name}</li>
+                          <li key={index} className={`text-sm ${theme === 'light' ? 'text-slate-600' : 'text-gray-400'}`}>{file.name}</li>
                         ))}
                       </ul>
                     </div>
                   )}
                 </div>
                 <div>
-                    <label className="block text-gray-300 font-semibold mb-2">Pratinjau Langsung</label>
-                    <LivePreviewCard formData={formData} imageFiles={imageFiles} />
+                    <label className={`block ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} font-semibold mb-2`}>Pratinjau Langsung</label>
+                    <LivePreviewCard formData={formData} imageFiles={imageFiles} theme={theme} />
                 </div>
               </div>
             </div>
 
             {/* Tombol Submit */}
-            <div className="mt-12 border-t border-white/10 pt-8">
+            <div className={`mt-12 border-t ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} pt-8`}>
                 {error && <p className="text-red-400 text-center mb-4">{error}</p>}
-                <button type="submit" disabled={isSubmitting} className="w-full max-w-md mx-auto flex justify-center bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-300 disabled:bg-gray-500 transition-transform duration-300 hover:scale-105">
+                <button type="submit" disabled={isSubmitting} className={`w-full max-w-md mx-auto flex justify-center ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg disabled:bg-gray-500 transition-transform duration-300 hover:scale-105`}>
                     {isSubmitting ? 'Memproses...' : 'Publikasikan Tantangan'}
                 </button>
             </div>

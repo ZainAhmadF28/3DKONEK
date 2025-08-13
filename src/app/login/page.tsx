@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTheme } from '@/context/ThemeContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { theme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,16 +39,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 font-sans text-gray-200">
-      <div className="w-full max-w-md glass-card rounded-2xl p-8 shadow-2xl">
-        <h1 className="font-display text-3xl font-bold text-center text-white mb-2">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center p-4 font-sans text-slate-900 dark:text-gray-200 transition-colors duration-300">
+      <div className={`w-full max-w-md ${theme === 'light' ? 'bg-white shadow-xl border border-gray-200' : 'glass-card'} rounded-2xl p-8 shadow-2xl`}>
+        <h1 className="font-display text-3xl font-bold text-center text-slate-900 dark:text-white mb-2">
           Selamat Datang Kembali
         </h1>
-        <p className="text-center text-gray-400 mb-8">Login untuk melanjutkan petualangan rekayasa Anda.</p>
+        <p className="text-center text-slate-600 dark:text-gray-400 mb-8">Login untuk melanjutkan petualangan rekayasa Anda.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <p className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg p-3 text-sm text-center">
+            <p className="bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 rounded-lg p-3 text-sm text-center">
               {error}
             </p>
           )}
@@ -55,7 +57,7 @@ const LoginPage = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="form-input"
+              className={`w-full ${theme === 'light' ? 'bg-gray-50 border-gray-300 text-slate-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500/20' : 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-lime-400 focus:ring-lime-400/20'} border rounded-lg px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-2`}
               placeholder="Alamat Email"
               required
             />
@@ -65,7 +67,7 @@ const LoginPage = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
+              className={`w-full ${theme === 'light' ? 'bg-gray-50 border-gray-300 text-slate-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500/20' : 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-lime-400 focus:ring-lime-400/20'} border rounded-lg px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-2`}
               placeholder="Password"
               required
             />
@@ -73,30 +75,28 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full btn-primary"
+            className={`w-full ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
           >
             {isSubmitting ? 'Memproses...' : 'Login'}
           </button>
         </form>
 
-        <p className="text-center mt-8 text-sm text-gray-400">
+        <p className="text-center mt-8 text-sm text-slate-600 dark:text-gray-400">
           Belum punya akun?{' '}
-          <Link href="/register" className="font-semibold text-lime-400 hover:underline">
+          <Link href="/register" className={`font-semibold ${theme === 'light' ? 'text-blue-600 hover:text-blue-700' : 'text-lime-400 hover:text-lime-300'} hover:underline transition-colors`}>
             Daftar di sini
           </Link>
         </p>
       </div>
 
-      <style jsx>{`
-        .glass-card { background: rgba(31, 41, 55, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+      <style jsx global>{`
+        .glass-card { 
+          background: rgba(31, 41, 55, 0.4); 
+          backdrop-filter: blur(12px); 
+          -webkit-backdrop-filter: blur(12px); 
+          border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
         .font-display { font-family: 'Space Grotesk', sans-serif; }
-        body { font-family: 'Inter', sans-serif; }
-        .form-input { width: 100%; background-color: #1f2937; border: 1px solid #4b5563; color: white; border-radius: 0.5rem; padding: 0.75rem 1rem; transition: all 0.2s; }
-        .form-input::placeholder { color: #6b7280; }
-        .form-input:focus { outline: none; border-color: #9EFF00; box-shadow: 0 0 0 2px #9EFF0040; }
-        .btn-primary { background-color: #9EFF00; color: #111827; font-weight: 700; padding: 0.75rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; }
-        .btn-primary:hover { transform: scale(1.05); }
-        .btn-primary:disabled { background-color: #4b5563; color: #9ca3af; cursor: not-allowed; }
       `}</style>
     </div>
   );

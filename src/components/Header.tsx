@@ -9,20 +9,21 @@ import {
   FaHome, FaTasks, FaBook
 } from 'react-icons/fa';
 import Image from 'next/image';
-import { ThemeSwitcher } from '@/context/ThemeContext';
+import { ThemeSwitcher, useTheme } from '@/context/ThemeContext';
 
 const Header = () => {
   const { data: session, status } = useSession();
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <ul className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-      <li><Link href="/" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaHome /> Beranda</Link></li>
-      <li><Link href="/tantangan" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaTasks /> Tantangan</Link></li>
-      <li><Link href="/perpustakaan" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaBook /> Perpustakaan</Link></li>
-      <li><Link href="/edukasi" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaGraduationCap /> Edukasi</Link></li>
+      <li><Link href="/" className={`${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'} transition-colors flex items-center gap-2`} onClick={onClick}><FaHome /> Beranda</Link></li>
+      <li><Link href="/tantangan" className={`${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'} transition-colors flex items-center gap-2`} onClick={onClick}><FaTasks /> Tantangan</Link></li>
+      <li><Link href="/perpustakaan" className={`${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'} transition-colors flex items-center gap-2`} onClick={onClick}><FaBook /> Perpustakaan</Link></li>
+      <li><Link href="/edukasi" className={`${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'} transition-colors flex items-center gap-2`} onClick={onClick}><FaGraduationCap /> Edukasi</Link></li>
       {status === 'authenticated' && session?.user?.role !== 'ADMIN' && (
-        <li><Link href="/bengkel" className="hover:text-lime-400 transition-colors flex items-center gap-2" onClick={onClick}><FaTools /> Bengkel Saya</Link></li>
+        <li><Link href="/bengkel" className={`${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'} transition-colors flex items-center gap-2`} onClick={onClick}><FaTools /> Bengkel Saya</Link></li>
       )}
     </ul>
   );
@@ -65,7 +66,7 @@ const Header = () => {
                     <FaUserCircle /> Dashboard
                   </Link>
                 )}
-                <button onClick={() => signOut({ callbackUrl: '/' })} className="inline-flex items-center gap-2 rounded-lg bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-green-700 dark:hover:bg-lime-300">
+                <button onClick={() => signOut({ callbackUrl: '/' })} className={`inline-flex items-center gap-2 rounded-lg ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-lime-400 hover:bg-lime-300'} ${theme === 'light' ? 'text-white' : 'text-gray-900'} px-3 py-2 text-sm font-semibold`}>
                   <FaSignOutAlt /> Logout
                 </button>
               </>
@@ -74,20 +75,24 @@ const Header = () => {
                  <Link href="/login" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-white/15 bg-gray-100 dark:bg-transparent text-gray-700 dark:text-gray-100 px-3 py-2 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-white/10">
                   <FaSignInAlt /> Login
                 </Link>
-                <Link href="/register" className="inline-flex items-center gap-2 rounded-lg bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-green-700 dark:hover:bg-lime-300">
+                <Link href="/register" className={`inline-flex items-center gap-2 rounded-lg ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-lime-400 hover:bg-lime-300'} ${theme === 'light' ? 'text-white' : 'text-gray-900'} px-3 py-2 text-sm font-semibold`}>
                   <FaUserPlus /> Daftar
                 </Link>
               </>
             )}
           </div>
 
-          <button
-            className="md:hidden inline-flex items-center justify-center h-12 w-12 rounded-md border border-black/15 dark:border-white/15"
-            onClick={() => setOpen(true)}
-            aria-label="Buka menu"
-          >
-            <FaBars />
-          </button>
+          {/* Mobile: Theme Switcher dan Hamburger Button */}
+          <div className="md:hidden flex items-center gap-3">
+            <ThemeSwitcher />
+            <button
+              className="inline-flex items-center justify-center h-12 w-12 rounded-md border border-black/15 dark:border-white/15"
+              onClick={() => setOpen(true)}
+              aria-label="Buka menu"
+            >
+              <FaBars />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -104,9 +109,6 @@ const Header = () => {
             <nav className="mb-6">
               <NavLinks onClick={() => setOpen(false)} />
             </nav>
-            <div className="mb-4">
-              <ThemeSwitcher />
-            </div>
             <div className="mt-auto space-y-2">
               {status === 'loading' ? (
                 <div className="text-sm text-gray-300">Memuat...</div>
@@ -122,7 +124,7 @@ const Header = () => {
                       <span className="inline-flex items-center gap-2"><FaUserCircle /> Dashboard</span>
                     </Link>
                   )}
-                  <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/' }); }} className="w-full rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                  <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/' }); }} className={`w-full rounded-lg ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} px-3 py-2 text-sm font-semibold`}>
                     <span className="inline-flex items-center gap-2"><FaSignOutAlt /> Logout</span>
                   </button>
                 </>
@@ -131,7 +133,7 @@ const Header = () => {
                   <Link href="/login" onClick={() => setOpen(false)} className="block w-full text-left rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-white/10">
                     <span className="inline-flex items-center gap-2"><FaSignInAlt /> Login</span>
                   </Link>
-                  <Link href="/register" onClick={() => setOpen(false)} className="block w-full text-left rounded-lg bg-lime-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-lime-300">
+                  <Link href="/register" onClick={() => setOpen(false)} className={`block w-full text-left rounded-lg ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} px-3 py-2 text-sm font-semibold`}>
                     <span className="inline-flex items-center gap-2"><FaUserPlus /> Daftar</span>
                   </Link>
                 </>

@@ -9,9 +9,14 @@ import ChallengeCard, { Challenge } from '@/components/ChallengeCard';
 import dynamic from 'next/dynamic';
 const ChallengeDetailModal = dynamic(() => import('@/components/ChallengeDetailModal'), { ssr: false });
 import { CHALLENGE_CATEGORIES } from '@/constants/categories';
+import { useTheme } from '@/context/ThemeContext';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+
+const CATEGORY_DISPLAY_LIMIT = 6;
 
 const ChallengesPage = () => {
   const { status } = useSession();
+  const { theme } = useTheme();
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,15 +61,20 @@ const ChallengesPage = () => {
   const handleCardClick = (challenge: Challenge) => setSelectedChallenge(challenge);
   const handleCloseModal = () => setSelectedChallenge(null);
 
+  // Tentukan kategori yang akan ditampilkan
+  const displayedCategories = showAllCategories 
+    ? CHALLENGE_CATEGORIES 
+    : CHALLENGE_CATEGORIES.slice(0, CATEGORY_DISPLAY_LIMIT);
+
   useEffect(() => {
     document.body.style.overflow = selectedChallenge ? 'hidden' : 'auto';
     return () => { document.body.style.overflow = 'auto'; };
   }, [selectedChallenge]);
 
   const renderContent = () => {
-    if (isLoading) return <p className="text-center text-gray-400 col-span-full">Memuat tantangan...</p>;
-    if (error) return <p className="text-center text-red-400 col-span-full">Error: {error}</p>;
-    if (challenges.length === 0) return <p className="text-center text-gray-400 col-span-full">Belum ada tantangan yang tersedia.</p>;
+    if (isLoading) return <p className="text-center text-slate-600 dark:text-gray-400 col-span-full">Memuat tantangan...</p>;
+    if (error) return <p className="text-center text-red-600 dark:text-red-400 col-span-full">Error: {error}</p>;
+    if (challenges.length === 0) return <p className="text-center text-slate-600 dark:text-gray-400 col-span-full">Belum ada tantangan yang tersedia.</p>;
 
     return challenges.map((challenge) => (
       <ChallengeCard key={challenge.id} challenge={challenge} onClick={() => handleCardClick(challenge)} />
@@ -74,30 +84,40 @@ const ChallengesPage = () => {
   const GlobalStyles = () => (
     <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #111827; }
         .font-display { font-family: 'Space Grotesk', sans-serif; }
-        .glass-card { background: rgba(31, 41, 55, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-card { 
+          background: rgba(31, 41, 55, 0.4); 
+          backdrop-filter: blur(12px); 
+          -webkit-backdrop-filter: blur(12px); 
+          border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        .glass-card-light { 
+          background: rgba(255, 255, 255, 0.8); 
+          backdrop-filter: blur(12px); 
+          -webkit-backdrop-filter: blur(12px); 
+          border: 1px solid rgba(0, 0, 0, 0.1); 
+        }
       `}</style>
   );
 
   return (
     <>
       <GlobalStyles />
-      <div className="bg-gray-900 min-h-screen text-gray-100 flex flex-col">
+      <div className="bg-white dark:bg-gray-900 min-h-screen text-slate-900 dark:text-gray-100 flex flex-col transition-colors duration-300">
         <Header />
         <main className="flex-grow pt-28 pb-20">
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
               <aside className="lg:col-span-1 lg:sticky lg:top-28 h-fit">
-                <div className="glass-card rounded-2xl p-6">
-                  <h1 className="font-display text-4xl md:text-5xl font-bold text-white leading-tight">Papan Tantangan</h1>
-                  <p className="text-gray-300 mt-4 mb-8">Temukan masalah industri, ajukan solusi rekayasa Anda, dan dapatkan imbalan.</p>
+                <div className={`${theme === 'light' ? 'glass-card-light' : 'glass-card'} rounded-2xl p-6`}>
+                  <h1 className="font-display text-4xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight">Papan Tantangan</h1>
+                  <p className="text-slate-600 dark:text-gray-300 mt-4 mb-8">Temukan masalah industri, ajukan solusi rekayasa Anda, dan dapatkan imbalan.</p>
 
                   {status === 'authenticated' && (
                     <div className="mb-8">
                       <Link
                         href="/tantangan/baru"
-                        className="w-full text-center inline-block bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-300 transition-colors"
+                        className={`w-full text-center inline-block ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg transition-colors`}
                       >
                         + Buat Tantangan Baru
                       </Link>
@@ -105,23 +125,23 @@ const ChallengesPage = () => {
                   )}
 
                   <div>
-                    <h3 className="font-display text-xl font-bold text-white mb-4">Filter Kategori</h3>
+                    <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white mb-4">Filter Kategori</h3>
                     <div className="space-y-3">
-                      <label className="flex items-center gap-3 text-gray-200 cursor-pointer">
+                      <label className="flex items-center gap-3 text-slate-700 dark:text-gray-200 cursor-pointer">
                         <input
                           type="radio"
                           name="category"
-                          className="accent-lime-400 w-4 h-4 bg-gray-700 border-gray-600"
+                          className={`w-4 h-4 ${theme === 'light' ? 'accent-blue-600 bg-gray-100 border-gray-300' : 'accent-lime-400 bg-gray-700 border-gray-600'}`}
                           checked={categoryFilters.length === 0}
                           onChange={() => setCategoryFilters([])}
                         />
                         <span>Semua Kategori</span>
                       </label>
-                      {CHALLENGE_CATEGORIES.slice(0, 6).map((cat) => (
-                        <label key={cat} className="flex items-center gap-3 text-gray-200 cursor-pointer">
+                      {displayedCategories.map((cat) => (
+                        <label key={cat} className="flex items-center gap-3 text-slate-700 dark:text-gray-200 cursor-pointer">
                           <input
                             type="checkbox"
-                            className="accent-lime-400 w-4 h-4 rounded bg-gray-700 border-gray-600"
+                            className={`w-4 h-4 rounded ${theme === 'light' ? 'accent-blue-600 bg-gray-100 border-gray-300' : 'accent-lime-400 bg-gray-700 border-gray-600'}`}
                             checked={categoryFilters.includes(cat)}
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -135,6 +155,18 @@ const ChallengesPage = () => {
                         </label>
                       ))}
                     </div>
+                    {CHALLENGE_CATEGORIES.length > CATEGORY_DISPLAY_LIMIT && (
+                      <button
+                        onClick={() => setShowAllCategories(!showAllCategories)}
+                        className={`${theme === 'light' ? 'text-blue-600 hover:text-blue-700' : 'text-lime-400/80 hover:text-lime-400'} text-sm font-semibold mt-4 flex items-center gap-2 transition-colors`}
+                      >
+                        {showAllCategories ? (
+                          <> <FaChevronUp /> Tampilkan lebih sedikit </>
+                        ) : (
+                          <> <FaChevronDown /> Tampilkan lebih banyak </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               </aside>

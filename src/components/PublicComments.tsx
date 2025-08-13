@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { FaPaperPlane, FaUserCircle } from 'react-icons/fa';
+import { useTheme } from '../context/ThemeContext';
 
 // Tipe data untuk komentar, disesuaikan dengan respons API
 interface Comment {
@@ -21,6 +22,7 @@ interface PublicCommentsProps {
 
 const PublicComments: React.FC<PublicCommentsProps> = ({ challengeId }) => {
   const { data: session, status } = useSession();
+  const { theme } = useTheme();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -68,28 +70,48 @@ const PublicComments: React.FC<PublicCommentsProps> = ({ challengeId }) => {
   };
 
   return (
-    <div className="border-t border-white/10 pt-6 mt-6">
-      <h3 className="font-display text-xl font-bold text-white mb-4">Komentar Publik</h3>
+    <div className={`border-t pt-6 mt-6 ${
+      theme === 'light' ? 'border-gray-200' : 'border-white/10'
+    }`}>
+      <h3 className={`font-display text-xl font-bold mb-4 ${
+        theme === 'light' ? 'text-gray-900' : 'text-white'
+      }`}>Komentar Publik</h3>
       
       {/* Daftar Komentar */}
-      <div className="space-y-4 max-h-60 overflow-y-auto p-2 pr-4 rounded-lg bg-gray-900/50">
+      <div className={`space-y-4 max-h-60 overflow-y-auto p-2 pr-4 rounded-lg ${
+        theme === 'light' ? 'bg-gray-50' : 'bg-gray-900/50'
+      }`}>
         {isLoading ? (
-          <p className="text-sm text-center text-gray-400 py-4">Memuat komentar...</p>
+          <p className={`text-sm text-center py-4 ${
+            theme === 'light' ? 'text-gray-600' : 'text-gray-400'
+          }`}>Memuat komentar...</p>
         ) : comments.length > 0 ? (
           comments.map((comment) => (
             <div key={comment.id} className="flex items-start gap-3">
-              <FaUserCircle size={32} className="text-gray-500 mt-1 flex-shrink-0" />
-              <div className="flex-1 bg-gray-700/50 p-3 rounded-lg">
+              <FaUserCircle size={32} className={`mt-1 flex-shrink-0 ${
+                theme === 'light' ? 'text-gray-400' : 'text-gray-500'
+              }`} />
+              <div className={`flex-1 p-3 rounded-lg ${
+                theme === 'light' ? 'bg-white border border-gray-200' : 'bg-gray-700/50'
+              }`}>
                 <div className="flex items-center gap-2">
-                    <p className="font-bold text-sm text-white">{comment.user.name || 'Anonim'}</p>
-                    <p className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString('id-ID', { hour:'2-digit', minute: '2-digit' })}</p>
+                    <p className={`font-bold text-sm ${
+                      theme === 'light' ? 'text-gray-900' : 'text-white'
+                    }`}>{comment.user.name || 'Anonim'}</p>
+                    <p className={`text-xs ${
+                      theme === 'light' ? 'text-gray-500' : 'text-gray-500'
+                    }`}>{new Date(comment.createdAt).toLocaleString('id-ID', { hour:'2-digit', minute: '2-digit' })}</p>
                 </div>
-                <p className="text-sm text-gray-300 mt-1">{comment.content}</p>
+                <p className={`text-sm mt-1 ${
+                  theme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                }`}>{comment.content}</p>
               </div>
             </div>
           ))
         ) : (
-          <p className="text-sm text-center text-gray-500 py-8">Belum ada komentar. Jadilah yang pertama!</p>
+          <p className={`text-sm text-center py-8 ${
+            theme === 'light' ? 'text-gray-500' : 'text-gray-500'
+          }`}>Belum ada komentar. Jadilah yang pertama!</p>
         )}
       </div>
 
@@ -100,37 +122,40 @@ const PublicComments: React.FC<PublicCommentsProps> = ({ challengeId }) => {
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="form-input flex-grow"
+            className={`flex-grow px-5 py-3 rounded-full transition-all duration-200 ${
+              theme === 'light' 
+                ? 'bg-white border border-blue-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
+                : 'bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40'
+            }`}
             placeholder="Tulis komentar..."
             disabled={isSubmitting}
           />
           <button
             type="submit"
             disabled={isSubmitting || !newComment.trim()}
-            className="btn-primary !p-0 h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-full"
+            className={`h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-full font-bold transition-all duration-200 ${
+              isSubmitting || !newComment.trim()
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : theme === 'light'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-110'
+                : 'bg-lime-400 text-gray-900 hover:bg-lime-300 hover:scale-110'
+            }`}
           >
             {isSubmitting ? '...' : <FaPaperPlane />}
           </button>
         </form>
       ) : (
-        <div className="text-sm text-center mt-4 p-4 bg-gray-800/50 rounded-lg">
-          <Link href="/login" className="font-semibold text-lime-400 hover:underline">
+        <div className={`text-sm text-center mt-4 p-4 rounded-lg ${
+          theme === 'light' ? 'bg-gray-100 border border-gray-200' : 'bg-gray-800/50'
+        }`}>
+          <Link href="/login" className={`font-semibold hover:underline ${
+            theme === 'light' ? 'text-blue-600' : 'text-lime-400'
+          }`}>
             Login
           </Link>
-          <span className="text-gray-400"> untuk ikut berkomentar.</span>
+          <span className={theme === 'light' ? 'text-gray-600' : 'text-gray-400'}> untuk ikut berkomentar.</span>
         </div>
       )}
-
-      {/* Style lokal untuk komponen ini */}
-      <style jsx>{`
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
-        .form-input { width: 100%; background-color: #1f2937; border: 1px solid #4b5563; color: white; border-radius: 9999px; padding: 0.75rem 1.25rem; transition: all 0.2s; }
-        .form-input::placeholder { color: #6b7280; }
-        .form-input:focus { outline: none; border-color: #9EFF00; box-shadow: 0 0 0 2px #9EFF0040; }
-        .btn-primary { background-color: #9EFF00; color: #111827; font-weight: 700; transition: all 0.2s; }
-        .btn-primary:hover { transform: scale(1.1); }
-        .btn-primary:disabled { background-color: #4b5563; color: #9ca3af; cursor: not-allowed; transform: scale(1); }
-      `}</style>
     </div>
   );
 };

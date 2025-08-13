@@ -8,6 +8,7 @@ import { FaPaperPlane, FaUserCircle, FaFileAlt, FaCube, FaTimes, FaPlus, FaImage
 import ThreeDViewerModal from './ThreeDViewerModal';
 import ModelViewer from './ModelViewer';
 import { useForum } from '@/context/ForumContext';
+import { useTheme } from '@/context/ThemeContext';
 
 interface Post {
   id: number;
@@ -24,6 +25,7 @@ interface Community { id: number; name: string; description: string | null; avat
 const ForumSidebar = () => {
   const { isForumOpen, closeForum } = useForum();
   const { status, data: session } = useSession();
+  const { theme } = useTheme();
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostFile, setNewPostFile] = useState<File | null>(null);
@@ -115,18 +117,24 @@ const ForumSidebar = () => {
     
     if (post.fileType === 'model/gltf-binary' || post.fileUrl.endsWith('.glb') || post.fileUrl.endsWith('.gltf')) {
       return (
-        <div className="mt-2 bg-gray-800 rounded-lg p-2">
-          <div className="w-full h-48 rounded-lg overflow-hidden mb-2">
+        <div className={`mt-2 rounded-lg p-2 ${
+          theme === 'light' ? 'bg-gray-100 border border-gray-200' : 'bg-gray-800'
+        }`}>
+          <div className="w-full h-64 rounded-lg overflow-hidden mb-2">
             <ModelViewer src={post.fileUrl} alt="3D Model" />
           </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setModelViewerSrc(post.fileUrl)} 
-              className="inline-flex items-center gap-2 text-lime-400 font-semibold hover:underline text-sm"
+              className={`inline-flex items-center gap-2 font-semibold hover:underline text-sm ${
+                theme === 'light' ? 'text-blue-600' : 'text-lime-400'
+              }`}
             >
               <FaCube /> Lihat Fullscreen
             </button>
-            <a href={post.fileUrl} download className="text-sm text-gray-400 hover:underline">
+            <a href={post.fileUrl} download className={`text-sm hover:underline ${
+              theme === 'light' ? 'text-gray-600' : 'text-gray-400'
+            }`}>
               Unduh
             </a>
           </div>
@@ -157,7 +165,9 @@ const ForumSidebar = () => {
           )}
           <div className={`rounded-lg p-3 shadow-sm ${
             isOwnMessage 
-              ? 'bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900' 
+              ? theme === 'light' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-lime-400 text-gray-900'
               : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600'
           }`}>
             {!isOwnMessage && (
@@ -174,7 +184,7 @@ const ForumSidebar = () => {
               </div>
             )}
             {post.community && selectedCommunityId === 'all' && (
-              <p className={`text-xs font-semibold mb-1 ${isOwnMessage ? 'text-green-100 dark:text-gray-700' : 'text-green-600 dark:text-lime-400'}`}>
+              <p className={`text-xs font-semibold mb-1 ${isOwnMessage ? theme === 'light' ? 'text-blue-100' : 'text-gray-700' : theme === 'light' ? 'text-blue-600' : 'text-lime-400'}`}>
                 #{post.community.name}
               </p>
             )}
@@ -186,7 +196,7 @@ const ForumSidebar = () => {
             {renderAttachment(post)}
             {isOwnMessage && (
               <div className="flex justify-end mt-1">
-                <span className="text-xs text-green-100 dark:text-gray-700">
+                <span className={`text-xs ${theme === 'light' ? 'text-blue-100' : 'text-gray-700'}`}>
                   {new Date(post.createdAt).toLocaleString('id-ID', { 
                     hour: '2-digit', 
                     minute: '2-digit'
@@ -196,7 +206,7 @@ const ForumSidebar = () => {
             )}
           </div>
           {isOwnMessage && (
-            <FaUserCircle size={32} className="text-green-600 dark:text-lime-500 mt-1 flex-shrink-0" />
+            <FaUserCircle size={32} className={`${theme === 'light' ? 'text-blue-600' : 'text-lime-500'} mt-1 flex-shrink-0`} />
           )}
         </div>
       </div>
@@ -236,11 +246,11 @@ const ForumSidebar = () => {
         <h3 className="font-display font-bold text-gray-900 dark:text-white text-lg">Komunitas</h3>
         <div className="flex items-center gap-2">
           {status === 'authenticated' && (
-            <button onClick={() => setIsCreatingCommunity(true)} className="p-2 text-green-600 dark:text-lime-400 hover:text-green-500 dark:hover:text-lime-300">
+            <button onClick={() => setIsCreatingCommunity(true)} className={`p-2 ${theme === 'light' ? 'text-blue-600 hover:text-blue-500' : 'text-lime-400 hover:text-lime-300'}`}>
               <FaPlus size={18} />
             </button>
           )}
-          <button onClick={closeForum} className="p-2 text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-lime-400">
+          <button onClick={closeForum} className={`p-2 text-gray-500 dark:text-gray-400 ${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'}`}>
             <FaTimes size={18} />
           </button>
         </div>
@@ -248,7 +258,7 @@ const ForumSidebar = () => {
       
       <div className="flex-1 overflow-y-auto">
         <button
-          className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-200 dark:border-gray-800/50 ${selectedCommunityId === 'all' ? 'bg-green-100 dark:bg-lime-400/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800/30'}`}
+          className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-200 dark:border-gray-800/50 ${selectedCommunityId === 'all' ? theme === 'light' ? 'bg-blue-100' : 'bg-lime-400/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800/30'}`}
           onClick={() => {
             setSelectedCommunityId('all');
             setIsMobileCommunitiesView(false);
@@ -264,7 +274,7 @@ const ForumSidebar = () => {
         {communities.map(c => (
           <button
             key={c.id}
-            className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-200 dark:border-gray-800/50 ${selectedCommunityId === c.id ? 'bg-green-100 dark:bg-lime-400/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800/30'}`}
+            className={`w-full text-left p-4 flex items-center gap-3 transition-colors border-b border-gray-200 dark:border-gray-800/50 ${selectedCommunityId === c.id ? theme === 'light' ? 'bg-blue-100' : 'bg-lime-400/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800/30'}`}
             onClick={() => {
               setSelectedCommunityId(c.id);
               setIsMobileCommunitiesView(false);
@@ -275,7 +285,7 @@ const ForumSidebar = () => {
                 <Image src={c.avatarUrl} alt={c.name} fill className="object-cover" />
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-green-600 dark:text-lime-400 font-bold text-lg">
+              <div className={`w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} font-bold text-lg`}>
                 {c.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -294,7 +304,7 @@ const ForumSidebar = () => {
       <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-white/10">
         <button 
           onClick={() => setIsMobileCommunitiesView(true)} 
-          className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-lime-400 -ml-2"
+          className={`p-2 text-gray-600 dark:text-gray-400 ${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'} -ml-2`}
         >
           <FaArrowLeft size={18} />
         </button>
@@ -311,7 +321,7 @@ const ForumSidebar = () => {
                   />
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-green-600 dark:text-lime-400 font-bold">
+                <div className={`w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} font-bold`}>
                   {(communities.find(c => c.id === selectedCommunityId)?.name?.charAt(0).toUpperCase()) || 'C'}
                 </div>
               )}
@@ -346,7 +356,7 @@ const ForumSidebar = () => {
             <textarea 
               value={newPostContent} 
               onChange={(e) => setNewPostContent(e.target.value)} 
-              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-green-500 dark:focus:border-lime-400 focus:ring-1 focus:ring-green-500/20 dark:focus:ring-lime-400/20" 
+              className={`w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm resize-none focus:outline-none ${theme === 'light' ? 'focus:border-blue-500 focus:ring-blue-500/20' : 'focus:border-lime-400 focus:ring-lime-400/20'} focus:ring-1`} 
               rows={2} 
               placeholder="Tulis sesuatu..."
             />
@@ -355,12 +365,12 @@ const ForumSidebar = () => {
                 type="file" 
                 ref={fileInputRef} 
                 onChange={(e) => setNewPostFile(e.target.files ? e.target.files[0] : null)} 
-                className="text-xs text-gray-600 dark:text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-gray-200 dark:file:bg-gray-700 file:text-green-600 dark:file:text-lime-400 hover:file:bg-gray-300 dark:hover:file:bg-gray-600"
+                className={`text-xs text-gray-600 dark:text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-gray-200 dark:file:bg-gray-700 ${theme === 'light' ? 'file:text-blue-600' : 'file:text-lime-400'} hover:file:bg-gray-300 dark:hover:file:bg-gray-600`}
               />
               <button 
                 type="submit" 
                 disabled={isSubmitting || (!newPostContent.trim() && !newPostFile)} 
-                className="bg-green-600 dark:bg-lime-400 text-white dark:text-gray-900 p-2 rounded-full disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:text-gray-600 dark:disabled:text-gray-400 transition-colors"
+                className={`${theme === 'light' ? 'bg-blue-600' : 'bg-lime-400'} ${theme === 'light' ? 'text-white' : 'text-gray-900'} p-2 rounded-full disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:text-gray-600 dark:disabled:text-gray-400 transition-colors`}
               >
                 {isSubmitting ? (
                   <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
@@ -373,7 +383,7 @@ const ForumSidebar = () => {
         ) : (
           <div className="text-center py-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              <Link href="/login" className="font-semibold text-green-600 dark:text-lime-400 hover:underline">Login</Link> untuk berdiskusi.
+              <Link href="/login" className={`font-semibold ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} hover:underline`}>Login</Link> untuk berdiskusi.
             </p>
           </div>
         )}
@@ -398,14 +408,14 @@ const ForumSidebar = () => {
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
               <h3 className="font-display font-bold text-gray-900 dark:text-white">Komunitas</h3>
               {status === 'authenticated' && (
-                <button onClick={() => setIsCreatingCommunity(true)} className="inline-flex items-center gap-1 text-green-600 dark:text-lime-400 text-sm font-semibold hover:text-green-500 dark:hover:text-lime-300">
+                <button onClick={() => setIsCreatingCommunity(true)} className={`inline-flex items-center gap-1 ${theme === 'light' ? 'text-blue-600 hover:text-blue-500' : 'text-lime-400 hover:text-lime-300'} text-sm font-semibold`}>
                   <FaPlus /> Baru
                 </button>
               )}
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
               <button
-                className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === 'all' ? 'bg-green-100 dark:bg-lime-400/20' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === 'all' ? theme === 'light' ? 'bg-blue-100' : 'bg-lime-400/20' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
                 onClick={() => setSelectedCommunityId('all')}
               >
                 <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">A</div>
@@ -416,13 +426,13 @@ const ForumSidebar = () => {
               {communities.map(c => (
                 <button
                   key={c.id}
-                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === c.id ? 'bg-green-100 dark:bg-lime-400/20' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${selectedCommunityId === c.id ? theme === 'light' ? 'bg-blue-100' : 'bg-lime-400/20' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
                   onClick={() => setSelectedCommunityId(c.id)}
                 >
                   {c.avatarUrl ? (
                     <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700"><Image src={c.avatarUrl} alt={c.name} fill className="object-cover" /></div>
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-green-600 dark:text-lime-400 font-bold">{c.name.charAt(0).toUpperCase()}</div>
+                    <div className={`w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} font-bold`}>{c.name.charAt(0).toUpperCase()}</div>
                   )}
                   <div className="min-w-0">
                     <p className="font-semibold text-sm truncate text-gray-900 dark:text-white">{c.name}</p>
@@ -441,7 +451,7 @@ const ForumSidebar = () => {
                   {selectedCommunityId === 'all' ? 'Semua Postingan' : communities.find(c => c.id === selectedCommunityId)?.name || 'Komunitas'}
                 </p>
               </div>
-              <button onClick={closeForum} className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-lime-400"><FaTimes size={20} /></button>
+              <button onClick={closeForum} className={`text-gray-600 dark:text-gray-400 ${theme === 'light' ? 'hover:text-blue-600' : 'hover:text-lime-400'}`}><FaTimes size={20} /></button>
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto space-y-3">
@@ -463,7 +473,7 @@ const ForumSidebar = () => {
                   <textarea 
                     value={newPostContent} 
                     onChange={(e) => setNewPostContent(e.target.value)} 
-                    className="form-input" 
+                    className={`w-full p-3 rounded-lg border resize-none transition-all ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50`}
                     rows={2} 
                     placeholder="Tulis sesuatu..." 
                   />
@@ -472,12 +482,12 @@ const ForumSidebar = () => {
                       type="file" 
                       ref={fileInputRef} 
                       onChange={(e) => setNewPostFile(e.target.files ? e.target.files[0] : null)} 
-                      className="text-xs text-gray-600 dark:text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-gray-200 dark:file:bg-gray-700 file:text-green-600 dark:file:text-lime-400 hover:file:bg-gray-300 dark:hover:file:bg-gray-600"
+                      className={`text-xs ${theme === 'light' ? 'text-slate-600' : 'text-gray-400'} file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs ${theme === 'light' ? 'file:bg-blue-100 file:text-blue-600 hover:file:bg-blue-200' : 'file:bg-gray-700 file:text-lime-400 hover:file:bg-gray-600'}`}
                     />
                     <button 
                       type="submit" 
                       disabled={isSubmitting || (!newPostContent.trim() && !newPostFile)} 
-                      className="btn-primary p-3 rounded-full"
+                      className={`p-3 rounded-full font-bold transition-all disabled:opacity-50 ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'}`}
                     >
                       {isSubmitting ? '...' : <FaPaperPlane />}
                     </button>
@@ -493,21 +503,21 @@ const ForumSidebar = () => {
       {modelViewerSrc && <ThreeDViewerModal src={modelViewerSrc} onClose={() => setModelViewerSrc(null)} />}
       {isCreatingCommunity && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={() => setIsCreatingCommunity(false)}>
-          <div className="glass-card rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-display text-lg font-bold text-white mb-4">Buat Komunitas Baru</h3>
+          <div className={`${theme === 'light' ? 'bg-white border border-gray-200' : 'glass-card'} rounded-2xl p-6 w-full max-w-md`} onClick={(e) => e.stopPropagation()}>
+            <h3 className={`font-display text-lg font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'} mb-4`}>Buat Komunitas Baru</h3>
             <form onSubmit={handleCreateCommunity} className="space-y-4">
-              <input value={newCommunityName} onChange={(e) => setNewCommunityName(e.target.value)} className="form-input" placeholder="Nama komunitas" />
-              <textarea value={newCommunityDesc} onChange={(e) => setNewCommunityDesc(e.target.value)} className="form-input" rows={3} placeholder="Deskripsi (opsional)" />
+              <input value={newCommunityName} onChange={(e) => setNewCommunityName(e.target.value)} className={`w-full p-3 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} placeholder="Nama komunitas" />
+              <textarea value={newCommunityDesc} onChange={(e) => setNewCommunityDesc(e.target.value)} className={`w-full p-3 rounded-lg border resize-none ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} rows={3} placeholder="Deskripsi (opsional)" />
               <div>
-                <label className="text-sm font-semibold text-gray-300">Avatar (opsional)</label>
-                <div className="flex items-center gap-4 p-3 mt-1 rounded-lg bg-gray-800 border border-gray-700">
-                    <FaImage className="text-lime-400 text-xl flex-shrink-0" />
-                    <input type="file" accept="image/*" onChange={(e) => setNewCommunityAvatar(e.target.files ? e.target.files[0] : null)} className="file-input" />
+                <label className={`text-sm font-semibold ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'}`}>Avatar (opsional)</label>
+                <div className={`flex items-center gap-4 p-3 mt-1 rounded-lg ${theme === 'light' ? 'bg-gray-100 border border-gray-300' : 'bg-gray-800 border border-gray-700'}`}>
+                    <FaImage className={`${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} text-xl flex-shrink-0`} />
+                    <input type="file" accept="image/*" onChange={(e) => setNewCommunityAvatar(e.target.files ? e.target.files[0] : null)} className={`flex-1 text-sm ${theme === 'light' ? 'text-slate-700 file:bg-blue-100 file:text-blue-900 hover:file:bg-blue-200' : 'text-gray-200 file:bg-lime-100 file:text-gray-900 hover:file:bg-lime-200'} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold`} />
                 </div>
               </div>
               <div className="flex justify-end gap-4 pt-2">
-                <button type="button" onClick={() => setIsCreatingCommunity(false)} className="btn-secondary">Batal</button>
-                <button type="submit" className="btn-primary">Buat</button>
+                <button type="button" onClick={() => setIsCreatingCommunity(false)} className={`px-4 py-2 rounded-lg font-semibold border transition-all ${theme === 'light' ? 'bg-gray-100 text-slate-700 border-gray-300 hover:bg-gray-200' : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'}`}>Batal</button>
+                <button type="submit" className={`px-4 py-2 rounded-lg font-bold transition-all ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'}`}>Buat</button>
               </div>
             </form>
           </div>

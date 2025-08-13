@@ -12,6 +12,7 @@ import ChallengeCard, { Challenge } from '@/components/ChallengeCard';
 import BengkelDetailModal from '@/components/BengkelDetailModal';
 import ProposalStatusBadge from '@/components/ProposalStatusBadge';
 import ThreeDViewerModal from '@/components/ThreeDViewerModal';
+import { useTheme } from '@/context/ThemeContext';
 
 // Tipe data spesifik untuk halaman ini
 interface MyProposal { id: number; status: string; challenge: Challenge; }
@@ -25,6 +26,7 @@ interface MyLibraryItem { id: number; title: string; isPaid: boolean; price: num
 // Komponen Panel Profil
 const ProfilePanel = () => {
     const { data: session } = useSession();
+    const { theme } = useTheme();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [name, setName] = useState(session?.user?.name || '');
@@ -57,33 +59,33 @@ const ProfilePanel = () => {
     };
 
     return (
-        <div className="glass-card p-6 rounded-2xl h-full">
+        <div className={`${theme === 'light' ? 'bg-white border border-gray-200 shadow-lg' : 'glass-card'} p-6 rounded-2xl h-full`}>
             <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-lime-400 font-bold text-2xl font-display">
+                <div className={`w-16 h-16 rounded-full ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'} flex items-center justify-center ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} font-bold text-2xl font-display`}>
                     {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                    <p className="font-display font-bold text-white text-xl">{session?.user?.name || 'Pengguna'}</p>
-                    <p className="text-sm text-gray-400">Role: <span className="font-semibold text-gray-200">{session?.user.role}</span></p>
+                    <p className={`font-display font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'} text-xl`}>{session?.user?.name || 'Pengguna'}</p>
+                    <p className={`text-sm ${theme === 'light' ? 'text-slate-500' : 'text-gray-400'}`}>Role: <span className={`font-semibold ${theme === 'light' ? 'text-slate-700' : 'text-gray-200'}`}>{session?.user.role}</span></p>
                 </div>
             </div>
-            <h3 className="font-display text-lg font-bold text-white mb-3">Kelola Profil</h3>
+            <h3 className={`font-display text-lg font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'} mb-3`}>Kelola Profil</h3>
             {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Nama</label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} className="form-input" />
+                    <label className={`block text-sm font-semibold ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} mb-1`}>Nama</label>
+                    <input value={name} onChange={(e) => setName(e.target.value)} className={`w-full p-3 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} />
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="form-input" />
+                    <label className={`block text-sm font-semibold ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} mb-1`}>Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={`w-full p-3 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} />
                 </div>
                 <div className="pt-2">
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Ganti Password</label>
-                    <input type="password" placeholder="Password saat ini" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="form-input mb-2" />
-                    <input type="password" placeholder="Password baru (min 8)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="form-input" />
+                    <label className={`block text-sm font-semibold ${theme === 'light' ? 'text-slate-700' : 'text-gray-300'} mb-1`}>Ganti Password</label>
+                    <input type="password" placeholder="Password saat ini" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className={`w-full p-3 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all mb-2`} />
+                    <input type="password" placeholder="Password baru (min 8)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={`w-full p-3 rounded-lg border ${theme === 'light' ? 'bg-white border-gray-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500' : 'bg-gray-700 border-gray-600 text-white focus:border-lime-400 focus:ring-lime-400'} focus:ring-2 focus:ring-opacity-50 transition-all`} />
                 </div>
-                <button disabled={!canSave || saving} onClick={handleSave} className="w-full btn-primary mt-4">{saving ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
+                <button disabled={!canSave || saving} onClick={handleSave} className={`w-full ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg disabled:opacity-50 transition-all mt-4`}>{saving ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
             </div>
         </div>
     );
@@ -138,7 +140,7 @@ const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }) =
                                  {challenge.submissions[0].status === 'PENDING' && (
                                     <div className="flex gap-2">
                                         <button onClick={() => onReview(challenge.submissions[0].id, 'REVISION_REQUESTED')} className="bg-yellow-500 text-white text-xs font-bold py-1 px-2 rounded-md hover:bg-yellow-600">Revisi</button>
-                                        <button onClick={() => onReview(challenge.submissions[0].id, 'APPROVED')} className="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-md hover:bg-green-600">Setujui</button>
+                                        <button onClick={() => onReview(challenge.submissions[0].id, 'APPROVED')} className={`${theme === 'light' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs font-bold py-1 px-2 rounded-md`}>Setujui</button>
                                     </div>
                                  )}
                              </div>
@@ -154,6 +156,7 @@ const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }) =
 const UserDashboardPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { theme } = useTheme();
   
   const [myChallenges, setMyChallenges] = useState<MyChallenge[]>([]);
   const [acceptedChallenges, setAcceptedChallenges] = useState<Challenge[]>([]);
@@ -226,11 +229,11 @@ const UserDashboardPage = () => {
   const handleCloseModal = () => setSelectedChallenge(null);
 
   if (status === 'loading' || !session) {
-    return <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">Memuat...</div>;
+    return <div className="flex justify-center items-center min-h-screen bg-white dark:bg-gray-900 text-slate-900 dark:text-white transition-colors duration-300">Memuat...</div>;
   }
 
   const renderContent = () => {
-    if (isLoading) return <p className="text-center text-gray-400">Memuat...</p>;
+    if (isLoading) return <p className="text-center text-slate-600 dark:text-gray-400">Memuat...</p>;
 
     switch (view) {
         case 'Dibuat':
@@ -257,10 +260,10 @@ const UserDashboardPage = () => {
     }
   };
   
-  const EmptyState = ({ message, actionText, actionLink }) => (
-      <div className="text-center py-16 px-6 glass-card rounded-2xl">
-          <h3 className="font-display text-2xl font-bold text-white">{message}</h3>
-          <Link href={actionLink} className="mt-4 inline-block btn-primary">
+  const EmptyState = ({ message, actionText, actionLink }: any) => (
+      <div className={`text-center py-16 px-6 ${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} rounded-2xl`}>
+          <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white">{message}</h3>
+          <Link href={actionLink} className={`mt-4 inline-block ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg transition-colors`}>
               {actionText}
           </Link>
       </div>
@@ -268,7 +271,7 @@ const UserDashboardPage = () => {
 
   return (
     <>
-      <div className="bg-gray-900 min-h-screen text-gray-50 flex flex-col">
+      <div className="bg-white dark:bg-gray-900 min-h-screen text-slate-900 dark:text-gray-50 flex flex-col transition-colors duration-300">
         <Header />
         <main className="flex-grow pt-28 pb-20">
           <div className="container mx-auto px-8">
@@ -279,15 +282,22 @@ const UserDashboardPage = () => {
 
               <section className="lg:col-span-3 space-y-8">
                 <div>
-                    <h1 className="font-display text-4xl font-bold text-white">Dashboard Saya</h1>
-                    <p className="text-lg text-gray-400 mt-1">Selamat datang kembali, {session.user?.name}!</p>
+                    <h1 className="font-display text-4xl font-bold text-slate-900 dark:text-white">Dashboard Saya</h1>
+                    <p className="text-lg text-slate-600 dark:text-gray-400 mt-1">Selamat datang kembali, {session.user?.name}!</p>
                 </div>
                 
-                <div className="glass-card p-6 rounded-2xl">
-                    <div className="flex border-b border-white/10 mb-6">
+                <div className={`${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} p-6 rounded-2xl`}>
+                    <div className={`flex border-b ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} mb-6`}>
                         {['Dibuat', 'Dikerjakan', 'Diajukan'].map(tab => (
-                            <button key={tab} onClick={() => setView(tab as any)} 
-                                className={`py-2 px-4 text-sm font-semibold transition-colors ${view === tab ? 'border-b-2 border-lime-400 text-lime-300' : 'text-gray-400 hover:text-white'}`}>
+                            <button key={tab} onClick={() => setView(tab as 'Dibuat' | 'Dikerjakan' | 'Diajukan')} 
+                                className={`py-2 px-4 text-sm font-semibold transition-colors ${view === tab ? 
+                                  theme === 'light' 
+                                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                                    : 'border-b-2 border-lime-400 text-lime-300' 
+                                  : theme === 'light'
+                                    ? 'text-slate-600 hover:text-slate-900'
+                                    : 'text-gray-400 hover:text-white'
+                                }`}>
                                 {tab}
                             </button>
                         ))}
@@ -296,25 +306,25 @@ const UserDashboardPage = () => {
                 </div>
 
                 {(session.user.role === 'DESAINER' || session.user.role === 'ADMIN') && (
-                  <div className="glass-card p-6 rounded-2xl">
+                  <div className={`${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} p-6 rounded-2xl`}>
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="font-display text-xl font-bold text-white">Perpustakaan Saya</h2>
-                        <Link href="/perpustakaan/upload" className="btn-primary text-sm !py-2 !px-4"><FaPlus className="mr-2"/> Unggah</Link>
+                        <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Perpustakaan Saya</h2>
+                        <Link href="/perpustakaan/upload" className={`${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2`}><FaPlus /> Unggah</Link>
                     </div>
                     {myLibrary.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {myLibrary.map(it => (
-                                <div key={it.id} className="bg-gray-800 rounded-lg overflow-hidden">
-                                    <div className="relative h-24 bg-gray-700">
+                                <div key={it.id} className={`${theme === 'light' ? 'bg-gray-100 border border-gray-200' : 'bg-gray-800'} rounded-lg overflow-hidden`}>
+                                    <div className={`relative h-24 ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'}`}>
                                         {it.posterUrl && <Image src={it.posterUrl} alt={it.title} fill className="object-cover" />}
                                     </div>
                                     <div className="p-2">
-                                        <p className="font-semibold text-white text-xs truncate">{it.title}</p>
+                                        <p className="font-semibold text-slate-900 dark:text-white text-xs truncate">{it.title}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    ) : <p className="text-sm text-gray-500">Anda belum mengunggah aset apa pun.</p>}
+                    ) : <p className="text-sm text-slate-600 dark:text-gray-500">Anda belum mengunggah aset apa pun.</p>}
                   </div>
                 )}
               </section>
@@ -325,19 +335,17 @@ const UserDashboardPage = () => {
       </div>
       
       {/* Modals */}
-      <BengkelDetailModal challenge={selectedChallenge} onClose={handleCloseModal} onSubmissionSuccess={() => fetchData('Dikerjakan')} onView3D={handleView3D} />
+      {selectedChallenge && <BengkelDetailModal challenge={selectedChallenge} onClose={handleCloseModal} onSubmissionSuccess={() => fetchData('Dikerjakan')} onView3D={handleView3D} />}
       {modelViewerSrc && <ThreeDViewerModal src={modelViewerSrc} onClose={() => setModelViewerSrc(null)} />}
 
       <style jsx global>{`
-        .glass-card { background: rgba(31, 41, 55, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-card { 
+          background: rgba(31, 41, 55, 0.4); 
+          backdrop-filter: blur(12px); 
+          -webkit-backdrop-filter: blur(12px); 
+          border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
         .font-display { font-family: 'Space Grotesk', sans-serif; }
-        body { font-family: 'Inter', sans-serif; }
-        .form-input { width: 100%; background-color: #1f2937; border: 1px solid #4b5563; color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; transition: all 0.2s; }
-        .form-input:focus { outline: none; border-color: #9EFF00; box-shadow: 0 0 0 2px #9EFF0040; }
-        .btn-primary { background-color: #9EFF00; color: #111827; font-weight: 700; padding: 0.6rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-primary:hover { transform: scale(1.05); }
-        .btn-secondary { background-color: transparent; border: 1px solid #4b5563; color: #d1d5db; font-weight: 600; padding: 0.4rem 1rem; border-radius: 0.5rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-secondary:hover { background-color: #374151; border-color: #6b7280; }
       `}</style>
     </>
   );

@@ -3,6 +3,7 @@
 import React from 'react';
 import { FaTimes } from 'react-icons/fa';
 import ModelViewer from './ModelViewer';
+import { useTheme } from '@/context/ThemeContext';
 
 interface ThreeDViewerModalProps {
   src: string;
@@ -10,17 +11,19 @@ interface ThreeDViewerModalProps {
 }
 
 const ThreeDViewerModal: React.FC<ThreeDViewerModalProps> = ({ src, onClose }) => {
+  const { theme } = useTheme();
+  
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-2xl w-full max-w-4xl p-4 relative z-10"
+        className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-lg shadow-2xl w-full max-w-4xl p-4 relative z-10`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl z-10"
+          className={`absolute top-2 right-2 ${theme === 'light' ? 'text-gray-500 hover:text-gray-800' : 'text-gray-400 hover:text-gray-200'} text-2xl z-10`}
           onClick={onClose}
           aria-label="Tutup penampil 3D"
         >

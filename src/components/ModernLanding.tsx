@@ -24,6 +24,7 @@ const GlobalStyles = () => (
     }
     .lime-glow { box-shadow: 0 0 15px rgba(158,255,0,0.4), 0 0 5px rgba(158,255,0,0.6); }
     .green-glow { box-shadow: 0 0 15px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.6); }
+    .blue-glow { box-shadow: 0 0 15px rgba(59,130,246,0.4), 0 0 5px rgba(59,130,246,0.6); }
   `}</style>
 );
 
@@ -86,13 +87,13 @@ const Hero = () => {
     <section className="min-h-screen flex items-center justify-center text-center pt-20">
       <div className="relative z-10 max-w-4xl mx-auto px-4">
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight mb-6 text-slate-900 dark:text-gray-100">
-          3D<span className="text-green-600 dark:text-lime-400">KONEK</span>
+          3D<span className={`${theme === 'light' ? 'text-blue-600' : 'text-lime-400'}`}>KONEK</span>
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-600 dark:text-gray-300 mb-10">
         Platform Koneksi dan Edukasi Desain 3D untuk Semua Kalangan<br></br>Belajar, berkolaborasi, dan berkarya di dunia desain 3D. Terhubung dengan komunitas, akses tantangan, dan kembangkan
         </p>
         <div className="flex justify-center gap-4">
-          <Link href="#fitur" className={`${theme === 'light' ? 'bg-green-600 hover:bg-green-700 green-glow text-white' : 'bg-lime-400 hover:bg-lime-300 lime-glow text-gray-900'} font-bold py-3 px-8 rounded-full flex items-center transition-transform duration-300 hover:scale-105`}>
+          <Link href="#fitur" className={`${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 blue-glow text-white' : 'bg-lime-400 hover:bg-lime-300 lime-glow text-gray-900'} font-bold py-3 px-8 rounded-full flex items-center transition-transform duration-300 hover:scale-105`}>
             <FaBolt className="mr-2" /> Mulai Menjelajah
           </Link>
         </div>
@@ -118,8 +119,8 @@ const Problems = () => {
         </div>
         <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {data.map((p, i) => (
-            <div key={i} className={`${theme === 'light' ? 'glass-card-light border-green-500' : 'glass-card border-lime-400'} p-8 rounded-2xl border-t-2 transform hover:-translate-y-2 transition-transform duration-300`}>
-              <div className={`text-4xl ${theme === 'light' ? 'text-green-600' : 'text-lime-400'} mb-5 inline-block`}>{p.icon}</div>
+            <div key={i} className={`${theme === 'light' ? 'glass-card-light border-blue-500' : 'glass-card border-lime-400'} p-8 rounded-2xl border-t-2 transform hover:-translate-y-2 transition-transform duration-300`}>
+              <div className={`text-4xl ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} mb-5 inline-block`}>{p.icon}</div>
               <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white mb-3">{p.title}</h3>
               <p className="text-slate-600 dark:text-gray-300">{p.desc}</p>
             </div>
@@ -149,7 +150,7 @@ const Workflow = () => {
           {steps.map((s, i) => (
             <div key={i} className="relative p-6">
               <div className="flex items-center mb-4">
-                <div className={`z-10 flex items-center justify-center w-12 h-12 rounded-full ${theme === 'light' ? 'bg-green-600 green-glow text-white' : 'bg-lime-400 lime-glow text-gray-900'} font-bold text-xl`}>{s.step}</div>
+                <div className={`z-10 flex items-center justify-center w-12 h-12 rounded-full ${theme === 'light' ? 'bg-blue-600 blue-glow text-white' : 'bg-lime-400 lime-glow text-gray-900'} font-bold text-xl`}>{s.step}</div>
                 <div className="flex-1 h-0.5 bg-slate-300 dark:bg-gray-700 ml-4 hidden md:block"></div>
               </div>
               <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white mb-2">{s.title}</h3>
@@ -182,7 +183,7 @@ const Features = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((f, i) => (
             <div key={i} className={`${theme === 'light' ? 'glass-card-light' : 'glass-card'} p-8 rounded-2xl transform hover:-translate-y-2 transition-transform duration-300 text-center`}>
-              <div className={`text-5xl ${theme === 'light' ? 'text-green-600' : 'text-lime-400'} mb-6 inline-block`}>{f.icon}</div>
+              <div className={`text-5xl ${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} mb-6 inline-block`}>{f.icon}</div>
               <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white mb-3">{f.title}</h3>
               <p className="text-slate-600 dark:text-gray-300">{f.desc}</p>
             </div>
@@ -201,7 +202,7 @@ const CTA = () => {
       <div className="max-w-3xl mx-auto text-center px-4">
         <h2 className="font-display text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-gray-100">Siap Menciptakan Dampak?</h2>
         <p className="text-lg text-slate-600 dark:text-gray-300 mb-10">Bergabunglah dengan talenta rekayasa lainnya. Daftar sekarang, gratis.</p>
-        <Link href="/register" className={`inline-block ${theme === 'light' ? 'bg-green-600 hover:bg-green-700 green-glow text-white' : 'bg-lime-400 hover:bg-lime-300 lime-glow text-gray-900'} font-bold py-4 px-10 rounded-full text-lg transition-transform duration-300 hover:scale-105`}>
+        <Link href="/register" className={`inline-block ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 blue-glow text-white' : 'bg-lime-400 hover:bg-lime-300 lime-glow text-gray-900'} font-bold py-4 px-10 rounded-full text-lg transition-transform duration-300 hover:scale-105`}>
           Daftar Sekarang
         </Link>
       </div>

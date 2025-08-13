@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { FaTimes, FaPaperPlane, FaComments, FaFileArchive, FaCube, FaDownload, FaFileUpload } from 'react-icons/fa';
 import { Challenge } from './ChallengeCard';
 import Link from 'next/link';
+import { useTheme } from '@/context/ThemeContext';
 
 type SubmissionItem = {
   id: number;
@@ -21,6 +22,7 @@ interface ModalProps {
 }
 
 const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmissionSuccess, onView3D }) => {
+  const { theme } = useTheme();
   const [submissionFile, setSubmissionFile] = useState<File | null>(null);
   const [submissionNotes, setSubmissionNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,7 +122,7 @@ const BengkelDetailModal: React.FC<ModalProps> = ({ challenge, onClose, onSubmis
                                     <a href={sub.fileUrl} download className="text-gray-400 hover:underline font-semibold inline-flex items-center gap-1.5 text-sm"><FaDownload /> Unduh</a>
                                 </div>
                             </div>
-                            <span className={`font-bold px-2 py-0.5 rounded-full text-xs ${sub.status === 'APPROVED' ? 'bg-green-500/20 text-green-300' : sub.status === 'REVISION_REQUESTED' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-blue-500/20 text-blue-300'}`}>{sub.status}</span>
+                            <span className={`font-bold px-2 py-0.5 rounded-full text-xs ${sub.status === 'APPROVED' ? theme === 'light' ? 'bg-blue-500/20 text-blue-600' : 'bg-green-500/20 text-green-300' : sub.status === 'REVISION_REQUESTED' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-blue-500/20 text-blue-300'}`}>{sub.status}</span>
                         </li>
                     ))}
                 </ul>

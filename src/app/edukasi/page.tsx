@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { FaPlayCircle, FaBlender } from 'react-icons/fa';
+import { useTheme } from '@/context/ThemeContext';
 
 // Tipe data untuk setiap modul pembelajaran
 interface Module {
@@ -91,16 +92,17 @@ const learningModules: Module[] = [
 const EdukasiPage = () => {
   // State untuk menyimpan modul yang sedang diputar
   const [selectedModule, setSelectedModule] = useState<Module>(learningModules[0]);
+  const { theme } = useTheme();
 
   return (
-    <div className="bg-gray-900 min-h-screen text-gray-50 flex flex-col">
+    <div className={`${theme === 'dark' ? 'bg-gray-900 text-gray-50' : 'bg-gray-50 text-gray-900'} min-h-screen flex flex-col transition-colors duration-300`}>
       <Header />
       <main className="flex-grow pt-28 pb-20">
         <div className="container mx-auto px-8">
           <div className="text-center mb-16">
-            <FaBlender className="text-5xl text-lime-400 mx-auto mb-4" />
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-white">Pusat Edukasi 3D</h1>
-            <p className="text-lg text-gray-400 mt-4 max-w-3xl mx-auto">
+            <FaBlender className={`text-5xl ${theme === 'dark' ? 'text-lime-400' : 'text-blue-500'} mx-auto mb-4`} />
+            <h1 className={`font-display text-4xl md:text-5xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Pusat Edukasi 3D</h1>
+            <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-4 max-w-3xl mx-auto`}>
               Tingkatkan keterampilan Anda dengan modul pembelajaran gratis untuk mendukung kemandirian talenta rekayasa Indonesia.
             </p>
           </div>
@@ -121,16 +123,16 @@ const EdukasiPage = () => {
                   className="w-full h-full"
                 ></iframe>
               </div>
-              <div className="glass-card p-6 rounded-2xl">
-                <h2 className="font-display text-2xl font-bold text-white">{selectedModule.title}</h2>
-                <p className="text-gray-300 mt-2 leading-relaxed">{selectedModule.description}</p>
+              <div className={`${theme === 'dark' ? 'glass-card' : 'bg-white border border-gray-200 shadow-lg'} p-6 rounded-2xl`}>
+                <h2 className={`font-display text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{selectedModule.title}</h2>
+                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mt-2 leading-relaxed`}>{selectedModule.description}</p>
               </div>
             </div>
 
             {/* Kolom Kanan: Daftar Putar (Playlist) */}
             <div className="lg:col-span-1">
-              <div className="glass-card p-6 rounded-2xl h-full">
-                <h3 className="font-display text-xl font-bold text-white border-b border-white/10 pb-3 mb-4">Daftar Modul</h3>
+              <div className={`${theme === 'dark' ? 'glass-card' : 'bg-white border border-gray-200 shadow-lg'} p-6 rounded-2xl h-full`}>
+                <h3 className={`font-display text-xl font-bold ${theme === 'dark' ? 'text-white border-white/10' : 'text-gray-900 border-gray-200'} border-b pb-3 mb-4`}>Daftar Modul</h3>
                 <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
                   {learningModules.map((module, index) => (
                     <button
@@ -138,19 +140,27 @@ const EdukasiPage = () => {
                       onClick={() => setSelectedModule(module)}
                       className={`w-full text-left p-4 rounded-lg transition-colors flex items-center gap-4 ${
                         selectedModule.id === module.id
-                          ? 'bg-lime-400/20'
-                          : 'hover:bg-gray-700/50'
+                          ? (theme === 'dark' ? 'bg-lime-400/20' : 'bg-blue-50')
+                          : (theme === 'dark' ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50')
                       }`}
                     >
-                      <div className={`font-display text-lg font-bold ${selectedModule.id === module.id ? 'text-lime-400' : 'text-gray-500'}`}>
+                      <div className={`font-display text-lg font-bold ${
+                        selectedModule.id === module.id 
+                          ? (theme === 'dark' ? 'text-lime-400' : 'text-blue-600') 
+                          : (theme === 'dark' ? 'text-gray-500' : 'text-gray-400')
+                      }`}>
                         {String(index + 1).padStart(2, '0')}
                       </div>
                       <div className="flex-grow">
-                        <h4 className={`font-semibold ${selectedModule.id === module.id ? 'text-white' : 'text-gray-300'}`}>{module.title}</h4>
-                        <p className="text-xs text-gray-400">{module.duration}</p>
+                        <h4 className={`font-semibold ${
+                          selectedModule.id === module.id 
+                            ? (theme === 'dark' ? 'text-white' : 'text-gray-900') 
+                            : (theme === 'dark' ? 'text-gray-300' : 'text-gray-700')
+                        }`}>{module.title}</h4>
+                        <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{module.duration}</p>
                       </div>
                       {selectedModule.id === module.id && (
-                        <FaPlayCircle className="text-lime-400 text-xl flex-shrink-0" />
+                        <FaPlayCircle className={`${theme === 'dark' ? 'text-lime-400' : 'text-blue-600'} text-xl flex-shrink-0`} />
                       )}
                     </button>
                   ))}

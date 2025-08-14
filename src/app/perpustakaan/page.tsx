@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -25,7 +26,7 @@ const ALL_CATEGORIES = ["Semua", ...LIBRARY_CATEGORIES];
 const CATEGORY_DISPLAY_LIMIT = 7; // Batas jumlah kategori yang ditampilkan awalnya
 
 // Komponen untuk Kartu Item di Perpustakaan
-const LibraryItemCard = ({ item }: { item: GalleryItem }) => {
+const LibraryItemCard = ({ item, purchaseRefreshKey }: { item: GalleryItem; purchaseRefreshKey?: number }) => {
     const { theme } = useTheme();
     
     return (
@@ -38,7 +39,7 @@ const LibraryItemCard = ({ item }: { item: GalleryItem }) => {
                 <p className="text-sm text-slate-600 dark:text-gray-400 mb-4">by {item.author.name || 'Anonim'}</p>
                 <div className="mt-auto">
                     {item.isPaid ? (
-                        <PaidDownloadButton itemId={item.id} price={item.price} />
+                        <PaidDownloadButton itemId={item.id} price={item.price} refreshKey={purchaseRefreshKey} />
                     ) : (
                         <a 
                           href={`/api/gallery/download?itemId=${item.id}`}
@@ -54,24 +55,73 @@ const LibraryItemCard = ({ item }: { item: GalleryItem }) => {
 };
 
 // Komponen untuk Tombol Unduh Berbayar
-const PaidDownloadButton = ({ itemId, price }: { itemId: number; price: number }) => {
+const PaidDownloadButton = ({ itemId, price, refreshKey }: { itemId: number; price: number; refreshKey?: number }) => {
     const { theme } = useTheme();
-    // Logika untuk cek akses dan pembelian bisa ditambahkan di sini
-    // Untuk saat ini, kita buat tombol statis
+    const { data: session } = useSession();
+    const [isPurchased, setIsPurchased] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const checkPurchaseStatus = async () => {
+            if (!session?.user) {
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/gallery/purchased?itemId=${itemId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setIsPurchased(data.purchased);
+                }
+            } catch (error) {
+                console.error('Error checking purchase status:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkPurchaseStatus();
+    }, [itemId, session, refreshKey]); // Tambahkan refreshKey sebagai dependency
+
+    if (isLoading) {
+        return (
+            <div className={`w-full ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'} text-gray-500 font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2`}>
+                Mengecek...
+            </div>
+        );
+    }
+
+    if (isPurchased) {
+        return (
+            <a 
+                href={`/api/gallery/download?itemId=${itemId}`}
+                className={`w-full text-center block ${theme === 'light' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-400 text-white'} font-bold py-2 px-4 rounded-lg transition-colors text-sm flex items-center justify-center gap-2`}
+            >
+                <FaDownload /> Unduh
+            </a>
+        );
+    }
+
     return (
-        <button className={`w-full ${theme === 'light' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-amber-500 hover:bg-amber-600'} text-white font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors`}>
+        <Link 
+            href={`/perpustakaan/checkout/${itemId}`}
+            className={`w-full ${theme === 'light' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-amber-500 hover:bg-amber-600'} text-white font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors`}
+        >
             <FaDollarSign /> Beli Rp {new Intl.NumberFormat('id-ID').format(price)}
-        </button>
+        </Link>
     );
 };
 
 const PerpustakaanPage = () => {
   const { data: session, status } = useSession();
   const { theme } = useTheme();
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
-  const [showAllCategories, setShowAllCategories] = useState(false); // State untuk show more/less
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [purchaseRefreshKey, setPurchaseRefreshKey] = useState(0); // Key untuk trigger refresh pembelian
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -88,6 +138,22 @@ const PerpustakaanPage = () => {
     };
     fetchItems();
   }, [selectedCategory]);
+
+  // Effect untuk menangani success purchase redirect
+  useEffect(() => {
+    const purchaseSuccess = searchParams.get('purchaseSuccess');
+    if (purchaseSuccess) {
+      console.log('Purchase successful for item:', purchaseSuccess);
+      // Trigger refresh untuk komponen PaidDownloadButton
+      setPurchaseRefreshKey(prev => prev + 1);
+      
+      // Hapus parameter dari URL tanpa reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete('purchaseSuccess');
+      url.searchParams.delete('t');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  }, [searchParams]);
   
   const displayedCategories = showAllCategories ? ALL_CATEGORIES : ALL_CATEGORIES.slice(0, CATEGORY_DISPLAY_LIMIT);
 
@@ -169,7 +235,7 @@ const PerpustakaanPage = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                   {items.map(item => (
-                    <LibraryItemCard key={item.id} item={item} />
+                    <LibraryItemCard key={item.id} item={item} purchaseRefreshKey={purchaseRefreshKey} />
                   ))}
                 </div>
               )}

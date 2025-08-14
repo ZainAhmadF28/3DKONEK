@@ -12,8 +12,30 @@ import path from 'path';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
+  const itemIdParam = searchParams.get('itemId');
 
   try {
+    // Jika ada itemId, ambil item spesifik
+    if (itemIdParam) {
+      const itemId = parseInt(itemIdParam);
+      if (isNaN(itemId)) {
+        return NextResponse.json({ message: 'Invalid item ID.' }, { status: 400 });
+      }
+
+      const item = await prisma.galleryItem.findUnique({
+        where: { id: itemId },
+        include: {
+          author: { select: { name: true } },
+        },
+      });
+
+      if (!item) {
+        return NextResponse.json({ message: 'Item tidak ditemukan.' }, { status: 404 });
+      }
+
+      return NextResponse.json(item);
+    }
+
     // Jika admin sedang login, tampilkan semua (pending maupun approved)
     // Jika bukan admin / publik, hanya tampilkan yang sudah approved
     const session = await getServerSession(authOptions);

@@ -7,10 +7,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaFilePdf, FaCheck, FaComments, FaCube, FaDownload, FaUser, FaBook, FaPlus } from 'react-icons/fa';
+import { FaCheck, FaComments, FaCube, FaDownload, FaPlus } from 'react-icons/fa';
 import ChallengeCard, { Challenge } from '@/components/ChallengeCard';
 import BengkelDetailModal from '@/components/BengkelDetailModal';
-import ProposalStatusBadge from '@/components/ProposalStatusBadge';
 import ThreeDViewerModal from '@/components/ThreeDViewerModal';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -22,6 +21,20 @@ interface MyChallenge extends Challenge {
     solver: { id: number; name: string | null; } | null;
 }
 interface MyLibraryItem { id: number; title: string; isPaid: boolean; price: number; isApproved: boolean; posterUrl?: string | null; }
+interface MyPurchase {
+    id: number;
+    createdAt: string;
+    item: {
+        id: number;
+        title: string;
+        price: number;
+        posterUrl: string | null;
+        fileUrl: string;
+        description: string | null;
+        category: string;
+        isApproved: boolean;
+    };
+}
 
 // Komponen Panel Profil
 const ProfilePanel = () => {
@@ -92,7 +105,13 @@ const ProfilePanel = () => {
 };
 
 // Komponen untuk menampilkan tantangan yang dibuat pengguna
-const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }) => {
+const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }: {
+    challenge: MyChallenge;
+    onApprove: (proposalId: number) => void;
+    onReview: (submissionId: number, status: 'APPROVED' | 'REVISION_REQUESTED') => void;
+    onView3D: (fileUrl: string) => void;
+}) => {
+    const { theme } = useTheme();
     return (
         <div className="glass-card rounded-2xl overflow-hidden">
             <div className="p-6">
@@ -115,7 +134,7 @@ const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }) =
                         <h4 className="font-semibold text-gray-300 mb-2">Proposal Masuk ({challenge.proposals?.length || 0})</h4>
                         {challenge.proposals?.length > 0 ? (
                             <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                                {challenge.proposals.map(p => (
+                                {challenge.proposals.map((p: { id: number; message: string; fileUrl: string | null; author: { name: string | null; } }) => (
                                     <div key={p.id} className="bg-gray-800 p-3 rounded-lg flex justify-between items-center">
                                         <p className="text-sm text-gray-200 font-semibold">{p.author.name}</p>
                                         <button onClick={() => onApprove(p.id)} className="btn-primary text-xs !py-1 !px-3"><FaCheck /> Setujui</button>
@@ -131,7 +150,7 @@ const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }) =
                         {challenge.submissions?.length > 0 ? (
                              <div className="bg-gray-800 p-3 rounded-lg flex justify-between items-center">
                                  <div>
-                                    <p className="text-sm text-gray-200 font-semibold">Dari: {challenge.solver.name}</p>
+                                    <p className="text-sm text-gray-200 font-semibold">Dari: {challenge.solver?.name || 'Tidak diketahui'}</p>
                                     <div className="flex items-center gap-4 mt-1">
                                         <button onClick={() => onView3D(challenge.submissions[0].fileUrl)} className="text-lime-400 hover:underline text-xs font-semibold inline-flex items-center gap-1.5"><FaCube /> Lihat 3D</button>
                                         <a href={challenge.submissions[0].fileUrl} download className="text-gray-400 hover:underline text-xs font-semibold inline-flex items-center gap-1.5"><FaDownload /> Unduh</a>
@@ -152,6 +171,75 @@ const CreatedChallengeManager = ({ challenge, onApprove, onReview, onView3D }) =
     );
 };
 
+// Komponen untuk menampilkan kartu pembelian
+const PurchaseCard = ({ purchase, onView3D }: { purchase: MyPurchase; onView3D: (fileUrl: string) => void }) => {
+    const { theme } = useTheme();
+    
+    return (
+        <div className={`${theme === 'light' ? 'bg-white border border-gray-200 shadow-lg' : 'glass-card'} rounded-2xl overflow-hidden hover:scale-105 transition-all duration-300`}>
+            <div className="relative h-48">
+                {purchase.item.posterUrl ? (
+                    <Image 
+                        src={purchase.item.posterUrl} 
+                        alt={purchase.item.title}
+                        fill
+                        className="object-cover"
+                    />
+                ) : (
+                    <div className={`w-full h-full ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'} flex items-center justify-center`}>
+                        <FaCube className={`text-4xl ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`} />
+                    </div>
+                )}
+                <div className="absolute top-3 right-3">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-green-900 text-green-200'}`}>
+                        Dibeli
+                    </span>
+                </div>
+            </div>
+            <div className="p-4">
+                <h3 className={`font-display font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'} text-lg mb-2 line-clamp-2`}>
+                    {purchase.item.title}
+                </h3>
+                <p className={`text-sm ${theme === 'light' ? 'text-slate-600' : 'text-gray-400'} mb-2 line-clamp-2`}>
+                    {purchase.item.description || 'Tidak ada deskripsi'}
+                </p>
+                <div className="flex items-center justify-between mb-3">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-blue-900 text-blue-200'}`}>
+                        {purchase.item.category}
+                    </span>
+                    <span className={`font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+                        Rp {purchase.item.price.toLocaleString('id-ID')}
+                    </span>
+                </div>
+                <div className={`text-xs ${theme === 'light' ? 'text-slate-500' : 'text-gray-500'} mb-3`}>
+                    Dibeli pada: {new Date(purchase.createdAt).toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })}
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => onView3D(purchase.item.fileUrl)}
+                        className={`flex-1 ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-2 px-4 rounded-lg transition-all flex items-center justify-center gap-2`}
+                    >
+                        <FaCube />
+                        Lihat 3D
+                    </button>
+                    <a
+                        href={purchase.item.fileUrl}
+                        download
+                        className={`flex-1 ${theme === 'light' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-400 text-white'} font-bold py-2 px-4 rounded-lg transition-all flex items-center justify-center gap-2`}
+                    >
+                        <FaDownload />
+                        Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const UserDashboardPage = () => {
   const router = useRouter();
@@ -162,8 +250,9 @@ const UserDashboardPage = () => {
   const [acceptedChallenges, setAcceptedChallenges] = useState<Challenge[]>([]);
   const [myProposals, setMyProposals] = useState<MyProposal[]>([]);
   const [myLibrary, setMyLibrary] = useState<MyLibraryItem[]>([]);
+  const [myPurchases, setMyPurchases] = useState<MyPurchase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [view, setView] = useState<'Dibuat' | 'Dikerjakan' | 'Diajukan'>('Dibuat');
+  const [view, setView] = useState<'Dibuat' | 'Dikerjakan' | 'Diajukan' | 'Pembelian'>('Dibuat');
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [modelViewerSrc, setModelViewerSrc] = useState<string | null>(null);
 
@@ -173,13 +262,15 @@ const UserDashboardPage = () => {
         let res;
         if (currentView === 'Dibuat') res = await fetch('/api/akun/challenges');
         else if (currentView === 'Dikerjakan') res = await fetch('/api/akun/accepted-challenges');
-        else res = await fetch('/api/akun/proposed-challenges');
+        else if (currentView === 'Diajukan') res = await fetch('/api/akun/proposed-challenges');
+        else if (currentView === 'Pembelian') res = await fetch('/api/akun/purchases');
         
-        if (res.ok) {
+        if (res && res.ok) {
             const data = await res.json();
             if (currentView === 'Dibuat') setMyChallenges(data);
             else if (currentView === 'Dikerjakan') setAcceptedChallenges(data);
-            else setMyProposals(data);
+            else if (currentView === 'Diajukan') setMyProposals(data);
+            else if (currentView === 'Pembelian') setMyPurchases(data);
         }
     } catch (error) { console.error('Gagal mengambil data:', error); }
     finally { setIsLoading(false); }
@@ -190,7 +281,11 @@ const UserDashboardPage = () => {
     if (status === 'authenticated') {
       fetchData(view);
       // Fetch library data in background
-      fetch('/api/akun/library').then(res => res.ok && res.json().then(setMyLibrary));
+      fetch('/api/akun/library').then(res => {
+        if (res.ok) {
+          res.json().then(setMyLibrary);
+        }
+      });
     }
   }, [status, router, view]);
 
@@ -256,11 +351,19 @@ const UserDashboardPage = () => {
                     {myProposals.map(p => <ChallengeCard key={p.id} challenge={p.challenge} onClick={() => {}} />)}
                 </div>
             ) : <EmptyState message="Anda belum mengajukan proposal." actionText="Cari Tantangan" actionLink="/tantangan" />;
+        case 'Pembelian':
+            return myPurchases.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {myPurchases.map(purchase => (
+                        <PurchaseCard key={purchase.id} purchase={purchase} onView3D={handleView3D} />
+                    ))}
+                </div>
+            ) : <EmptyState message="Anda belum membeli asset 3D apapun." actionText="Jelajahi Perpustakaan" actionLink="/perpustakaan" />;
         default: return null;
     }
   };
   
-  const EmptyState = ({ message, actionText, actionLink }: any) => (
+  const EmptyState = ({ message, actionText, actionLink }: { message: string; actionText: string; actionLink: string }) => (
       <div className={`text-center py-16 px-6 ${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} rounded-2xl`}>
           <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white">{message}</h3>
           <Link href={actionLink} className={`mt-4 inline-block ${theme === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-lime-400 hover:bg-lime-300 text-gray-900'} font-bold py-3 px-6 rounded-lg transition-colors`}>
@@ -288,8 +391,8 @@ const UserDashboardPage = () => {
                 
                 <div className={`${theme === 'light' ? 'bg-white shadow-lg border border-gray-200' : 'glass-card'} p-6 rounded-2xl`}>
                     <div className={`flex border-b ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} mb-6`}>
-                        {['Dibuat', 'Dikerjakan', 'Diajukan'].map(tab => (
-                            <button key={tab} onClick={() => setView(tab as 'Dibuat' | 'Dikerjakan' | 'Diajukan')} 
+                        {['Dibuat', 'Dikerjakan', 'Diajukan', 'Pembelian'].map(tab => (
+                            <button key={tab} onClick={() => setView(tab as 'Dibuat' | 'Dikerjakan' | 'Diajukan' | 'Pembelian')} 
                                 className={`py-2 px-4 text-sm font-semibold transition-colors ${view === tab ? 
                                   theme === 'light' 
                                     ? 'border-b-2 border-blue-600 text-blue-600' 

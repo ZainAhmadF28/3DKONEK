@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -113,10 +113,31 @@ const PaidDownloadButton = ({ itemId, price, refreshKey }: { itemId: number; pri
     );
 };
 
+// Komponen untuk menangani search params
+const PurchaseStatusHandler = ({ onPurchaseSuccess }: { onPurchaseSuccess: () => void }) => {
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const purchaseSuccess = searchParams.get('purchaseSuccess');
+        if (purchaseSuccess) {
+            console.log('Purchase successful for item:', purchaseSuccess);
+            // Trigger refresh untuk komponen PaidDownloadButton
+            onPurchaseSuccess();
+            
+            // Hapus parameter dari URL tanpa reload
+            const url = new URL(window.location.href);
+            url.searchParams.delete('purchaseSuccess');
+            url.searchParams.delete('t');
+            window.history.replaceState({}, '', url.pathname + url.search);
+        }
+    }, [searchParams, onPurchaseSuccess]);
+
+    return null; // Komponen ini tidak merender apapun
+};
+
 const PerpustakaanPage = () => {
   const { data: session, status } = useSession();
   const { theme } = useTheme();
-  const searchParams = useSearchParams();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
@@ -139,27 +160,20 @@ const PerpustakaanPage = () => {
     fetchItems();
   }, [selectedCategory]);
 
-  // Effect untuk menangani success purchase redirect
-  useEffect(() => {
-    const purchaseSuccess = searchParams.get('purchaseSuccess');
-    if (purchaseSuccess) {
-      console.log('Purchase successful for item:', purchaseSuccess);
-      // Trigger refresh untuk komponen PaidDownloadButton
-      setPurchaseRefreshKey(prev => prev + 1);
-      
-      // Hapus parameter dari URL tanpa reload
-      const url = new URL(window.location.href);
-      url.searchParams.delete('purchaseSuccess');
-      url.searchParams.delete('t');
-      window.history.replaceState({}, '', url.pathname + url.search);
-    }
-  }, [searchParams]);
+  // Function untuk trigger refresh purchase
+  const handlePurchaseSuccess = () => {
+    setPurchaseRefreshKey(prev => prev + 1);
+  };
   
   const displayedCategories = showAllCategories ? ALL_CATEGORIES : ALL_CATEGORIES.slice(0, CATEGORY_DISPLAY_LIMIT);
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen text-slate-900 dark:text-gray-50 flex flex-col transition-colors duration-300">
       <Header />
+      {/* Suspense boundary untuk useSearchParams */}
+      <Suspense fallback={null}>
+        <PurchaseStatusHandler onPurchaseSuccess={handlePurchaseSuccess} />
+      </Suspense>
       <main className="flex-grow pt-28 pb-20">
         {/* PERBAIKAN: Menambahkan padding horizontal (px-8) yang lebih lega */}
         <div className="container mx-auto px-8">
@@ -272,4 +286,34 @@ const PerpustakaanPage = () => {
   );
 };
 
-export default PerpustakaanPage;
+export default function PerpustakaanPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="bg-white dark:bg-gray-900 min-h-screen text-slate-900 dark:text-gray-50 flex flex-col transition-colors duration-300">
+        <Header />
+        <main className="flex-grow pt-28 pb-20">
+          <div className="container mx-auto px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-16 gap-y-12">
+              <aside className="lg:col-span-1 lg:sticky lg:top-28 h-fit z-10">
+                <div className="space-y-10">
+                  <div>
+                    <h1 className="font-display text-3xl md:text-3xl font-bold text-slate-900 dark:text-white">Perpustakaan 3D</h1>
+                    <p className="text-lg text-slate-600 dark:text-gray-400 mt-2">Jelajahi koleksi aset dari komunitas perekayasa.</p>
+                  </div>
+                </div>
+              </aside>
+              <div className="lg:col-span-3">
+                <div className="text-center py-16">
+                  <p className="text-gray-600 dark:text-gray-400">Memuat...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <PerpustakaanPage />
+    </Suspense>
+  );
+}

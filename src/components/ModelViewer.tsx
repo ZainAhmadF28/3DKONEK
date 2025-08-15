@@ -9,7 +9,7 @@ interface ModelViewerProps {
 
 const ModelViewer: React.FC<ModelViewerProps> = ({ src, alt }) => {
   return (
-    <div className="w-full h-96 md:h-[60vh] border rounded-lg overflow-hidden bg-slate-100">
+    <div className="w-full h-full flex items-center justify-center">
       <model-viewer
         src={src}
         alt={alt}
@@ -17,6 +17,10 @@ const ModelViewer: React.FC<ModelViewerProps> = ({ src, alt }) => {
         auto-rotate
         ar
         shadow-intensity="1"
+        camera-orbit="0deg 75deg 105%"
+        field-of-view="30deg"
+        min-camera-orbit="auto auto 50%"
+        max-camera-orbit="auto auto 200%"
         style={{ width: '100%', height: '100%' }}
       ></model-viewer>
     </div>

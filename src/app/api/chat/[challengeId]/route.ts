@@ -2,18 +2,17 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
-import { writeFile, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadToSupabase } from '@/lib/supabaseStorage';
 
 // Fungsi helper untuk memverifikasi akses pengguna ke chat
 async function verifyUserAccess(userId: number, challengeId: number) {
-    const challenge = await prisma.challenge.findUnique({
-        where: { id: challengeId },
-        select: { challengerId: true, solverId: true }
-    });
-    if (!challenge) return false;
-    // User punya akses jika dia adalah pembuat atau pengerja tantangan
-    return userId === challenge.challengerId || userId === challenge.solverId;
+  const challenge = await prisma.challenge.findUnique({
+    where: { id: challengeId },
+    select: { challengerId: true, solverId: true }
+  });
+  if (!challenge) return false;
+  // User punya akses jika dia adalah pembuat atau pengerja tantangan
+  return userId === challenge.challengerId || userId === challenge.solverId;
 }
 
 // Handler untuk MENGAMBIL pesan
@@ -30,16 +29,16 @@ export async function GET(
     const challengeId = parseInt(params.challengeId, 10);
     const hasAccess = await verifyUserAccess(session.user.id, challengeId);
     if (!hasAccess) {
-        return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
+      return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
     }
 
     const messages = await prisma.privateMessage.findMany({
       where: { challengeId: challengeId },
       // PERBAIKAN: Menggunakan relasi 'sender' bukan 'author'
-      include: { 
-        sender: { 
-          select: { id: true, name: true } 
-        } 
+      include: {
+        sender: {
+          select: { id: true, name: true }
+        }
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -72,20 +71,9 @@ export async function POST(
       content = (formData.get('content') as string) || null;
       const file = formData.get('file') as File | null;
       if (file) {
-        const uploadDir = path.join(process.cwd(), 'public/uploads/chat');
-        try {
-          await stat(uploadDir);
-        } catch (e: unknown) {
-          if (e.code === 'ENOENT') {
-            await mkdir(uploadDir, { recursive: true });
-          } else {
-            throw e;
-          }
-        }
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-        await writeFile(path.join(uploadDir, filename), buffer);
-        fileUrl = `/uploads/chat/${filename}`;
+        fileUrl = await uploadToSupabase(buffer, 'uploads', 'chat', filename, file.type);
         fileType = file.type;
       }
     } else {
@@ -94,7 +82,7 @@ export async function POST(
     }
     const hasAccess = await verifyUserAccess(session.user.id, challengeId);
     if (!hasAccess) {
-        return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
+      return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
     }
 
     if ((!content || content.trim() === '') && !fileUrl) {
@@ -103,14 +91,14 @@ export async function POST(
 
     // Tentukan siapa pengirim dan penerima
     const challenge = await prisma.challenge.findUnique({
-        where: { id: challengeId },
-        select: { challengerId: true, solverId: true }
+      where: { id: challengeId },
+      select: { challengerId: true, solverId: true }
     });
 
     if (!challenge || !challenge.solverId) {
-        return NextResponse.json({ message: 'Tantangan tidak valid atau belum memiliki pengerja.' }, { status: 400 });
+      return NextResponse.json({ message: 'Tantangan tidak valid atau belum memiliki pengerja.' }, { status: 400 });
     }
-    
+
     const senderId = session.user.id;
     const receiverId = senderId === challenge.challengerId ? challenge.solverId : challenge.challengerId;
 
@@ -125,10 +113,10 @@ export async function POST(
         fileType,
       },
       // PERBAIKAN: Menggunakan relasi 'sender'
-      include: { 
-        sender: { 
-          select: { id: true, name: true } 
-        } 
+      include: {
+        sender: {
+          select: { id: true, name: true }
+        }
       },
     });
 

@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
-import { writeFile, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadToSupabase } from '@/lib/supabaseStorage';
 
 export async function GET(request: Request) {
   try {
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
   if (session.user.role !== 'UMUM' && session.user.role !== 'ADMIN') {
     return NextResponse.json({ message: 'Hanya pengguna dengan role UMUM yang dapat membuat tantangan.' }, { status: 403 });
   }
-  
+
   const userExists = await prisma.user.findUnique({
     where: { id: session.user.id },
   });
@@ -72,23 +71,14 @@ export async function POST(request: Request) {
     if (!title || !category || !description || !reward || !deadline || imageFiles.length === 0) {
       return NextResponse.json({ message: 'Semua kolom wajib diisi.' }, { status: 400 });
     }
-    
-    // ... (logika upload file tetap sama)
-    const uploadDir = path.join(process.cwd(), 'public/uploads/challenges');
-    try {
-      await stat(uploadDir);
-    } catch (e: unknown) {
-      if (typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 'ENOENT') {
-        await mkdir(uploadDir, { recursive: true });
-      } else { throw e; }
-    }
+
+    // ... (logika upload file ke Supabase)
     const imageUrlPaths: string[] = [];
     for (const imageFile of imageFiles) {
-        const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const filename = Date.now() + '-' + imageFile.name.replace(/\s/g, '_');
-        const uploadPath = path.join(uploadDir, filename);
-        await writeFile(uploadPath, buffer);
-        imageUrlPaths.push(`/uploads/challenges/${filename}`);
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      const filename = `${Date.now()}-${imageFile.name.replace(/\s/g, '_')}`;
+      const fileUrl = await uploadToSupabase(buffer, 'uploads', 'challenges', filename, imageFile.type);
+      imageUrlPaths.push(fileUrl);
     }
 
     const newChallenge = await prisma.challenge.create({

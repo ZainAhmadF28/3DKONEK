@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { writeFile, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadToSupabase } from '@/lib/supabaseStorage';
 
 /**
  * Handler untuk GET request.
@@ -94,28 +93,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Judul, kategori, dan file .glb wajib diisi.' }, { status: 400 });
     }
 
-    // Logika upload file
-    const uploadDir = path.join(process.cwd(), 'public/uploads/gallery');
-    try {
-      await stat(uploadDir);
-    } catch (e: any) {
-      if (e.code === 'ENOENT') {
-        await mkdir(uploadDir, { recursive: true });
-      } else {
-        throw e;
-      }
-    }
+    // Upload model file to Supabase
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-    await writeFile(path.join(uploadDir, filename), buffer);
-    const fileUrl = `/uploads/gallery/${filename}`;
+    const fileUrl = await uploadToSupabase(buffer, 'uploads', 'gallery', filename, file.type);
 
     let posterUrl: string | undefined = undefined;
     if (poster) {
       const posterBuffer = Buffer.from(await poster.arrayBuffer());
       const posterName = `${Date.now()}-${poster.name.replace(/\s/g, '_')}`;
-      await writeFile(path.join(uploadDir, posterName), posterBuffer);
-      posterUrl = `/uploads/gallery/${posterName}`;
+      posterUrl = await uploadToSupabase(posterBuffer, 'uploads', 'gallery', posterName, poster.type);
     }
 
     // Buat entri baru di database

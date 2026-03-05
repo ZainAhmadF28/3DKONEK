@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { writeFile, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadToSupabase } from '@/lib/supabaseStorage';
 
 // GET: list all communities
 export async function GET() {
@@ -39,16 +38,9 @@ export async function POST(request: Request) {
       description = ((formData.get('description') as string | null)?.trim() || '') || null;
       const avatar = formData.get('avatar') as File | null;
       if (avatar) {
-        const uploadDir = path.join(process.cwd(), 'public/uploads/communities');
-        try { await stat(uploadDir); } catch (e: unknown) {
-          if (typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 'ENOENT') {
-            await mkdir(uploadDir, { recursive: true });
-          } else { throw e; }
-        }
         const buffer = Buffer.from(await avatar.arrayBuffer());
         const filename = `${Date.now()}-${avatar.name.replace(/\s/g, '_')}`;
-        await writeFile(path.join(uploadDir, filename), buffer);
-        avatarUrl = `/uploads/communities/${filename}`;
+        avatarUrl = await uploadToSupabase(buffer, 'uploads', 'communities', filename, avatar.type);
       }
     } else {
       const body = await request.json();

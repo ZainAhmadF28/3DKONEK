@@ -14,8 +14,7 @@ type PostRecord = {
   author?: { name: string | null };
   community?: { id: number; name: string } | null;
 };
-import { writeFile, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadToSupabase } from '@/lib/supabaseStorage';
 
 /**
  * Handler untuk GET request.
@@ -102,20 +101,9 @@ export async function POST(request: Request) {
     let fileType: string | undefined = undefined;
 
     if (file) {
-      const uploadDir = path.join(process.cwd(), 'public/uploads/forum');
-      try {
-        await stat(uploadDir);
-      } catch (e: any) {
-        if (e.code === 'ENOENT') {
-          await mkdir(uploadDir, { recursive: true });
-        } else {
-          throw e;
-        }
-      }
       const buffer = Buffer.from(await file.arrayBuffer());
       const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-      await writeFile(path.join(uploadDir, filename), buffer);
-      fileUrl = `/uploads/forum/${filename}`;
+      fileUrl = await uploadToSupabase(buffer, 'uploads', 'forum', filename, file.type);
       fileType = file.type;
     }
 

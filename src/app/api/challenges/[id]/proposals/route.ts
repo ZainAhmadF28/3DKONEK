@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
-import { writeFile, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadToSupabase } from '@/lib/supabaseStorage';
 
 export async function POST(
   request: Request,
@@ -32,20 +31,9 @@ export async function POST(
     let fileUrl: string | undefined = undefined;
 
     if (file) {
-      const uploadDir = path.join(process.cwd(), 'public/uploads/proposals');
-      try {
-        await stat(uploadDir);
-      } catch (e: unknown) {
-        if (typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 'ENOENT') {
-          await mkdir(uploadDir, { recursive: true });
-        } else {
-          throw e;
-        }
-      }
       const buffer = Buffer.from(await file.arrayBuffer());
       const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-      await writeFile(path.join(uploadDir, filename), buffer);
-      fileUrl = `/uploads/proposals/${filename}`;
+      fileUrl = await uploadToSupabase(buffer, 'uploads', 'proposals', filename, file.type);
     }
 
     const newProposal = await prisma.proposal.create({

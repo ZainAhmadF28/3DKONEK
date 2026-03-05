@@ -4,9 +4,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import * as THREE from 'three';
-import { FaTasks, FaComments, FaBook, FaMapMarkedAlt, FaBoxOpen, FaStar, FaBolt, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaTasks, FaComments, FaBook, FaMapMarkedAlt, FaBoxOpen, FaStar, FaBolt, FaTimes, FaChevronLeft, FaChevronRight, FaCamera } from 'react-icons/fa';
 import { useTheme } from '@/context/ThemeContext';
 import ModelViewer from './ModelViewer';
+import ImageSearch from './ImageSearch';
 
 interface LandingStats {
   stats: {
@@ -129,6 +130,7 @@ const Hero = () => {
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
+  const [showImageSearch, setShowImageSearch] = useState(false);
 
   // Fetch data from API
   useEffect(() => {
@@ -332,6 +334,22 @@ const Hero = () => {
                   <div className="space-y-3">
                     {activeTab === 0 && (
                       <div className="space-y-4">
+                        {/* Image Search Button */}
+                        <div className="flex justify-center mb-4">
+                          <button
+                            onClick={() => setShowImageSearch(true)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed transition-all ${
+                              theme === 'light' 
+                                ? 'border-blue-300 text-blue-600 hover:border-blue-500 hover:bg-blue-50' 
+                                : 'border-lime-300 text-lime-400 hover:border-lime-400 hover:bg-lime-400/10'
+                            }`}
+                            title="Cari asset berdasarkan gambar"
+                          >
+                            <FaCamera />
+                            <span>Cari dengan Gambar</span>
+                          </button>
+                        </div>
+
                         {data.previewData.assets.length > 0 ? (
                           <>
                             {/* 3D Model Viewer */}
@@ -631,6 +649,12 @@ const Hero = () => {
           </div>
         </div>
       )}
+
+      {/* Image Search Modal */}
+      <ImageSearch 
+        isOpen={showImageSearch} 
+        onClose={() => setShowImageSearch(false)} 
+      />
     </section>
   );
 };

@@ -8,8 +8,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HoverModelViewer from '@/components/HoverModelViewer';
 import { LIBRARY_CATEGORIES } from '@/constants/categories';
-import { FaUpload, FaDownload, FaDollarSign, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaUpload, FaDownload, FaDollarSign, FaChevronDown, FaChevronUp, FaSearch, FaCamera } from 'react-icons/fa';
 import { useTheme } from '@/context/ThemeContext';
+import ImageSearch from '@/components/ImageSearch';
 
 interface GalleryItem {
   id: number;
@@ -143,6 +144,23 @@ const PerpustakaanPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [purchaseRefreshKey, setPurchaseRefreshKey] = useState(0); // Key untuk trigger refresh pembelian
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showImageSearch, setShowImageSearch] = useState(false);
+
+  // Handle search parameter from URL (dari ImageSearch results)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchParam = urlParams.get('search');
+      if (searchParam) {
+        setSearchQuery(searchParam);
+        // Remove search param from URL
+        urlParams.delete('search');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -165,6 +183,16 @@ const PerpustakaanPage = () => {
     setPurchaseRefreshKey(prev => prev + 1);
   };
   
+  // Filter items berdasarkan search query
+  const filteredItems = items.filter(item => {
+    const matchesSearch = searchQuery === "" || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.author.name && item.author.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    return matchesSearch;
+  });
+  
   const displayedCategories = showAllCategories ? ALL_CATEGORIES : ALL_CATEGORIES.slice(0, CATEGORY_DISPLAY_LIMIT);
 
   return (
@@ -186,6 +214,38 @@ const PerpustakaanPage = () => {
                 <div>
                     <h1 className="font-display text-3xl md:text-3xl font-bold text-slate-900 dark:text-white">Perpustakaan 3D</h1>
                     <p className="text-lg text-slate-600 dark:text-gray-400 mt-2">Jelajahi koleksi aset dari komunitas perekayasa.</p>
+                </div>
+
+                {/* Search Section */}
+                <div className="space-y-3">
+                  <div className="relative">
+                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Cari asset 3D..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-lime-400 ${
+                        theme === 'light' 
+                          ? 'border-gray-300 bg-white text-gray-900' 
+                          : 'border-gray-600 bg-gray-700 text-white'
+                      }`}
+                    />
+                  </div>
+                  
+                  {/* Image Search Button */}
+                  <button
+                    onClick={() => setShowImageSearch(true)}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed transition-all ${
+                      theme === 'light' 
+                        ? 'border-blue-300 text-blue-600 hover:border-blue-500 hover:bg-blue-50' 
+                        : 'border-lime-300 text-lime-400 hover:border-lime-400 hover:bg-lime-400/10'
+                    }`}
+                    title="Cari berdasarkan gambar"
+                  >
+                    <FaCamera />
+                    <span>Cari dengan Gambar</span>
+                  </button>
                 </div>
 
                 {status === 'authenticated' && (session?.user.role === 'DESAINER' || session?.user.role === 'ADMIN') && (
@@ -248,15 +308,19 @@ const PerpustakaanPage = () => {
                  </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                  {items.map(item => (
+                  {filteredItems.map(item => (
                     <LibraryItemCard key={item.id} item={item} purchaseRefreshKey={purchaseRefreshKey} />
                   ))}
                 </div>
               )}
-              {!loading && items.length === 0 && (
+              {!loading && filteredItems.length === 0 && (
                 <div className={`text-center py-16 ${theme === 'dark' ? 'glass-card' : 'bg-white border border-gray-200'} rounded-2xl`}>
-                    <h3 className={`font-display text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Tidak Ada Model</h3>
-                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-2`}>Belum ada model 3D dalam kategori ini.</p>
+                    <h3 className={`font-display text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {searchQuery ? 'Tidak Ditemukan' : 'Tidak Ada Model'}
+                    </h3>
+                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-2`}>
+                      {searchQuery ? `Tidak ada hasil untuk "${searchQuery}"` : 'Belum ada model 3D dalam kategori ini.'}
+                    </p>
                 </div>
               )}
             </div>
@@ -264,6 +328,13 @@ const PerpustakaanPage = () => {
         </div>
       </main>
       <Footer />
+
+      {/* Image Search Modal */}
+      <ImageSearch 
+        isOpen={showImageSearch} 
+        onClose={() => setShowImageSearch(false)} 
+      />
+
        <style jsx global>{`
             .glass-card {
                 background: rgba(31, 41, 55, 0.4);

@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# user uploads
+/public/uploads
+
 # database
 *.db
 *.db-journal

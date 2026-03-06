@@ -124,16 +124,15 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ isOpen, onClose }) => {
           {/* Image Upload Area */}
           {!selectedImage ? (
             <div
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                theme === 'light' 
-                  ? 'border-gray-300 hover:border-blue-400 bg-gray-50' 
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${theme === 'light'
+                  ? 'border-gray-300 hover:border-blue-400 bg-gray-50'
                   : 'border-gray-600 hover:border-lime-400 bg-gray-700/50'
-              }`}
+                }`}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
-              <div className={`text-6xl mb-4 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
-                📷
+              <div className={`text-6xl mb-4 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'} flex justify-center`}>
+                <FaCamera />
               </div>
               <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
                 Upload Gambar untuk Pencarian
@@ -141,27 +140,25 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ isOpen, onClose }) => {
               <p className="text-slate-600 dark:text-gray-400 mb-6">
                 Drag & drop gambar atau pilih dari perangkat Anda
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold ${
-                    theme === 'light' 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold ${theme === 'light'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-lime-400 hover:bg-lime-300 text-gray-900'
-                  } transition-colors`}
+                    } transition-colors`}
                 >
                   <FaUpload />
                   Pilih Gambar
                 </button>
-                
+
                 <button
                   onClick={() => cameraInputRef.current?.click()}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold border-2 ${
-                    theme === 'light' 
-                      ? 'border-blue-600 text-blue-600 hover:bg-blue-50' 
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold border-2 ${theme === 'light'
+                      ? 'border-blue-600 text-blue-600 hover:bg-blue-50'
                       : 'border-lime-400 text-lime-400 hover:bg-lime-400/10'
-                  } transition-colors`}
+                    } transition-colors`}
                 >
                   <FaCamera />
                   Ambil Foto
@@ -198,15 +195,14 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ isOpen, onClose }) => {
                       <FaTimes className="w-3 h-3" />
                     </button>
                   </div>
-                  
+
                   <button
                     onClick={handleImageSearch}
                     disabled={isLoading}
-                    className={`w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold ${
-                      theme === 'light' 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white disabled:bg-blue-400' 
+                    className={`w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold ${theme === 'light'
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white disabled:bg-blue-400'
                         : 'bg-lime-400 hover:bg-lime-300 text-gray-900 disabled:bg-lime-600'
-                    } transition-colors disabled:cursor-not-allowed`}
+                      } transition-colors disabled:cursor-not-allowed`}
                   >
                     {isLoading ? <FaSpinner className="animate-spin" /> : <FaSearch />}
                     {isLoading ? 'Mencari...' : 'Cari Asset Serupa'}
@@ -245,11 +241,10 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ isOpen, onClose }) => {
                           <Link
                             key={asset.id}
                             href={`/perpustakaan?search=${asset.name}`}
-                            className={`p-4 rounded-xl border transition-all hover:shadow-lg ${
-                              theme === 'light' 
-                                ? 'bg-white border-gray-200 hover:border-blue-400' 
+                            className={`p-4 rounded-xl border transition-all hover:shadow-lg ${theme === 'light'
+                                ? 'bg-white border-gray-200 hover:border-blue-400'
                                 : 'bg-gray-700 border-gray-600 hover:border-lime-400'
-                            }`}
+                              }`}
                             onClick={handleClose}
                           >
                             <div className="flex items-center gap-3">
@@ -284,7 +279,7 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ isOpen, onClose }) => {
                     </div>
                   ) : analysis ? (
                     <div className="text-center py-8">
-                      <div className="text-4xl mb-4">🔍</div>
+                      <div className="text-4xl mb-4 flex justify-center"><FaSearch /></div>
                       <p className="text-slate-600 dark:text-gray-400">
                         Tidak ditemukan asset yang serupa dengan gambar ini.
                       </p>

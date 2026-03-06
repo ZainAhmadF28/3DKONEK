@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import * as THREE from 'three';
-import { FaTasks, FaComments, FaBook, FaMapMarkedAlt, FaBoxOpen, FaStar, FaBolt, FaTimes, FaChevronLeft, FaChevronRight, FaCamera } from 'react-icons/fa';
+import { FaTasks, FaComments, FaBook, FaMapMarkedAlt, FaBoxOpen, FaStar, FaBolt, FaTimes, FaChevronLeft, FaChevronRight, FaCamera, FaPause, FaPlay, FaCalendarAlt, FaUsers, FaClock, FaCogs, FaIndustry, FaBrain, FaGem } from 'react-icons/fa';
 import { useTheme } from '@/context/ThemeContext';
 import ModelViewer from './ModelViewer';
 import ImageSearch from './ImageSearch';
@@ -17,11 +17,11 @@ interface LandingStats {
     tutorials: number;
   };
   previewData: {
-    assets: Array<{ 
+    assets: Array<{
       id: number;
-      name: string; 
-      category: string; 
-      price: string; 
+      name: string;
+      category: string;
+      price: string;
       posterUrl: string | null;
       fileUrl: string;
       description: string | null;
@@ -168,7 +168,7 @@ const Hero = () => {
   useEffect(() => {
     if (activeTab === 0 && data.previewData.assets.length > 1 && !isPaused) {
       const interval = setInterval(() => {
-        setCurrentAssetIndex((prev) => 
+        setCurrentAssetIndex((prev) =>
           prev === data.previewData.assets.length - 1 ? 0 : prev + 1
         );
       }, 5000);
@@ -176,7 +176,7 @@ const Hero = () => {
       return () => clearInterval(interval);
     }
   }, [activeTab, data.previewData.assets.length, isPaused]);
-  
+
   const tabs = [
     {
       title: "Temukan Assets 3D",
@@ -234,7 +234,7 @@ const Hero = () => {
   // Navigation functions for asset carousel
   const nextAsset = () => {
     if (data.previewData.assets.length > 0) {
-      setCurrentAssetIndex((prev) => 
+      setCurrentAssetIndex((prev) =>
         prev === data.previewData.assets.length - 1 ? 0 : prev + 1
       );
     }
@@ -242,14 +242,14 @@ const Hero = () => {
 
   const prevAsset = () => {
     if (data.previewData.assets.length > 0) {
-      setCurrentAssetIndex((prev) => 
+      setCurrentAssetIndex((prev) =>
         prev === 0 ? data.previewData.assets.length - 1 : prev - 1
       );
     }
   };
 
   const currentAsset = data.previewData.assets[currentAssetIndex];
-  
+
   return (
     <section className="min-h-screen flex items-center justify-center pt-32 mt-8">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -286,26 +286,23 @@ const Hero = () => {
                     <button
                       key={index}
                       onClick={() => setActiveTab(index)}
-                      className={`relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-500 group ${
-                        activeTab === index 
-                          ? theme === 'light' 
-                            ? 'bg-blue-600 text-white scale-110 shadow-lg' 
+                      className={`relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-500 group ${activeTab === index
+                          ? theme === 'light'
+                            ? 'bg-blue-600 text-white scale-110 shadow-lg'
                             : 'bg-lime-400 text-gray-900 scale-110 shadow-lg shadow-lime-400/30'
                           : theme === 'light'
                             ? 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                             : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                      }`}
+                        }`}
                     >
                       <span className="text-lg">{tab.icon}</span>
-                      
+
                       {/* Tooltip */}
-                      <div className={`absolute -top-16 left-1/2 transform -translate-x-1/2 px-3 py-2 text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap ${
-                        theme === 'light' ? 'bg-gray-900 text-white' : 'bg-gray-800 text-gray-200'
-                      }`}>
+                      <div className={`absolute -top-16 left-1/2 transform -translate-x-1/2 px-3 py-2 text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap ${theme === 'light' ? 'bg-gray-900 text-white' : 'bg-gray-800 text-gray-200'
+                        }`}>
                         {tab.title}
-                        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
-                          theme === 'light' ? 'border-t-gray-900' : 'border-t-gray-800'
-                        }`}></div>
+                        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${theme === 'light' ? 'border-t-gray-900' : 'border-t-gray-800'
+                          }`}></div>
                       </div>
                     </button>
                   ))}
@@ -323,9 +320,8 @@ const Hero = () => {
                     <p className="text-slate-600 dark:text-gray-300 mb-4">
                       {tabs[activeTab].description}
                     </p>
-                    <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
-                      theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-lime-400/20 text-lime-400'
-                    }`}>
+                    <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-lime-400/20 text-lime-400'
+                      }`}>
                       {tabs[activeTab].stats}
                     </div>
                   </div>
@@ -338,11 +334,10 @@ const Hero = () => {
                         <div className="flex justify-center mb-4">
                           <button
                             onClick={() => setShowImageSearch(true)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed transition-all ${
-                              theme === 'light' 
-                                ? 'border-blue-300 text-blue-600 hover:border-blue-500 hover:bg-blue-50' 
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed transition-all ${theme === 'light'
+                                ? 'border-blue-300 text-blue-600 hover:border-blue-500 hover:bg-blue-50'
                                 : 'border-lime-300 text-lime-400 hover:border-lime-400 hover:bg-lime-400/10'
-                            }`}
+                              }`}
                             title="Cari asset berdasarkan gambar"
                           >
                             <FaCamera />
@@ -353,7 +348,7 @@ const Hero = () => {
                         {data.previewData.assets.length > 0 ? (
                           <>
                             {/* 3D Model Viewer */}
-                            <div 
+                            <div
                               className="relative"
                               onMouseEnter={() => setIsPaused(true)}
                               onMouseLeave={() => setIsPaused(false)}
@@ -364,13 +359,12 @@ const Hero = () => {
                                   alt={currentAsset.name}
                                 />
                               </div>
-                              
+
                               {/* Auto-play indicator */}
                               {data.previewData.assets.length > 1 && (
-                                <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-medium ${
-                                  theme === 'light' ? 'bg-white/80 text-gray-700' : 'bg-gray-800/80 text-gray-300'
-                                } ${isPaused ? 'opacity-50' : ''}`}>
-                                  {isPaused ? '⏸️' : '▶️'} Auto
+                                <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-medium ${theme === 'light' ? 'bg-white/80 text-gray-700' : 'bg-gray-800/80 text-gray-300'
+                                  } ${isPaused ? 'opacity-50' : ''}`}>
+                                  {isPaused ? <FaPause className="inline mr-1" /> : <FaPlay className="inline mr-1" />} Auto
                                 </div>
                               )}
 
@@ -379,21 +373,19 @@ const Hero = () => {
                                 <>
                                   <button
                                     onClick={prevAsset}
-                                    className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full ${
-                                      theme === 'light' 
-                                        ? 'bg-white/80 hover:bg-white text-gray-700' 
+                                    className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full ${theme === 'light'
+                                        ? 'bg-white/80 hover:bg-white text-gray-700'
                                         : 'bg-gray-800/80 hover:bg-gray-800 text-gray-300'
-                                    } flex items-center justify-center transition-all hover:scale-110 shadow-lg`}
+                                      } flex items-center justify-center transition-all hover:scale-110 shadow-lg`}
                                   >
                                     <FaChevronLeft className="text-sm" />
                                   </button>
                                   <button
                                     onClick={nextAsset}
-                                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full ${
-                                      theme === 'light' 
-                                        ? 'bg-white/80 hover:bg-white text-gray-700' 
+                                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full ${theme === 'light'
+                                        ? 'bg-white/80 hover:bg-white text-gray-700'
                                         : 'bg-gray-800/80 hover:bg-gray-800 text-gray-300'
-                                    } flex items-center justify-center transition-all hover:scale-110 shadow-lg`}
+                                      } flex items-center justify-center transition-all hover:scale-110 shadow-lg`}
                                   >
                                     <FaChevronRight className="text-sm" />
                                   </button>
@@ -406,12 +398,12 @@ const Hero = () => {
                                   <div className="flex items-center gap-3">
                                     <div className={`w-8 h-8 rounded-lg ${theme === 'light' ? 'bg-blue-100' : 'bg-lime-400/20'} flex items-center justify-center overflow-hidden`}>
                                       {currentAsset.posterUrl ? (
-                                        <Image 
-                                          src={currentAsset.posterUrl} 
-                                          alt={currentAsset.name} 
+                                        <Image
+                                          src={currentAsset.posterUrl}
+                                          alt={currentAsset.name}
                                           width={32}
                                           height={32}
-                                          className="w-full h-full object-cover rounded-lg" 
+                                          className="w-full h-full object-cover rounded-lg"
                                         />
                                       ) : (
                                         <FaBoxOpen className={`${theme === 'light' ? 'text-blue-600' : 'text-lime-400'} text-sm`} />
@@ -434,11 +426,10 @@ const Hero = () => {
                                       <button
                                         key={index}
                                         onClick={() => setCurrentAssetIndex(index)}
-                                        className={`w-2 h-2 rounded-full transition-all ${
-                                          index === currentAssetIndex
+                                        className={`w-2 h-2 rounded-full transition-all ${index === currentAssetIndex
                                             ? theme === 'light' ? 'bg-blue-600' : 'bg-lime-400'
                                             : 'bg-gray-300 dark:bg-gray-600'
-                                        }`}
+                                          }`}
                                       />
                                     ))}
                                   </div>
@@ -486,11 +477,10 @@ const Hero = () => {
                                 <p className="font-semibold text-slate-900 dark:text-white text-sm">{designer.name}</p>
                                 <p className="text-xs text-slate-500 dark:text-gray-400">{designer.project}</p>
                               </div>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                designer.status === 'Online' ? 'bg-green-100 text-green-800' :
-                                designer.status === 'Busy' ? 'bg-red-100 text-red-800' :
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
+                              <span className={`text-xs px-2 py-1 rounded-full ${designer.status === 'Online' ? 'bg-green-100 text-green-800' :
+                                  designer.status === 'Busy' ? 'bg-red-100 text-red-800' :
+                                    'bg-yellow-100 text-yellow-800'
+                                }`}>
                                 {designer.status}
                               </span>
                             </div>
@@ -513,12 +503,12 @@ const Hero = () => {
                                 <span className="text-green-600 font-bold text-sm">Rp {challenge.reward}</span>
                               </div>
                               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-gray-400">
-                                <span>📅 {challenge.deadline}</span>
-                                <span>👥 {challenge.participants} peserta</span>
+                                <span className="flex items-center gap-1.5"><FaCalendarAlt /> {challenge.deadline}</span>
+                                <span className="flex items-center gap-1.5"><FaUsers /> {challenge.participants} peserta</span>
                               </div>
                               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div className={`h-2 rounded-full ${theme === 'light' ? 'bg-blue-600' : 'bg-lime-400'}`} 
-                                     style={{ width: `${Math.min(challenge.participants * 3, 100)}%` }}></div>
+                                <div className={`h-2 rounded-full ${theme === 'light' ? 'bg-blue-600' : 'bg-lime-400'}`}
+                                  style={{ width: `${Math.min(challenge.participants * 3, 100)}%` }}></div>
                               </div>
                             </div>
                           ))
@@ -534,14 +524,14 @@ const Hero = () => {
                       <div className="space-y-3 relative">
                         {data.previewData.tutorials.length > 0 ? (
                           data.previewData.tutorials.map((course, i) => (
-                            <div 
-                              key={i} 
+                            <div
+                              key={i}
                               className="space-y-2"
                               onMouseEnter={() => setHoveredVideo(course.videoId || null)}
                               onMouseLeave={() => setHoveredVideo(null)}
                             >
                               {/* Tutorial Card */}
-                              <div 
+                              <div
                                 className={`p-4 rounded-xl ${theme === 'light' ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-800/50 hover:bg-gray-700/50'} space-y-2 transition-all duration-300 cursor-pointer relative group`}
                               >
                                 {/* Original Content */}
@@ -556,14 +546,14 @@ const Hero = () => {
                                   <span className={`text-xs px-2 py-1 rounded-full ${getLevelColor(course.level)}`}>
                                     {course.level}
                                   </span>
-                                  <span className="text-xs text-slate-500 dark:text-gray-400">⏱️ {course.duration}</span>
+                                  <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-gray-400"><FaClock /> {course.duration}</span>
                                 </div>
-                                
+
                                 {/* Hover Indicator */}
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                   <div className={`w-6 h-6 ${theme === 'light' ? 'bg-blue-600' : 'bg-lime-400'} rounded-full flex items-center justify-center`}>
                                     <svg className="w-3 h-3 text-white fill-current" viewBox="0 0 24 24">
-                                      <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.68L9.54 5.98C8.87 5.55 8 6.03 8 6.82z"/>
+                                      <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.68L9.54 5.98C8.87 5.55 8 6.03 8 6.82z" />
                                     </svg>
                                   </div>
                                 </div>
@@ -585,7 +575,7 @@ const Hero = () => {
                                     </div>
                                     <div className="flex items-center justify-between mt-2">
                                       <p className="text-xs text-slate-600 dark:text-gray-400">Hover untuk preview video tutorial</p>
-                                      <button 
+                                      <button
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setHoveredVideo(null);
@@ -651,9 +641,9 @@ const Hero = () => {
       )}
 
       {/* Image Search Modal */}
-      <ImageSearch 
-        isOpen={showImageSearch} 
-        onClose={() => setShowImageSearch(false)} 
+      <ImageSearch
+        isOpen={showImageSearch}
+        onClose={() => setShowImageSearch(false)}
       />
     </section>
   );
@@ -662,10 +652,10 @@ const Hero = () => {
 const Problems = () => {
   const { theme } = useTheme();
   const data = [
-    { icon: '⚙️', title: 'Ketergantungan Impor', desc: 'Suku cadang mahal & lama.' },
-    { icon: '🏭', title: 'Kuburan Mesin', desc: 'Mesin mangkrak karena satu komponen.' },
-    { icon: '🧠', title: 'Kesenjangan Talenta', desc: 'Talenta tak terhubung masalah nyata.' },
-    { icon: '💎', title: 'Potensi Terpendam', desc: 'UKM manufaktur belum tergali.' },
+    { icon: <FaCogs />, title: 'Ketergantungan Impor', desc: 'Suku cadang mahal & lama.' },
+    { icon: <FaIndustry />, title: 'Kuburan Mesin', desc: 'Mesin mangkrak karena satu komponen.' },
+    { icon: <FaBrain />, title: 'Kesenjangan Talenta', desc: 'Talenta tak terhubung masalah nyata.' },
+    { icon: <FaGem />, title: 'Potensi Terpendam', desc: 'UKM manufaktur belum tergali.' },
   ];
   return (
     <section id="masalah" className="py-20 sm:py-32">
@@ -753,7 +743,7 @@ const Features = () => {
 
 const CTA = () => {
   const { theme } = useTheme();
-  
+
   return (
     <section className="py-20 sm:py-32">
       <div className="max-w-3xl mx-auto text-center px-4">

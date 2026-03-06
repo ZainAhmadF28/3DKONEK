@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: "3DKONEK",
   description: "Kolaborasi Kita, Rekayasa Bangsa",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
   },
 };
 
